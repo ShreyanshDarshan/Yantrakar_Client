@@ -3,8 +3,11 @@
 
 #include "framework.h"
 #include "Yantrakar_Client.h"
+#include <opencv2/opencv.hpp>
+#include <iostream>
 
 #define MAX_LOADSTRING 100
+using namespace cv;
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -26,6 +29,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
+	Mat img = imread("BH.jpg");
+
+	imshow("bilac haul", img);
+	waitKey(1);
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
