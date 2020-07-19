@@ -27,6 +27,9 @@
     <ClInclude Include="Yantrakar_Client.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Notify\Notify\render.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yantrakar_Client.cpp">

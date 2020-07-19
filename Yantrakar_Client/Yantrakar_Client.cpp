@@ -4,21 +4,30 @@
 #include "framework.h"
 #include "Yantrakar_Client.h"
 #include <opencv2/opencv.hpp>
+#include "render.h"
 #include <iostream>
+//#include <Gdiplus.h>
 
 #define MAX_LOADSTRING 100
 using namespace cv;
+using namespace std;
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+int frames = 0;
+HBITMAP blackhole;
+HWND BlackH;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+void AddControls(HWND hWnd);
+void loadBH();
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -29,10 +38,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
-	Mat img = imread("BH.jpg");
+	
 
-	imshow("bilac haul", img);
-	waitKey(1);
+	//// Initialize GDI+
+	//Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+	//ULONG_PTR gdiplusToken;
+	//Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -52,6 +63,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Main message loop:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
+		Mat img(256, 256, CV_8UC3, Scalar(0, 0, 0));
+		for (int i = 0; i < 255; i++)
+		{
+			for (int j = 0; j < 256; j++)
+			{
+				img.at<Vec3b>(i, j)[0] = i;
+				img.at<Vec3b>(i, j)[1] = j;
+				img.at<Vec3b>(i, j)[2] = frames % 256;
+			}
+		}
+		imshow("bilac haul", img);
+		frames++;
+		waitKey(1);
+
+		
+
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
         {
             TranslateMessage(&msg);
@@ -59,6 +86,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
+	//Gdiplus::GdiplusShutdown(gdiplusToken);
     return (int) msg.wParam;
 }
 
@@ -149,11 +177,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+	case WM_CREATE:
+		loadBH();
+		AddControls(hWnd);
+		break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Add any drawing code that uses hdc here...
+
+			/*Screen s(ps.rcPaint.right, ps.rcPaint.bottom, hWnd);
+			s.Draw();*/
+			//FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_BACKGROUND + 1));
+			
             EndPaint(hWnd, &ps);
         }
         break;
@@ -185,3 +222,30 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return (INT_PTR)FALSE;
 }
+
+void AddControls(HWND hWnd)
+{
+	CreateWindowW(L"static", L"Enter Text :", WS_VISIBLE | WS_CHILD , 200, 100, 100, 50, hWnd, NULL, NULL, NULL);
+	BlackH = CreateWindowW(L"static", L"Name :", WS_VISIBLE | WS_CHILD | SS_BITMAP, 350, 60, 100, 100, hWnd, NULL, NULL, NULL);
+	SendMessageW(BlackH, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) blackhole);
+}
+
+void loadBH()
+{
+	blackhole = (HBITMAP)LoadImageW(NULL, L"BH.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+}
+
+//void draw(HDC hdc) {
+//	Gdiplus::Graphics gf(hdc);
+//	Gdiplus::Pen pen(Gdiplus::Color(255, 255, 0, 0));               // For lines, rectangles and curves
+//	Gdiplus::SolidBrush brush(Gdiplus::Color(255, 0, 255, 0));      // For filled shapes
+//
+//	gf.DrawLine(&pen, 0, 0, 500, 500);
+//	gf.FillRectangle(&brush, 320, 200, 100, 100);
+//	gf.DrawRectangle(&pen, 600, 400, 100, 150);
+//
+//	Gdiplus::Bitmap bmp(L"water_small.png");
+//	gf.DrawImage(&bmp, 430, 10);
+//
+//	gf.FillEllipse(&brush, 50, 400, 200, 100);
+//}
