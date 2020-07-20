@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.29409.12
+VisualStudioVersion = 16.0.30309.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Yantrakar_Client", "Yantrakar_Client.vcxproj", "{D56CB178-6951-4CF0-8968-83E075778436}"
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Yantrakar_Setup", "..\Yantrakar_Setup\Yantrakar_Setup.vdproj", "{FAE1FABA-314D-44BE-9B13-DD3024E3D0B4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Yantrakar_Client", "Yantrakar_Client\Yantrakar_Client.vcxproj", "{33D22F23-F9D2-4613-A507-FC72E399C68E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,24 +13,19 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D56CB178-6951-4CF0-8968-83E075778436}.Debug|x64.ActiveCfg = Debug|x64
-		{D56CB178-6951-4CF0-8968-83E075778436}.Debug|x64.Build.0 = Debug|x64
-		{D56CB178-6951-4CF0-8968-83E075778436}.Debug|x86.ActiveCfg = Debug|Win32
-		{D56CB178-6951-4CF0-8968-83E075778436}.Debug|x86.Build.0 = Debug|Win32
-		{D56CB178-6951-4CF0-8968-83E075778436}.Release|x64.ActiveCfg = Release|x64
-		{D56CB178-6951-4CF0-8968-83E075778436}.Release|x64.Build.0 = Release|x64
-		{D56CB178-6951-4CF0-8968-83E075778436}.Release|x86.ActiveCfg = Release|Win32
-		{D56CB178-6951-4CF0-8968-83E075778436}.Release|x86.Build.0 = Release|Win32
-		{FAE1FABA-314D-44BE-9B13-DD3024E3D0B4}.Debug|x64.ActiveCfg = Debug
-		{FAE1FABA-314D-44BE-9B13-DD3024E3D0B4}.Debug|x64.Build.0 = Debug
-		{FAE1FABA-314D-44BE-9B13-DD3024E3D0B4}.Debug|x86.ActiveCfg = Debug
-		{FAE1FABA-314D-44BE-9B13-DD3024E3D0B4}.Release|x64.ActiveCfg = Release
-		{FAE1FABA-314D-44BE-9B13-DD3024E3D0B4}.Release|x86.ActiveCfg = Release
+		{33D22F23-F9D2-4613-A507-FC72E399C68E}.Debug|x64.ActiveCfg = Debug|x64
+		{33D22F23-F9D2-4613-A507-FC72E399C68E}.Debug|x64.Build.0 = Debug|x64
+		{33D22F23-F9D2-4613-A507-FC72E399C68E}.Debug|x86.ActiveCfg = Debug|Win32
+		{33D22F23-F9D2-4613-A507-FC72E399C68E}.Debug|x86.Build.0 = Debug|Win32
+		{33D22F23-F9D2-4613-A507-FC72E399C68E}.Release|x64.ActiveCfg = Release|x64
+		{33D22F23-F9D2-4613-A507-FC72E399C68E}.Release|x64.Build.0 = Release|x64
+		{33D22F23-F9D2-4613-A507-FC72E399C68E}.Release|x86.ActiveCfg = Release|Win32
+		{33D22F23-F9D2-4613-A507-FC72E399C68E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BCD65B61-3F95-4DCC-B0D8-85DC72E0DBC0}
+		SolutionGuid = {C469A3C7-A071-470C-88A0-98E8C4035491}
 	EndGlobalSection
 EndGlobal
