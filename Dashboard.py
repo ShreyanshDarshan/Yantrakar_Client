@@ -1,5 +1,8 @@
 import wx
 import wx.lib.platebtn as plateButtons
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 
 class DashboardGallerySlide(wx.Panel):
 
@@ -47,6 +50,7 @@ class Dashboard(wx.Frame):
         self.darkGrey = wx.Colour(50, 50, 50)
         self.Grey = wx.Colour(70, 70, 70)
         self.lightGrey = wx.Colour(100, 100, 100)
+        self.faintWhite = wx.Colour(200, 200, 200)
         self.white = wx.Colour(255, 255, 255)
 
         self.SetFont(self.fontNormal)
@@ -63,54 +67,68 @@ class Dashboard(wx.Frame):
         LayoutnavPanelUpper.SetFlexibleDirection(wx.BOTH)
         LayoutnavPanelUpper.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
 
+        # Add Dashboard button on Navbar
         self.dashboardNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Dashboard", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
         self.dashboardNavButton.SetForegroundColour(self.white)
         self.dashboardNavButton.SetBackgroundColour(self.Grey)
-        self.dashboardNavButton.SetFont(self.fontBold)
+        # self.dashboardNavButton.SetFont(self.fontBold)
         self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
+        self.dashboardNavButton.SetPressColor(self.darkGrey)
 
+        # Add Config button on Navbar
         self.cameraConfigNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Camera Config", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
         self.cameraConfigNavButton.SetForegroundColour(self.white)
         self.cameraConfigNavButton.SetBackgroundColour(self.darkGrey)
-        self.cameraConfigNavButton.SetFont(self.fontBold)
+        # self.cameraConfigNavButton.SetFont(self.fontBold)
         self.cameraConfigNavButton.SetMinSize(wx.Size(200, 50))
+        self.cameraConfigNavButton.SetPressColor(self.darkGrey)
 
+        # Add Calibration button on Navbar
         self.calibrationNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Calibration", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
         self.calibrationNavButton.SetForegroundColour(self.white)
         self.calibrationNavButton.SetBackgroundColour(self.darkGrey)
-        self.calibrationNavButton.SetFont(self.fontBold)
+        # self.calibrationNavButton.SetFont(self.fontBold)
         self.calibrationNavButton.SetMinSize(wx.Size(200, 50))
+        self.calibrationNavButton.SetPressColor(self.darkGrey)
 
+        # Add Help button on Navbar
         self.helpNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Help", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
-        self.helpNavButton.SetForegroundColour(wx.Colour(255, 255, 255))
+        self.helpNavButton.SetForegroundColour(self.white)
         self.helpNavButton.SetBackgroundColour(self.darkGrey)
-        self.helpNavButton.SetFont(self.fontBold)
+        # self.helpNavButton.SetFont(self.fontBold)
         self.helpNavButton.SetMinSize(wx.Size(200, 50))
+        self.helpNavButton.SetPressColor(self.darkGrey)
 
+
+        # add all nav bar buttons
         LayoutnavPanelUpper.Add(self.dashboardNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
         LayoutnavPanelUpper.Add(self.cameraConfigNavButton, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 10)
         LayoutnavPanelUpper.Add(self.calibrationNavButton, wx.GBPosition(2, 0), wx.GBSpan(1, 1), wx.ALL, 10)
         LayoutnavPanelUpper.Add(self.helpNavButton, wx.GBPosition(3, 0), wx.GBSpan(1, 1), wx.ALL, 10)
 
+        # Make lower nav panel
         LayoutnavPanelLower = wx.GridBagSizer(0, 0)
         LayoutnavPanelLower.SetFlexibleDirection(wx.BOTH)
         LayoutnavPanelLower.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
 
+        # Add User button on Navbar
         self.userNavButton = plateButtons.PlateButton(self.navPanel, -1, u"User", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
-        self.userNavButton.SetForegroundColour(wx.Colour(255, 255, 255))
+        self.userNavButton.SetForegroundColour(self.white)
         self.userNavButton.SetBackgroundColour(self.darkGrey)
-        self.userNavButton.SetFont(self.fontBold)
+        # self.userNavButton.SetFont(self.fontBold)
         self.userNavButton.SetMinSize(wx.Size(200, 50))
+        self.userNavButton.SetPressColor(self.darkGrey)
 
+        # add user button
         LayoutnavPanelLower.Add(self.userNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
 
+        # add upper and lower nav panel
         LayoutnavPanel.Add(LayoutnavPanelUpper, 1, wx.EXPAND, 0)
         LayoutnavPanel.Add(LayoutnavPanelLower, 0, wx.EXPAND, 0)
 
         self.navPanel.SetSizer(LayoutnavPanel)
         self.navPanel.Layout()
         LayoutnavPanel.Fit(self.navPanel)
-
 
         self.dashboardPanel = wx.ScrolledWindow(self, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.VSCROLL | wx.HSCROLL)
         self.dashboardPanel.SetScrollRate(5, 5)
@@ -120,13 +138,18 @@ class Dashboard(wx.Frame):
         LayoutDashboardControls = wx.BoxSizer(wx.HORIZONTAL)
 
         cameraIDLabel = wx.StaticText(self.dashboardPanel, -1, "Camera ID")
+        cameraIDLabel.SetForegroundColour(self.faintWhite)
+
         self.cameraIDEntry = wx.ComboBox(self.dashboardPanel, -1)
         self.cameraIDEntry.Append("All Cameras")
         self.cameraIDEntry.SetSelection(0)
+
         durationLabel = wx.StaticText(self.dashboardPanel, -1, "Duration")
+        durationLabel.SetForegroundColour(self.faintWhite)
         self.durationEntry = wx.ComboBox(self.dashboardPanel, -1)
         self.durationEntry.Append("All Days")
         self.durationEntry.SetSelection(0)
+
         self.viewButton = wx.Button(self.dashboardPanel, -1, "View")
         self.viewButton.SetBackgroundColour(self.darkGrey)
         self.viewButton.SetForegroundColour(self.white)
@@ -167,26 +190,34 @@ class Dashboard(wx.Frame):
         dashboardGalleryControls = wx.Panel(DashboardGalleryPanel, -1, pos=wx.DefaultPosition, size=wx.DefaultSize)
         LayoutDashboardGalleryControls = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.galleryPlayButton = plateButtons.PlateButton(dashboardGalleryControls, -1, u"Play", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_DEFAULT)
-        self.galleryPlayButton.SetMaxSize((80, -1))
-        self.galleryPlayButton.SetBackgroundColour(self.lightOrange)
-        self.galleryPlayButton.SetFont(self.fontBold)
-        self.galleryPlayButton.SetForegroundColour(wx.Colour(255, 255, 255))
+        self.galleryPlayButton = plateButtons.PlateButton(dashboardGalleryControls, -1, "Live", None, wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL | plateButtons.PB_STYLE_SQUARE)
+        self.galleryPlayButton.SetMaxSize((50, -1))
+        self.galleryPlayButton.SetBackgroundColour(self.darkGrey)
+        # self.galleryPlayButton.SetFont(self.fontBold)
+        self.galleryPlayButton.SetForegroundColour(self.white)
+        self.galleryPlayButton.SetPressColor(self.darkGrey)
 
-        self.galleryPauseButton = plateButtons.PlateButton(dashboardGalleryControls, -1, u"Pause", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_DEFAULT)
-        self.galleryPauseButton.SetMaxSize((80, -1))
-        self.galleryPauseButton.SetBackgroundColour(self.lightOrange)
+        self.galleryPauseButton = plateButtons.PlateButton(dashboardGalleryControls, -1, "", wx.Bitmap("pause button.png"), wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL | plateButtons.PB_STYLE_SQUARE)
+        self.isPlaying = True
+        self.galleryPauseButton.SetMaxSize((40, -1))
+        self.galleryPauseButton.SetBackgroundColour(self.darkGrey)
         self.galleryPauseButton.SetFont(self.fontBold)
-        self.galleryPauseButton.SetForegroundColour(wx.Colour(255, 255, 255))
+        self.galleryPauseButton.SetForegroundColour(self.white)
+        self.galleryPauseButton.Bind(wx.EVT_BUTTON, self.toggle_play)
+        self.galleryPauseButton.SetPressColor(self.lightGrey)
+
 
         self.gallerySlider = wx.Slider(dashboardGalleryControls, -1, 0, 0, 3)
-        self.gallerySlider.SetBackgroundColour(self.lightOrange)
+        self.gallerySlider.SetBackgroundColour(self.darkGrey)
+        # self.gallerySlider.SetForegroundColour(self.white)
+        # self.galleryPlayButton.SetPressColor(self.Grey)
 
-        LayoutDashboardGalleryControls.Add(self.galleryPlayButton, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
-        LayoutDashboardGalleryControls.Add(self.galleryPauseButton, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
-        LayoutDashboardGalleryControls.Add(self.gallerySlider, proportion=8, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutDashboardGalleryControls.Add(self.galleryPlayButton, proportion=1, flag=wx.ALIGN_CENTER, border=0)
+        LayoutDashboardGalleryControls.Add(self.galleryPauseButton, proportion=1, flag=wx.ALL, border=0)
+        LayoutDashboardGalleryControls.Add(self.gallerySlider, proportion=8, flag=wx.ALIGN_CENTER, border=0)
 
         dashboardGalleryControls.SetSizer(LayoutDashboardGalleryControls)
+        dashboardGalleryControls.SetBackgroundColour(self.darkGrey)
         LayoutDashboardGalleryControls.Fit(dashboardGalleryControls)
 
         LayoutDashboardGallery.Add(self.dashboardGalleryView, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
@@ -196,13 +227,14 @@ class Dashboard(wx.Frame):
         LayoutDashboardGallery.Fit(DashboardGalleryPanel)
 
 
-        DashboardGraphPanel = wx.Panel(self.dashboardPanel, pos=wx.DefaultPosition)
-        DashboardGraphPanel.SetBackgroundColour(self.lightOrange)
+        DashboardGraphPanel = wx.StaticBitmap(self.dashboardPanel, -1, wx.Bitmap("plot.png"), pos=wx.DefaultPosition, size=wx.Size(1100, 300))
+        DashboardGraphPanel.SetBackgroundColour(self.lightGrey)
+        # DashboardGraphPanel.AutoLayout()
         DashboardGraphPanel.SetMinSize((-1, 500))
 
         LayoutDashboard.Add(LayoutDashboardControls, proportion=0, flag=wx.EXPAND | wx.ALL, border=30)
         LayoutDashboard.Add(DashboardGalleryPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=30)
-        LayoutDashboard.Add(DashboardGraphPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=30)
+        LayoutDashboard.Add(DashboardGraphPanel, proportion=1, flag=wx.ALIGN_CENTER, border=30)
 
         self.dashboardPanel.SetSizer(LayoutDashboard)
         self.dashboardPanel.Layout()
@@ -216,6 +248,36 @@ class Dashboard(wx.Frame):
 
         self.Center()
         self.Show(True)
+
+    def toggle_play(self, event):
+        if self.isPlaying:
+            self.galleryPauseButton.SetBitmap(wx.Bitmap("play button.png"))
+            self.isLive = False
+            self.isPlaying = False
+        else:
+            self.galleryPauseButton.SetBitmap(wx.Bitmap("pause button.png"))
+            self.isPlaying = True
+
+    # def go_live(self, event):
+    #     if self.isLive:
+
+import random 
+
+y = []
+for i in range (10):
+    y.append(random.randrange(0, 10, 1))
+x = np.arange(10)
+# y = np.random()
+plt.style.use(u'dark_background')
+fig = plt.figure()
+ax = plt.subplot(111)
+ax.plot(x, y, label='$y = numbers')
+plt.title('Legend inside')
+ax.legend()
+#plt.show()
+fig.set_size_inches(15, 5)
+fig.tight_layout()
+fig.savefig('plot.png', transparent=True)
 
 app = wx.App()
 window = Dashboard(None)
