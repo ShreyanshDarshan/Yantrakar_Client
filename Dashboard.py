@@ -13,34 +13,38 @@ class Dashboard(wx.Frame):
         self.fontBold = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
         self.darkOrange = wx.Colour(255, 191, 0)
         self.lightOrange = wx.Colour(248, 217, 122)
+        self.darkGrey = wx.Colour(50, 50, 50)
+        self.Grey = wx.Colour(70, 70, 70)
+        self.lightGrey = wx.Colour(100, 100, 100)
+        self.white = wx.Colour(255, 255, 255)
 
         self.SetFont(self.fontNormal)
-        self.SetBackgroundColour(wx.Colour(wx.WHITE))
+        self.SetBackgroundColour(self.Grey)
 
         LayoutMain = wx.BoxSizer(wx.HORIZONTAL)
 
         self.navPanel = wx.Panel(self, pos=wx.DefaultPosition)
-        self.navPanel.SetBackgroundColour(self.darkOrange)
+        self.navPanel.SetBackgroundColour(self.darkGrey)
 
         LayoutnavPanel = wx.GridBagSizer(0, 0)
         LayoutnavPanel.SetFlexibleDirection(wx.BOTH)
         LayoutnavPanel.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
 
         self.dashboardNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Dashboard", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
-        self.dashboardNavButton.SetForegroundColour(wx.Colour(255, 255, 255))
-        self.dashboardNavButton.SetBackgroundColour(self.lightOrange)
+        self.dashboardNavButton.SetForegroundColour(self.white)
+        self.dashboardNavButton.SetBackgroundColour(self.Grey)
         self.dashboardNavButton.SetFont(self.fontBold)
         self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
 
         self.cameraConfigNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Camera Config", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
-        self.cameraConfigNavButton.SetForegroundColour(wx.Colour(255, 255, 255))
-        self.cameraConfigNavButton.SetBackgroundColour(self.darkOrange)
+        self.cameraConfigNavButton.SetForegroundColour(self.white)
+        self.cameraConfigNavButton.SetBackgroundColour(self.darkGrey)
         self.cameraConfigNavButton.SetFont(self.fontBold)
         self.cameraConfigNavButton.SetMinSize(wx.Size(200, 50))
 
         self.calibrationNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Calibration", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
-        self.calibrationNavButton.SetForegroundColour(wx.Colour(255, 255, 255))
-        self.calibrationNavButton.SetBackgroundColour(self.darkOrange)
+        self.calibrationNavButton.SetForegroundColour(self.white)
+        self.calibrationNavButton.SetBackgroundColour(self.darkGrey)
         self.calibrationNavButton.SetFont(self.fontBold)
         self.calibrationNavButton.SetMinSize(wx.Size(200, 50))
 
@@ -69,8 +73,8 @@ class Dashboard(wx.Frame):
         self.durationEntry.Append("All Days")
         self.durationEntry.SetSelection(0)
         self.viewButton = wx.Button(self.dashboardPanel, -1, "View")
-        self.viewButton.SetBackgroundColour(self.darkOrange)
-        self.viewButton.SetForegroundColour(wx.Colour(255, 255, 255))
+        self.viewButton.SetBackgroundColour(self.darkGrey)
+        self.viewButton.SetForegroundColour(self.white)
         self.viewButton.SetFont(self.fontBold)
 
         LayoutDashboardControls.Add(wx.Size(0, 0), 1, wx.EXPAND, 0)
@@ -85,11 +89,11 @@ class Dashboard(wx.Frame):
 
 
         DashboardGraphPanel = wx.Panel(self.dashboardPanel, pos=wx.DefaultPosition)
-        DashboardGraphPanel.SetBackgroundColour(wx.Colour(240, 215, 13))
+        DashboardGraphPanel.SetBackgroundColour(self.lightGrey)
         DashboardGraphPanel.SetMinSize((-1, 500))
 
         DashboardGalleryPanel = wx.Panel(self.dashboardPanel, pos=wx.DefaultPosition)
-        DashboardGalleryPanel.SetBackgroundColour(wx.Colour(240, 215, 200))
+        DashboardGalleryPanel.SetBackgroundColour(self.lightGrey)
         DashboardGalleryPanel.SetMinSize((-1, 500))
 
         LayoutDashboard.Add(LayoutDashboardControls, proportion=0, flag=wx.EXPAND | wx.ALL, border=30)
