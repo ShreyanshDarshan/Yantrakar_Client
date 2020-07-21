@@ -6,15 +6,19 @@ import numpy as np
 
 class DashboardGallerySlide(wx.Panel):
 
-    def __init__(self, parent, size, image, time, cameraID, cameraAlias):
+    def __init__(self, parent, size, image, time, cameraID, cameraAlias, color1, color2, color3):
         self.size = size
         self.image = image
         self.time = time
         self.cameraID = cameraID
         self.cameraAlias = cameraAlias
+        self.color1 = color1
+        self.color2 = color2
+        self.color3 = color3
+        #print("SLIDER SIZE")
+        #print(size)
         super(DashboardGallerySlide, self).__init__(parent, -1, size=(self.size[0], -1), pos=wx.DefaultPosition)
 
-        print(self.size)
         self.SetMinSize(self.size)
 
         self.initSlide()
@@ -23,22 +27,75 @@ class DashboardGallerySlide(wx.Panel):
 
         LayoutSlide = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.slideImagePanel = wx.Panel(self, -1)
-        self.slideImagePanel.SetBackgroundColour(wx.Colour(255, 0, 0))
-        self.slideDetailsPanel = wx.Panel(self, -1)
-        self.slideDetailsPanel.SetBackgroundColour(wx.Colour(0, 255, 0))
+        #self.SetFont(wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
 
-        LayoutSlide.Add(self.slideImagePanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
-        LayoutSlide.Add(self.slideDetailsPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
+        self.slideImagePanel = wx.Panel(self, -1)
+        self.slideImagePanel.SetBackgroundColour(self.color2)
+        self.slideDetailsPanel = wx.Panel(self, -1)
+        self.slideDetailsPanel.SetBackgroundColour(self.color2)
+
+        slideDetailsLayout = wx.BoxSizer(wx.VERTICAL)
+
+        slideDetailsLayoutMain = wx.GridBagSizer(0, 0)
+
+        self.cameraAliasLabel = wx.StaticText(self.slideDetailsPanel, -1, "Camera Alias")
+        self.cameraAliasLabel.SetForegroundColour(self.color3)
+        self.cameraAliasValue = wx.StaticText(self.slideDetailsPanel, -1, self.cameraAlias)
+        self.cameraAliasValue.SetForegroundColour(self.color3)
+        self.cameraIDLabel = wx.StaticText(self.slideDetailsPanel, -1, "Camera ID")
+        self.cameraIDLabel.SetForegroundColour(self.color3)
+        self.cameraIDValue = wx.StaticText(self.slideDetailsPanel, -1, self.cameraID)
+        self.cameraIDValue.SetForegroundColour(self.color3)
+        self.timeLabel = wx.StaticText(self.slideDetailsPanel, -1, "Time")
+        self.timeLabel.SetForegroundColour(self.color3)
+        self.timeValue = wx.StaticText(self.slideDetailsPanel, -1, self.time)
+        self.timeValue.SetForegroundColour(self.color3)
+
+        slideDetailsLayoutMain.Add(self.cameraAliasLabel, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+        slideDetailsLayoutMain.Add(self.cameraAliasValue, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL, 5)
+        slideDetailsLayoutMain.Add(self.cameraIDLabel, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+        slideDetailsLayoutMain.Add(self.cameraIDValue, wx.GBPosition(1, 1), wx.GBSpan(1, 1), wx.ALL, 5)
+        slideDetailsLayoutMain.Add(self.timeLabel, wx.GBPosition(2, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+        slideDetailsLayoutMain.Add(self.timeValue, wx.GBPosition(2, 1), wx.GBSpan(1, 1), wx.ALL, 5)
+
+        slideDetailsLayout.Add(slideDetailsLayoutMain, proportion=0, flag=wx.EXPAND | wx.ALL, border=10)
+        slideDetailsLayout.Add((0, 0), proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
+
+        self.slideDetailsPanel.SetSizer(slideDetailsLayout)
+        slideDetailsLayout.Fit(self.slideDetailsPanel)
+
+        LayoutSlide.Add(self.slideImagePanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutSlide.Add(self.slideDetailsPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
 
         self.SetSizer(LayoutSlide)
         LayoutSlide.Fit(self)
+        self.Layout()
+
+        self.imageBitmap = wx.Bitmap(self.image, wx.BITMAP_TYPE_ANY)
+
+        wx.CallAfter(self.addImage)
+
+    def addImage(self):
+        self.scaleImage()
+        self.imageBitmapView = wx.StaticBitmap(self.slideImagePanel, -1, self.imageBitmap)
+
+    def scaleImage(self):
+        image = wx.Bitmap.ConvertToImage(self.imageBitmap)
+        #print(self.slideImagePanel.GetSize())
+        #print(self.slideDetailsPanel.GetSize())
+        image = image.Scale(self.slideImagePanel.GetSize()[0], self.slideImagePanel.GetSize()[1], wx.IMAGE_QUALITY_HIGH)
+        self.imageBitmap = wx.Bitmap(image)
 
 
 class Dashboard(wx.Frame):
 
     def __init__(self, parent):
         super(Dashboard, self).__init__(parent, title="Yantrakar Dashboard", size=(1100, 750))
+
+        self.noOfSlides = 3
+        self.slideSpeed = 10
+        self.SlidesList = []
+
         self.SetMinSize((1100, 750))
         self.initUI()
 
@@ -173,19 +230,9 @@ class Dashboard(wx.Frame):
         LayoutDashboardGallery = wx.BoxSizer(wx.VERTICAL)
 
         self.dashboardGalleryView = wx.ScrolledWindow(DashboardGalleryPanel, pos=wx.DefaultPosition, style=wx.HSCROLL)
-        self.dashboardGalleryView.SetScrollRate(5, 5)
+
+        self.dashboardGalleryView.SetScrollRate(self.slideSpeed, self.slideSpeed)
         self.dashboardGalleryView.SetBackgroundColour(self.lightGrey)
-
-        LayoutDashboardGalleryView = wx.GridBagSizer(0, 0)
-
-        slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "", "", "", "")
-        slide2 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "", "", "", "")
-
-        LayoutDashboardGalleryView.Add(slide1, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 0)
-        LayoutDashboardGalleryView.Add(slide2, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL, 0)
-
-        self.dashboardGalleryView.SetSizer(LayoutDashboardGalleryView)
-        LayoutDashboardGalleryView.Fit(self.dashboardGalleryView)
 
         dashboardGalleryControls = wx.Panel(DashboardGalleryPanel, -1, pos=wx.DefaultPosition, size=wx.DefaultSize)
         LayoutDashboardGalleryControls = wx.BoxSizer(wx.HORIZONTAL)
@@ -209,12 +256,14 @@ class Dashboard(wx.Frame):
 
         self.gallerySlider = wx.Slider(dashboardGalleryControls, -1, 0, 0, 3)
         self.gallerySlider.SetBackgroundColour(self.darkGrey)
+        self.gallerySlider.Enable(False)
         # self.gallerySlider.SetForegroundColour(self.white)
         # self.galleryPlayButton.SetPressColor(self.Grey)
 
         LayoutDashboardGalleryControls.Add(self.galleryPlayButton, proportion=1, flag=wx.ALIGN_CENTER, border=0)
         LayoutDashboardGalleryControls.Add(self.galleryPauseButton, proportion=1, flag=wx.ALL, border=0)
         LayoutDashboardGalleryControls.Add(self.gallerySlider, proportion=8, flag=wx.ALIGN_CENTER, border=0)
+
 
         dashboardGalleryControls.SetSizer(LayoutDashboardGalleryControls)
         dashboardGalleryControls.SetBackgroundColour(self.darkGrey)
@@ -243,11 +292,104 @@ class Dashboard(wx.Frame):
         LayoutMain.Add(self.navPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutMain.Add(self.dashboardPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
 
+        self.LayoutDashboardGalleryView = wx.GridBagSizer(0, 0)
+
+        slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "./test.png", "10:00 AM", "camera#1", "CAM1", self.lightGrey, self.darkGrey, self.white)
+        slide2 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "./test.png", "1:00 PM", "camera#2", "CAM2", self.lightGrey, self.darkGrey, self.white)
+        slide3 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "./test.png", "1:00 PM", "camera#3", "CAM3", self.lightGrey, self.darkGrey, self.white)
+
+        self.SlidesList.append(slide1)
+        self.SlidesList.append(slide2)
+        self.SlidesList.append(slide3)
+
+        self.LayoutDashboardGalleryView.Add(slide1, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 0)
+        self.LayoutDashboardGalleryView.Add(slide2, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL, 0)
+        self.LayoutDashboardGalleryView.Add(slide3, wx.GBPosition(0, 2), wx.GBSpan(1, 1), wx.ALL, 0)
+
+        self.dashboardGalleryView.SetSizer(self.LayoutDashboardGalleryView)
+        self.LayoutDashboardGalleryView.Fit(self.dashboardGalleryView)
+        self.dashboardGalleryView.Layout()
+
+        self.dashboardGalleryView.ShowScrollbars(wx.SHOW_SB_NEVER, wx.SHOW_SB_NEVER)
+
         self.SetSizer(LayoutMain)
         self.Layout()
 
         self.Center()
         self.Show(True)
+
+        self.updateGalleryPanel()
+
+        self.gallerySlider.Bind(wx.EVT_SLIDER, self.onGallerySlider)
+
+        self.timer = wx.Timer(self)
+        self.timer.Start(1)
+        self.slideshowDirection = 1
+
+        self.waitTimer = wx.Timer(self)
+
+        self.Bind(wx.EVT_TIMER, self.playSlideShow, self.timer)
+        self.Bind(wx.EVT_TIMER, self.pauseSlideShow, self.waitTimer)
+
+        self.Bind(wx.EVT_SIZE, self.mainWindowSizeChange)
+
+    def updateGalleryPanel(self):
+        if(self.noOfSlides > 1):
+            self.gallerySlider.Enable(True)
+            self.gallerySlider.SetRange(0, int((self.dashboardGalleryView.GetSize()[0]) * (self.noOfSlides - 1)/ self.slideSpeed))
+            self.galleryPauseButton.Enable(True)
+        else:
+            self.gallerySlider.SetRange(0, 1)
+            self.gallerySlider.Enable(False)
+
+        if(self.noOfSlides <= 1):
+            self.galleryPauseButton.Enable(False)
+            self.isPlaying = False
+
+
+    def pauseSlideShow(self, event):
+        if(self.isPlaying):
+            self.waitTimer.Stop()
+            self.timer.Start(1)
+
+    def playSlideShow(self, event):
+        if(self.isPlaying):
+            if (self.gallerySlider.GetValue() % int(self.gallerySlider.GetRange()[1] / (self.noOfSlides - 1)) == 0):
+                self.waitTimer.Start(1000)
+                self.timer.Stop()
+
+            if(self.slideshowDirection == 1):
+                self.gallerySlider.SetValue(self.gallerySlider.GetValue() + 1)
+            else:
+                self.gallerySlider.SetValue(self.gallerySlider.GetValue() - 1)
+
+            self.onGallerySlider(event)
+
+    def onGallerySlider(self, event):
+        val = self.gallerySlider.GetValue()
+
+        if(val >= self.gallerySlider.GetRange()[1]):
+            self.slideshowDirection = -1
+        elif(val == 0):
+            self.slideshowDirection = 1
+
+        self.dashboardGalleryView.Scroll(int(val), -1)
+
+    def mainWindowSizeChangeUpdate(self, event):
+        for i in self.SlidesList:
+            i.size = self.dashboardGalleryView.GetSize()
+            i.SetSize((self.dashboardGalleryView.GetSize()[0], -1))
+            i.SetMinSize(self.dashboardGalleryView.GetSize())
+            i.addImage()
+
+        self.dashboardGalleryView.Refresh()
+        self.gallerySlider.SetRange(0, int((self.dashboardGalleryView.GetSize()[0]) * (self.noOfSlides - 1) / self.slideSpeed))
+        wx.CallAfter(self.Layout)
+
+    def mainWindowSizeChange(self, event):
+        self.Layout()
+        wx.CallAfter(self.mainWindowSizeChangeUpdate, event)
+
 
     def toggle_play(self, event):
         if self.isPlaying:
