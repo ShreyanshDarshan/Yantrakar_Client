@@ -1,6 +1,37 @@
 import wx
 import wx.lib.platebtn as plateButtons
 
+class DashboardGallerySlide(wx.Panel):
+
+    def __init__(self, parent, size, image, time, cameraID, cameraAlias):
+        self.size = size
+        self.image = image
+        self.time = time
+        self.cameraID = cameraID
+        self.cameraAlias = cameraAlias
+        super(DashboardGallerySlide, self).__init__(parent, -1, size=(self.size[0], -1), pos=wx.DefaultPosition)
+
+        print(self.size)
+        self.SetMinSize(self.size)
+
+        self.initSlide()
+
+    def initSlide(self):
+
+        LayoutSlide = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.slideImagePanel = wx.Panel(self, -1)
+        self.slideImagePanel.SetBackgroundColour(wx.Colour(255, 0, 0))
+        self.slideDetailsPanel = wx.Panel(self, -1)
+        self.slideDetailsPanel.SetBackgroundColour(wx.Colour(0, 255, 0))
+
+        LayoutSlide.Add(self.slideImagePanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
+        LayoutSlide.Add(self.slideDetailsPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
+
+        self.SetSizer(LayoutSlide)
+        LayoutSlide.Fit(self)
+
+
 class Dashboard(wx.Frame):
 
     def __init__(self, parent):
@@ -26,9 +57,11 @@ class Dashboard(wx.Frame):
         self.navPanel = wx.Panel(self, pos=wx.DefaultPosition)
         self.navPanel.SetBackgroundColour(self.darkGrey)
 
-        LayoutnavPanel = wx.GridBagSizer(0, 0)
-        LayoutnavPanel.SetFlexibleDirection(wx.BOTH)
-        LayoutnavPanel.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
+        LayoutnavPanel = wx.BoxSizer(wx.VERTICAL)
+
+        LayoutnavPanelUpper = wx.GridBagSizer(0, 0)
+        LayoutnavPanelUpper.SetFlexibleDirection(wx.BOTH)
+        LayoutnavPanelUpper.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
 
         self.dashboardNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Dashboard", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
         self.dashboardNavButton.SetForegroundColour(self.white)
@@ -48,15 +81,37 @@ class Dashboard(wx.Frame):
         self.calibrationNavButton.SetFont(self.fontBold)
         self.calibrationNavButton.SetMinSize(wx.Size(200, 50))
 
-        LayoutnavPanel.Add(self.dashboardNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-        LayoutnavPanel.Add(self.cameraConfigNavButton, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-        LayoutnavPanel.Add(self.calibrationNavButton, wx.GBPosition(2, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+        self.helpNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Help", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
+        self.helpNavButton.SetForegroundColour(wx.Colour(255, 255, 255))
+        self.helpNavButton.SetBackgroundColour(self.darkGrey)
+        self.helpNavButton.SetFont(self.fontBold)
+        self.helpNavButton.SetMinSize(wx.Size(200, 50))
+
+        LayoutnavPanelUpper.Add(self.dashboardNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+        LayoutnavPanelUpper.Add(self.cameraConfigNavButton, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+        LayoutnavPanelUpper.Add(self.calibrationNavButton, wx.GBPosition(2, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+        LayoutnavPanelUpper.Add(self.helpNavButton, wx.GBPosition(3, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+
+        LayoutnavPanelLower = wx.GridBagSizer(0, 0)
+        LayoutnavPanelLower.SetFlexibleDirection(wx.BOTH)
+        LayoutnavPanelLower.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
+
+        self.userNavButton = plateButtons.PlateButton(self.navPanel, -1, u"User", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
+        self.userNavButton.SetForegroundColour(wx.Colour(255, 255, 255))
+        self.userNavButton.SetBackgroundColour(self.darkGrey)
+        self.userNavButton.SetFont(self.fontBold)
+        self.userNavButton.SetMinSize(wx.Size(200, 50))
+
+        LayoutnavPanelLower.Add(self.userNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+
+        LayoutnavPanel.Add(LayoutnavPanelUpper, 1, wx.EXPAND, 0)
+        LayoutnavPanel.Add(LayoutnavPanelLower, 0, wx.EXPAND, 0)
 
         self.navPanel.SetSizer(LayoutnavPanel)
         self.navPanel.Layout()
         LayoutnavPanel.Fit(self.navPanel)
 
-        wx.ScrolledWindow()
+
         self.dashboardPanel = wx.ScrolledWindow(self, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.VSCROLL | wx.HSCROLL)
         self.dashboardPanel.SetScrollRate(5, 5)
 
@@ -88,17 +143,66 @@ class Dashboard(wx.Frame):
         LayoutDashboardControls.Add(wx.Size(0, 0), 1, wx.EXPAND, 0)
 
 
-        DashboardGraphPanel = wx.Panel(self.dashboardPanel, pos=wx.DefaultPosition)
-        DashboardGraphPanel.SetBackgroundColour(self.lightGrey)
-        DashboardGraphPanel.SetMinSize((-1, 500))
-
         DashboardGalleryPanel = wx.Panel(self.dashboardPanel, pos=wx.DefaultPosition)
         DashboardGalleryPanel.SetBackgroundColour(self.lightGrey)
         DashboardGalleryPanel.SetMinSize((-1, 500))
 
+        LayoutDashboardGallery = wx.BoxSizer(wx.VERTICAL)
+
+        self.dashboardGalleryView = wx.ScrolledWindow(DashboardGalleryPanel, pos=wx.DefaultPosition, style=wx.HSCROLL)
+        self.dashboardGalleryView.SetScrollRate(5, 5)
+        self.dashboardGalleryView.SetBackgroundColour(self.lightGrey)
+
+        LayoutDashboardGalleryView = wx.GridBagSizer(0, 0)
+
+        slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "", "", "", "")
+        slide2 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "", "", "", "")
+
+        LayoutDashboardGalleryView.Add(slide1, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 0)
+        LayoutDashboardGalleryView.Add(slide2, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL, 0)
+
+        self.dashboardGalleryView.SetSizer(LayoutDashboardGalleryView)
+        LayoutDashboardGalleryView.Fit(self.dashboardGalleryView)
+
+        dashboardGalleryControls = wx.Panel(DashboardGalleryPanel, -1, pos=wx.DefaultPosition, size=wx.DefaultSize)
+        LayoutDashboardGalleryControls = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.galleryPlayButton = plateButtons.PlateButton(dashboardGalleryControls, -1, u"Play", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_DEFAULT)
+        self.galleryPlayButton.SetMaxSize((80, -1))
+        self.galleryPlayButton.SetBackgroundColour(self.lightOrange)
+        self.galleryPlayButton.SetFont(self.fontBold)
+        self.galleryPlayButton.SetForegroundColour(wx.Colour(255, 255, 255))
+
+        self.galleryPauseButton = plateButtons.PlateButton(dashboardGalleryControls, -1, u"Pause", None, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_DEFAULT)
+        self.galleryPauseButton.SetMaxSize((80, -1))
+        self.galleryPauseButton.SetBackgroundColour(self.lightOrange)
+        self.galleryPauseButton.SetFont(self.fontBold)
+        self.galleryPauseButton.SetForegroundColour(wx.Colour(255, 255, 255))
+
+        self.gallerySlider = wx.Slider(dashboardGalleryControls, -1, 0, 0, 3)
+        self.gallerySlider.SetBackgroundColour(self.lightOrange)
+
+        LayoutDashboardGalleryControls.Add(self.galleryPlayButton, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutDashboardGalleryControls.Add(self.galleryPauseButton, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutDashboardGalleryControls.Add(self.gallerySlider, proportion=8, flag=wx.EXPAND | wx.ALL, border=0)
+
+        dashboardGalleryControls.SetSizer(LayoutDashboardGalleryControls)
+        LayoutDashboardGalleryControls.Fit(dashboardGalleryControls)
+
+        LayoutDashboardGallery.Add(self.dashboardGalleryView, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutDashboardGallery.Add(dashboardGalleryControls, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
+
+        DashboardGalleryPanel.SetSizer(LayoutDashboardGallery)
+        LayoutDashboardGallery.Fit(DashboardGalleryPanel)
+
+
+        DashboardGraphPanel = wx.Panel(self.dashboardPanel, pos=wx.DefaultPosition)
+        DashboardGraphPanel.SetBackgroundColour(self.lightOrange)
+        DashboardGraphPanel.SetMinSize((-1, 500))
+
         LayoutDashboard.Add(LayoutDashboardControls, proportion=0, flag=wx.EXPAND | wx.ALL, border=30)
-        LayoutDashboard.Add(DashboardGraphPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=30)
         LayoutDashboard.Add(DashboardGalleryPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=30)
+        LayoutDashboard.Add(DashboardGraphPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=30)
 
         self.dashboardPanel.SetSizer(LayoutDashboard)
         self.dashboardPanel.Layout()
