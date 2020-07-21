@@ -7,7 +7,8 @@
 #include "render.h"
 #include <iostream>
 //#include <Gdiplus.h>
-
+#define BG_COLOR RGB(200, 200, 200)
+#define TEXT_COLOR RGB(70, 70, 70)
 #define MAX_LOADSTRING 100
 using namespace cv;
 using namespace std;
@@ -18,7 +19,7 @@ WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 int frames = 0;
 HBITMAP blackhole;
-HWND BlackH;
+HWND BlackH, TxT;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -110,7 +111,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_YANTRAKARCLIENT));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+    wcex.hbrBackground  = (HBRUSH)(CreateSolidBrush(BG_COLOR));
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_YANTRAKARCLIENT);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -132,7 +133,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VSCROLL,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
@@ -197,6 +198,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+	case WM_CTLCOLORSTATIC:
+		{
+			HDC hdcStatic = (HDC)wParam;
+			SetTextColor(hdcStatic, TEXT_COLOR);
+			SetBkColor(hdcStatic, BG_COLOR);
+			//SetMenu
+			return (INT_PTR)CreateSolidBrush(BG_COLOR);
+		}
+		break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
@@ -225,7 +235,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 void AddControls(HWND hWnd)
 {
-	CreateWindowW(L"static", L"Enter Text :", WS_VISIBLE | WS_CHILD , 200, 100, 100, 50, hWnd, NULL, NULL, NULL);
+	TxT = CreateWindowW(L"static", L"Enter Text :", WS_VISIBLE | WS_CHILD , 200, 100, 100, 50, hWnd, NULL, NULL, NULL);
 	BlackH = CreateWindowW(L"static", L"Name :", WS_VISIBLE | WS_CHILD | SS_BITMAP, 350, 60, 100, 100, hWnd, NULL, NULL, NULL);
 	SendMessageW(BlackH, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) blackhole);
 }
