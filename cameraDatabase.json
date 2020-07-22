@@ -1,0 +1,38 @@
+{
+  "000001": {
+    "cameraAlias": "Main Gate",
+    "cameraID": "Admin",
+    "cameraIP": "192.100.0.106",
+    "cameraPassword": "Shrinivas2",
+    "cameraStatus": {
+      "feedAvailable": false,
+      "calibAvailable": false,
+      "isPaused": true
+    },
+    "CalibrationMatrix": null
+  },
+  "000002": {
+    "cameraAlias": "LBS Hall",
+    "cameraID": "Admin",
+    "cameraIP": "192.100.0.107",
+    "cameraPassword": "Shrinivas1",
+    "cameraStatus": {
+      "feedAvailable": false,
+      "calibAvailable": false,
+      "isPaused": false
+    },
+    "CalibrationMatrix": null
+  },
+  "000003": {
+    "cameraAlias": "2.2",
+    "cameraID": "Admin",
+    "cameraIP": "192.100.0.108",
+    "cameraPassword": "Shrinivas2",
+    "cameraStatus": {
+      "feedAvailable": false,
+      "calibAvailable": false,
+      "isPaused": false
+    },
+    "CalibrationMatrix": null
+  }
+}
