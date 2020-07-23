@@ -34,7 +34,7 @@ class CameraCalibration:
 
         #dst_points_2 = np.array([[[dst_points[0][0][1], dst_points[0][0][0]], [dst_points[0][1][1], dst_points[0][1][0]], [dst_points[0][2][1], dst_points[0][2][0]], [dst_points[0][3][1], dst_points[0][3][0]]]])
 
-        print(dst_points)
+        #print(dst_points)
 
         overlay = np.copy(img)
         output = np.copy(img)
@@ -139,7 +139,7 @@ class CameraCalibration:
                     if(not (is_stable_1 and is_stable_2)):
                         self.noOfFrames = 0
                         self.arucoFixed = 0
-                        self.calibrationLEDStatus = 0
+                        self.calibrationLEDStatus = 1
                     else:
                         self.arucoFixed = 1
                         self.calibrationLEDStatus = 1
