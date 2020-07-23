@@ -5,11 +5,14 @@ import os
 from os import path
 import wx.lib.platebtn as plateButtons
 
-class MyFrame1 ( wx.Frame ):
+class MyFrame1 ( wx.Panel ):
     
     def __init__( self, parent ):
-        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 1182,785 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
-        
+        #wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 1182,785 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+        wx.Frame.__init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size(1182, 785))
+
+        self.parent = parent
+
         self.darkOrange = wx.Colour(255, 191, 0)
         self.lightOrange = wx.Colour(248, 217, 122)
         self.darkGrey = wx.Colour(50, 50, 50)
@@ -17,13 +20,14 @@ class MyFrame1 ( wx.Frame ):
         self.lightGrey = wx.Colour(100, 100, 100)
         self.faintWhite = wx.Colour(200, 200, 200)
         self.white = wx.Colour(255, 255, 255)
+        self.fontNormal = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.fontBold = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 
         self.lastCameraIndex="01"
         self.didUpdate=False
         
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        self.SetFont( wx.Font( 10, 70, 90, 90, False, wx.EmptyString ) )
+        #self.SetFont( wx.Font( 10, 70, 90, 90, False, wx.EmptyString ) )
         self.SetForegroundColour(self.white)
         self.SetBackgroundColour( self.darkGrey )
 
@@ -38,6 +42,8 @@ class MyFrame1 ( wx.Frame ):
         LayoutnavPanelUpper.SetFlexibleDirection(wx.BOTH)
         LayoutnavPanelUpper.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
 
+        self.SetFont(self.fontNormal)
+
         # Add Dashboard button on Navbar
         self.dashboardNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Dashboard", None, wx.DefaultPosition,
                                                            wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
@@ -46,6 +52,8 @@ class MyFrame1 ( wx.Frame ):
         # self.dashboardNavButton.SetFont(self.fontBold)
         self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
         self.dashboardNavButton.SetPressColor(self.darkGrey)
+
+        self.dashboardNavButton.Bind(wx.EVT_BUTTON, self.dashboardNavButtonClicked)
 
         # Add Config button on Navbar
         self.cameraConfigNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Camera Config", None,
@@ -57,6 +65,8 @@ class MyFrame1 ( wx.Frame ):
         self.cameraConfigNavButton.SetMinSize(wx.Size(200, 50))
         self.cameraConfigNavButton.SetPressColor(self.darkGrey)
 
+        self.cameraConfigNavButton.Bind(wx.EVT_BUTTON, self.cameraConfigNavButtonClicked)
+
         # Add Calibration button on Navbar
         self.calibrationNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Calibration", None,
                                                              wx.DefaultPosition, wx.DefaultSize,
@@ -66,6 +76,8 @@ class MyFrame1 ( wx.Frame ):
         # self.calibrationNavButton.SetFont(self.fontBold)
         self.calibrationNavButton.SetMinSize(wx.Size(200, 50))
         self.calibrationNavButton.SetPressColor(self.darkGrey)
+
+        self.calibrationNavButton.Bind(wx.EVT_BUTTON, self.calibrationNavButtonClicked)
 
         # Add Help button on Navbar
         self.helpNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Help", None, wx.DefaultPosition,
@@ -619,12 +631,24 @@ class MyFrame1 ( wx.Frame ):
     def changeColor(self, event, newcolor):
         event.GetEventObject().SetBackgroundColour(newcolor)
 
+    def dashboardNavButtonClicked(self, event):
+        self.parent.current_page = 1
+        self.parent.changePage()
+
+    def cameraConfigNavButtonClicked(self, event):
+        self.parent.current_page = 2
+        self.parent.changePage()
+
+    def calibrationNavButtonClicked(self, event):
+        self.parent.current_page = 3
+        self.parent.changePage()
+
 class MyApp(wx.App):
     def OnInit(self):
         self.frame=MyFrame1(None)
-        self.frame.Show()
+        #self.frame.Show()
 
         return True
 
-app=MyApp()
-app.MainLoop()
+#app=MyApp()
+#app.MainLoop()

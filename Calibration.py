@@ -5,10 +5,13 @@ import cameraCalib
 import json
 import numpy as np
 
-class Dashboard(wx.Frame):
+class Calibration(wx.Panel):
 
     def __init__(self, parent):
-        super(Dashboard, self).__init__(parent, title="Yantrakar Calibration", size=(1100, 750))
+        #super(Calibration, self).__init__(parent, title="Yantrakar Calibration", size=(1100, 750))
+        super(Calibration, self).__init__(parent, size=(1100, 750))
+
+        self.parent = parent
 
         self.isCalibrating = False
         self.feedPlaying = False
@@ -63,6 +66,8 @@ class Dashboard(wx.Frame):
         self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
         self.dashboardNavButton.SetPressColor(self.darkGrey)
 
+        self.dashboardNavButton.Bind(wx.EVT_BUTTON, self.dashboardNavButtonClicked)
+
         # Add Config button on Navbar
         self.cameraConfigNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Camera Config", None,
                                                               wx.DefaultPosition, wx.DefaultSize,
@@ -73,6 +78,8 @@ class Dashboard(wx.Frame):
         self.cameraConfigNavButton.SetMinSize(wx.Size(200, 50))
         self.cameraConfigNavButton.SetPressColor(self.darkGrey)
 
+        self.cameraConfigNavButton.Bind(wx.EVT_BUTTON, self.cameraConfigNavButtonClicked)
+
         # Add Calibration button on Navbar
         self.calibrationNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Calibration", None,
                                                              wx.DefaultPosition, wx.DefaultSize,
@@ -82,6 +89,8 @@ class Dashboard(wx.Frame):
         # self.calibrationNavButton.SetFont(self.fontBold)
         self.calibrationNavButton.SetMinSize(wx.Size(200, 50))
         self.calibrationNavButton.SetPressColor(self.darkGrey)
+
+        self.calibrationNavButton.Bind(wx.EVT_BUTTON, self.calibrationNavButtonClicked)
 
         # Add Help button on Navbar
         self.helpNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Help", None, wx.DefaultPosition,
@@ -250,7 +259,7 @@ class Dashboard(wx.Frame):
         self.calibrationFeed.Bind(wx.EVT_PAINT, self.putFeed)
 
         self.Center()
-        self.Show(True)
+        #self.Show(True)
         self.Layout()
 
         self.updateCameraAliasList()
@@ -402,7 +411,19 @@ class Dashboard(wx.Frame):
                     self.calibrater.calibrationDone = 0
                     self.instructionStatus = -1
 
+    def dashboardNavButtonClicked(self, event):
+        self.parent.current_page = 1
+        self.parent.changePage()
 
-app = wx.App()
-window = Dashboard(None)
-app.MainLoop()
+    def cameraConfigNavButtonClicked(self, event):
+        self.parent.current_page = 2
+        self.parent.changePage()
+
+    def calibrationNavButtonClicked(self, event):
+        self.parent.current_page = 3
+        self.parent.changePage()
+
+
+#app = wx.App()
+#window = Calibration(None)
+#app.MainLoop()
