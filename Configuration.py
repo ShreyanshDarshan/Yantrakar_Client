@@ -17,6 +17,7 @@ class MyFrame1 ( wx.Frame ):
         self.lightGrey = wx.Colour(100, 100, 100)
         self.faintWhite = wx.Colour(200, 200, 200)
         self.white = wx.Colour(255, 255, 255)
+        self.fontBold = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 
         self.lastCameraIndex="01"
         self.didUpdate=False
@@ -25,80 +26,125 @@ class MyFrame1 ( wx.Frame ):
         self.SetFont( wx.Font( 10, 70, 90, 90, False, wx.EmptyString ) )
         self.SetForegroundColour(self.white)
         self.SetBackgroundColour( self.darkGrey )
-        
-        #Main FlexGrid Sizer (2X2)
-        fgSizer1 = wx.FlexGridSizer( 0, 2, 0, 0 )
-        fgSizer1.AddGrowableCol( 1 )
-        fgSizer1.AddGrowableRow( 1 )
-        fgSizer1.SetFlexibleDirection( wx.BOTH )
-        fgSizer1.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        
-        #MenuIconButton
-        self.m_bpButton61 = wx.BitmapButton( self, wx.ID_ANY, wx.NullBitmap, wx.DefaultPosition, wx.Size( -1,-1 ), wx.BU_AUTODRAW )
-        fgSizer1.Add( self.m_bpButton61, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
-        
-        #Title
-        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"Configuration", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1.Wrap( -1 )
-        self.m_staticText1.SetFont( wx.Font( 20, 70, 90, 90, False, wx.EmptyString ) )
-        self.m_staticText1.SetForegroundColour( self.white )
-        
-        fgSizer1.Add( self.m_staticText1, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
-        
-        #NavBarFlexGridSizer
-        fgSizer3 = wx.FlexGridSizer( 0, 1, 0, 0 )
-        fgSizer3.AddGrowableRow( 0 )
-        fgSizer3.SetFlexibleDirection( wx.BOTH )
-        fgSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        
-        #The Navigation Buttons
-        bSizer4 = wx.BoxSizer( wx.VERTICAL )
-        NavIconSize = wx.Size(20, 20)
-        
-        dashboardIcon=wx.Bitmap("ui_elements/Dashboard.png",wx.BITMAP_TYPE_ANY)
-        dashboardIcon.SetSize(NavIconSize)
-        self.m_bpButton5 = plateButtons.PlateButton( self, wx.ID_ANY, "", dashboardIcon, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE )
-        self.m_bpButton5.SetPressColor(self.Grey)
-        bSizer4.Add( self.m_bpButton5, 0, wx.ALL, 5 )
-        
-        configurationIcon=wx.Bitmap("ui_elements/Config.png",wx.BITMAP_TYPE_ANY)
-        configurationIcon.SetSize(NavIconSize)
-        self.m_bpButton6 = plateButtons.PlateButton( self, wx.ID_ANY, "", configurationIcon, wx.DefaultPosition, wx.DefaultSize, plateButtons.PB_STYLE_SQUARE )
-        self.m_bpButton6.SetPressColor(self.Grey)
-        bSizer4.Add( self.m_bpButton6, 0, wx.ALL, 5 )
-        
-        calibrationIcon=wx.Bitmap("ui_elements/Calibration.png",wx.BITMAP_TYPE_ANY)
-        calibrationIcon.SetSize(NavIconSize)
-        self.m_bpButton6 = plateButtons.PlateButton( self, wx.ID_ANY, "", calibrationIcon, wx.DefaultPosition, wx.DefaultSize, wx.BU_AUTODRAW )
-        self.m_bpButton6.SetPressColor(self.Grey)
-        bSizer4.Add( self.m_bpButton6, 0, wx.ALL, 5 )
-        
-        helpIcon=wx.Bitmap("ui_elements/Help.png",wx.BITMAP_TYPE_ANY)
-        helpIcon.SetSize(NavIconSize)
-        self.m_bpButton7 = plateButtons.PlateButton( self, wx.ID_ANY, "", helpIcon, wx.DefaultPosition, wx.DefaultSize, wx.BU_AUTODRAW )
-        self.m_bpButton7.SetPressColor(self.Grey)
-        # self.m_bpButton7.SetBitmapSelected( wx.Bitmap( u"C:\\Users\\Capture2.PNG", wx.BITMAP_TYPE_ANY ) )
-        bSizer4.Add( self.m_bpButton7, 0, wx.ALL, 5 )
-        
-        
-        fgSizer3.Add( bSizer4, 1, wx.EXPAND, 5 )
-        #User Icon Button 
-        bSizer5 = wx.BoxSizer( wx.VERTICAL )
-        UserIcon=wx.Bitmap("ui_elements/User.png",wx.BITMAP_TYPE_ANY)
-        UserIcon.SetSize(NavIconSize)
-        self.m_bpButton8 = plateButtons.PlateButton( self, wx.ID_ANY, "", UserIcon, wx.DefaultPosition, wx.DefaultSize, wx.BU_AUTODRAW )
-        self.m_bpButton8.SetPressColor(self.Grey)
-        bSizer5.Add( self.m_bpButton8, 0, wx.ALL, 5 )
-        
-        
-        fgSizer3.Add( bSizer5, 1, wx.EXPAND, 5 )
-        
-        
-        fgSizer1.Add( fgSizer3, 1, wx.EXPAND, 5 )
+
+        LayoutMain = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.navPanel = wx.Panel(self, pos=wx.DefaultPosition)
+        self.navPanel.SetBackgroundColour(self.darkGrey)
+
+        LayoutnavPanel = wx.BoxSizer(wx.VERTICAL)
+
+        LayoutnavPanelUpper = wx.GridBagSizer(0, 0)
+        LayoutnavPanelUpper.SetFlexibleDirection(wx.BOTH)
+        LayoutnavPanelUpper.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
+
+        # Add Dashboard button on Navbar
+        self.dashboardNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Dashboard", None, wx.DefaultPosition,
+                                                           wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
+        self.dashboardNavButton.SetForegroundColour(self.white)
+        self.dashboardNavButton.SetBackgroundColour(self.darkGrey)
+        # self.dashboardNavButton.SetFont(self.fontBold)
+        self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
+        self.dashboardNavButton.SetPressColor(self.darkGrey)
+
+        # Add Config button on Navbar
+        self.cameraConfigNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Camera Config", None,
+                                                              wx.DefaultPosition, wx.DefaultSize,
+                                                              plateButtons.PB_STYLE_SQUARE)
+        self.cameraConfigNavButton.SetForegroundColour(self.white)
+        self.cameraConfigNavButton.SetBackgroundColour(self.Grey)
+        # self.cameraConfigNavButton.SetFont(self.fontBold)
+        self.cameraConfigNavButton.SetMinSize(wx.Size(200, 50))
+        self.cameraConfigNavButton.SetPressColor(self.darkGrey)
+
+        # Add Calibration button on Navbar
+        self.calibrationNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Calibration", None,
+                                                             wx.DefaultPosition, wx.DefaultSize,
+                                                             plateButtons.PB_STYLE_SQUARE)
+        self.calibrationNavButton.SetForegroundColour(self.white)
+        self.calibrationNavButton.SetBackgroundColour(self.darkGrey)
+        # self.calibrationNavButton.SetFont(self.fontBold)
+        self.calibrationNavButton.SetMinSize(wx.Size(200, 50))
+        self.calibrationNavButton.SetPressColor(self.darkGrey)
+
+        # Add Help button on Navbar
+        self.helpNavButton = plateButtons.PlateButton(self.navPanel, -1, u"Help", None, wx.DefaultPosition,
+                                                      wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
+        self.helpNavButton.SetForegroundColour(self.white)
+        self.helpNavButton.SetBackgroundColour(self.darkGrey)
+        # self.helpNavButton.SetFont(self.fontBold)
+        self.helpNavButton.SetMinSize(wx.Size(200, 50))
+        self.helpNavButton.SetPressColor(self.darkGrey)
+
+        # add all nav bar buttons
+        LayoutnavPanelUpper.Add(self.dashboardNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+        LayoutnavPanelUpper.Add(self.cameraConfigNavButton, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+        LayoutnavPanelUpper.Add(self.calibrationNavButton, wx.GBPosition(2, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+        LayoutnavPanelUpper.Add(self.helpNavButton, wx.GBPosition(3, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+
+        # Make lower nav panel
+        LayoutnavPanelLower = wx.GridBagSizer(0, 0)
+        LayoutnavPanelLower.SetFlexibleDirection(wx.BOTH)
+        LayoutnavPanelLower.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
+
+        # Add User button on Navbar
+        self.userNavButton = plateButtons.PlateButton(self.navPanel, -1, u"User", None, wx.DefaultPosition,
+                                                      wx.DefaultSize, plateButtons.PB_STYLE_SQUARE)
+        self.userNavButton.SetForegroundColour(self.white)
+        self.userNavButton.SetBackgroundColour(self.darkGrey)
+        # self.userNavButton.SetFont(self.fontBold)
+        self.userNavButton.SetMinSize(wx.Size(200, 50))
+        self.userNavButton.SetPressColor(self.darkGrey)
+
+        # add user button
+        LayoutnavPanelLower.Add(self.userNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+
+        # add upper and lower nav panel
+        LayoutnavPanel.Add(LayoutnavPanelUpper, 1, wx.EXPAND, 0)
+        LayoutnavPanel.Add(LayoutnavPanelLower, 0, wx.EXPAND, 0)
+
+        self.navPanel.SetSizer(LayoutnavPanel)
+        self.navPanel.Layout()
+        LayoutnavPanel.Fit(self.navPanel)
+
+        self.configurationPanel = wx.ScrolledWindow(self, pos=wx.DefaultPosition, size=wx.DefaultSize,
+                                                  style=wx.VSCROLL | wx.HSCROLL)
+        self.configurationPanel.SetScrollRate(5, 5)
+
+        LayoutMain.Add(self.navPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutMain.Add(self.configurationPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+
+        self.SetSizer(LayoutMain)
+        self.Layout()
+
+        LayoutConfigurationPanel = wx.BoxSizer(wx.VERTICAL)
+
+        self.configurationPanelHeadPanel = wx.Panel(self.configurationPanel, -1)
+        self.configurationPanelHeadPanel.SetBackgroundColour(self.darkGrey)
+
+        LayoutHeadPanel = wx.BoxSizer(wx.VERTICAL)
+
+        self.configurationPanelHeading = wx.StaticText(self.configurationPanelHeadPanel, -1, "CONFIGURATION")
+        self.configurationPanelHeading.SetForegroundColour(self.white)
+        self.configurationPanelHeading.SetFont(self.fontBold)
+
+        LayoutHeadPanel.Add(self.configurationPanelHeading, proportion=1, flag=wx.ALIGN_CENTER | wx.ALL, border=15)
+
+        self.configurationPanelHeadPanel.SetSizer(LayoutHeadPanel)
+        LayoutHeadPanel.Fit(self.configurationPanelHeadPanel)
+
+        self.configurationMainPanel = wx.Panel(self.configurationPanel, -1)
+        self.configurationMainPanel.SetBackgroundColour(self.Grey)
+
+        LayoutConfigurationPanel.Add(self.configurationPanelHeadPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutConfigurationPanel.Add(self.configurationMainPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+
+        self.configurationPanel.SetSizer(LayoutConfigurationPanel)
+        LayoutConfigurationPanel.Fit(self.configurationPanel)
         
         bSizer3 = wx.BoxSizer( wx.VERTICAL )
         #Central Panel
-        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.m_panel1 = wx.Panel( self.configurationMainPanel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.m_panel1.SetBackgroundColour( self.Grey )
         
         #Central FlexGrid (1 Column)
@@ -268,12 +314,15 @@ class MyFrame1 ( wx.Frame ):
         fgSizer31.Fit( self.m_panel1 )
         bSizer3.Add( self.m_panel1, 1, wx.EXPAND |wx.ALL, 0 )
         
-        
-        fgSizer1.Add( bSizer3, 1, wx.EXPAND, 5 )
-        
-        
-        self.SetSizer( fgSizer1 )
+        self.configurationMainPanel.SetSizer(bSizer3)
+        bSizer3.Fit(self.configurationMainPanel)
+
         self.Layout()
+        #fgSizer1.Add( bSizer3, 1, wx.EXPAND, 5 )
+        
+        
+        #self.SetSizer( fgSizer1 )
+        #self.Layout()
         
         self.Centre( wx.BOTH )
     
@@ -406,8 +455,12 @@ class MyFrame1 ( wx.Frame ):
         
         m_button8 = wx.Button( m_scrolledWindow1, wx.ID_ANY, u"Configure", wx.DefaultPosition, wx.Size( -1,34 ), 0, name=name+"_configure" )
         m_button8.SetFont( wx.Font( 11, 70, 90, 90, False, wx.EmptyString ) )
+        m_button8.Bind(wx.EVT_BUTTON, lambda evt: self.configureButtonClicked(evt, m_textCtrl2.GetValue()))
         fgSizer.Add( m_button8, 0, wx.ALL|wx.EXPAND, 5 )
-        
+
+    def configureButtonClicked(self, event, value):
+        print(value)
+
     def controlButtonClick(self,event):
         name=event.GetEventObject().name
         cameraIndex=name[0:6]
@@ -532,7 +585,7 @@ class MyFrame1 ( wx.Frame ):
                         "calibAvailable": False,
                         "isPaused":True,
                     },
-                    "CalibrationMatrix": None,
+                    "CalibrationData": None,
                     }
                 })
             with open('cameraDatabase.json','w') as jsonFile:

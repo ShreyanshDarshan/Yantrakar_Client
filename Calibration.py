@@ -2,6 +2,8 @@ import wx
 import wx.lib.platebtn as plateButtons
 import cv2
 import cameraCalib
+import json
+import numpy as np
 
 class Dashboard(wx.Frame):
 
@@ -9,6 +11,7 @@ class Dashboard(wx.Frame):
         super(Dashboard, self).__init__(parent, title="Yantrakar Calibration", size=(1100, 750))
 
         self.isCalibrating = False
+        self.feedPlaying = False
         self.feedFPS = 30
         self.feed = None
         self.feedBitmap = None
@@ -16,6 +19,9 @@ class Dashboard(wx.Frame):
         self.calibrater = cameraCalib.CameraCalibration()
 
         self.instructionStatus = -1
+
+        self.cameraDatabase = None
+        self.cameraList = {}
 
         self.SetMinSize((1100, 750))
         self.initUI()
@@ -158,14 +164,15 @@ class Dashboard(wx.Frame):
         LayoutButtonPanel = wx.GridBagSizer(0, 0)
 
         self.howToCalibButton = wx.Button(self.calibrationButtonsPanel, -1, "How to Calibrate?")
-        cameraAliasLabel = wx.StaticText(self.calibrationButtonsPanel, -1, "Camera ID")
+        cameraAliasLabel = wx.StaticText(self.calibrationButtonsPanel, -1, "Camera Alias")
         self.cameraAliasEntry = wx.ComboBox(self.calibrationButtonsPanel, -1, size=(200, -1))
-        self.cameraAliasEntry.Append("CAM1")
         self.cameraAliasEntry.SetEditable(wx.TE_READONLY)
+        self.cameraAliasEntry.Bind(wx.EVT_COMBOBOX, self.cameraAliasEntryChanged)
         self.calibrateStartButton = wx.Button(self.calibrationButtonsPanel, -1, "Start")
         self.calibrateStartButton.Bind(wx.EVT_BUTTON, self.calibStartButtonClicked)
         self.calibrateSaveButton = wx.Button(self.calibrationButtonsPanel, -1, "Save")
         self.calibrateSaveButton.Enable(False)
+        self.calibrateSaveButton.Bind(wx.EVT_BUTTON, self.calibrateSaveButtonClicked)
 
         markerSideLabel = wx.StaticText(self.calibrationButtonsPanel, -1, "Marker Side Dimension (in cm)")
         self.markerSideEntry = wx.TextCtrl(self.calibrationButtonsPanel, -1, "14.0")
@@ -246,8 +253,57 @@ class Dashboard(wx.Frame):
         self.Show(True)
         self.Layout()
 
+        self.updateCameraAliasList()
+
+    def calibrateSaveButtonClicked(self, event):
+        cameraID = self.cameraList[self.cameraAliasEntry.GetValue()]
+        calibrationData = {
+            'calibrationMatrix': self.calibrater.topViewTransform.tolist(),
+            'worldRatio': self.calibrater.worldRatio
+        }
+
+        self.cameraDatabase[cameraID]['cameraStatus']['calibAvailable'] = True
+        self.cameraDatabase[cameraID]['CalibrationData'] = calibrationData
+
+        with open("cameraDatabase.json", 'w') as jsonFile:
+            json.dump(self.cameraDatabase,jsonFile,sort_keys=True, indent=4)
+
+        self.calibrateSaveButton.Enable(False)
+
+    def cameraAliasEntryChanged(self, event):
+        if (not self.cameraAliasEntry.GetSelection() is wx.NOT_FOUND):
+            #if(self.cameraDatabase[self.cameraAliasEntry.ge])
+            self.feedPlaying = True
+            self.instructionStatus = - 1
+            self.calibrateSaveButton.Enable(False)
+            cameraID = self.cameraList[self.cameraAliasEntry.GetValue()]
+            if(self.cameraDatabase[cameraID]['cameraStatus']['calibAvailable']):
+                print("HERE")
+                self.calibrater.topViewTransform = np.array(self.cameraDatabase[cameraID]['CalibrationData']['calibrationMatrix'])
+                self.calibrater.worldRatio = self.cameraDatabase[cameraID]['CalibrationData']['worldRatio']
+                self.calibrater.calibrationDone = 1
+            else:
+                self.calibrater.calibrationDone = 0
+
+
+    def updateCameraAliasList(self):
+        try:
+            with open("cameraDatabase.json", 'r') as jsonFile:
+                self.cameraDatabase = json.load(jsonFile)
+                for key in self.cameraDatabase:
+                    self.cameraList[self.cameraDatabase[key]['cameraAlias']] = key
+                    self.cameraAliasEntry.Append(self.cameraDatabase[key]['cameraAlias'])
+
+            self.cameraAliasEntry.Enable(True)
+            self.calibrateStartButton.Enable(True)
+            self.markerSideEntry.Enable(True)
+        except:
+            self.cameraAliasEntry.Enable(False)
+            self.calibrateStartButton.Enable(False)
+            self.markerSideEntry.Enable(False)
+
     def putFeed(self, event):
-        if(self.isCalibrating):
+        if(self.feedPlaying):
             if(not self.feedBitmap is None):
                 dc = wx.BufferedPaintDC(self.calibrationFeed)
                 dc.DrawBitmap(self.feedBitmap, 0, 0)
@@ -258,16 +314,50 @@ class Dashboard(wx.Frame):
         self.feedBitmap = wx.Bitmap(image)
 
     def updateFeed(self, event):
-        if(self.isCalibrating):
+        if(self.feedPlaying):
 
             #Get Frame from source
             rvt, self.feed = self.capture.read()
 
-            if (not self.calibrater.calibrationDone):
-                self.calibrater.calibrate(self.feed, float(self.markerSideEntry.GetValue()))
+            if(self.isCalibrating):
+                if (not self.calibrater.calibrationDone):
+                    self.calibrater.calibrate(self.feed, float(self.markerSideEntry.GetValue()))
             else:
-                self.feed = self.calibrater.drawGroundPlane(self.feed)
-                #self.feed = self.calibrater.findTopView(self.feed)
+                if(self.calibrater.calibrationDone):
+                    #print("HERE")
+                    self.feed = self.calibrater.drawGroundPlane(self.feed)
+                    #self.feed = self.calibrater.findTopView(self.feed)
+
+            if (self.isCalibrating):
+                if (not (self.instructionStatus == self.calibrater.calibrationLEDStatus)):
+                    print("HERE")
+                    #print(self.instructionStatus)
+                    #print(self.calibrater.calibrationLEDStatus)
+                    self.instructionStatus = self.calibrater.calibrationLEDStatus
+                    if (self.calibrater.calibrationLEDStatus == 0):
+                        self.instructionText.SetLabel(
+                            "Marker Not Found! Marker is either not present or too small to detect")
+                        self.instructionText.Wrap(280)
+                        self.instructionPanel.Refresh()
+                        self.calibrationFeedPanel.Layout()
+                    elif (self.calibrater.calibrationLEDStatus == 1):
+                        self.instructionText.SetLabel("Wait Calibrating! Do not move the marker")
+                        self.instructionText.Wrap(280)
+                        self.instructionPanel.Refresh()
+                        self.calibrationFeedPanel.Layout()
+                    else:
+                        #print("Here")
+                        self.instructionText.SetLabel("CALIBRATION COMPLETE! Now you can remove marker")
+                        self.instructionText.Wrap(280)
+                        self.instructionPanel.Refresh()
+                        self.calibrationFeedPanel.Layout()
+                        self.isCalibrating = False
+                        self.calibrateStartButton.SetLabel("Start")
+                        self.calibrateSaveButton.Enable(True)
+                        self.cameraAliasEntry.Enable(True)
+                        self.markerSideEntry.Enable(True)
+                else:
+                    print(self.instructionStatus)
 
             frame = cv2.cvtColor(self.feed, cv2.COLOR_BGR2RGB)
             tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
@@ -282,21 +372,6 @@ class Dashboard(wx.Frame):
             # if(status == 2)
             # Set instruction text to Calibration Complete
 
-            if(self.instructionStatus != self.calibrater.calibrationLEDStatus):
-                self.instructionStatus = self.calibrater.calibrationLEDStatus
-                if (self.calibrater.calibrationLEDStatus == 0):
-                    self.instructionText.SetLabel("Marker Not Found! Marker is either not present or too small to detect")
-                    self.instructionText.Wrap(280)
-                    self.calibrationFeedPanel.Layout()
-                elif (self.calibrater.calibrationLEDStatus == 1):
-                    self.instructionText.SetLabel("Wait Calibrating! Do not move the marker")
-                    self.instructionText.Wrap(280)
-                    self.calibrationFeedPanel.Layout()
-                else:
-                    self.instructionText.SetLabel("CALIBRATION COMPLETE! Now you can remove marker")
-                    self.instructionText.Wrap(280)
-                    self.calibrationFeedPanel.Layout()
-
 
     def calibStartButtonClicked(self, event):
         if(self.cameraAliasEntry.GetSelection() is wx.NOT_FOUND):
@@ -309,14 +384,23 @@ class Dashboard(wx.Frame):
                 self.instructionText.Wrap(280)
                 self.calibrationFeedPanel.Layout()
             else:
-                self.instructionText.SetLabel("")
-                self.instructionPanel.Layout()
+                #self.instructionText.SetLabel("")
+                #self.instructionPanel.Layout()
                 if(self.isCalibrating):
                     self.isCalibrating = False
+                    print(self.isCalibrating)
                     self.calibrateStartButton.SetLabel("Start")
+                    self.cameraAliasEntry.Enable(True)
+                    self.markerSideEntry.Enable(True)
+                    self.instructionStatus = -1
                 else:
                     self.isCalibrating = True
+                    print(self.isCalibrating)
                     self.calibrateStartButton.SetLabel("Stop")
+                    self.cameraAliasEntry.Enable(False)
+                    self.markerSideEntry.Enable(False)
+                    self.calibrater.calibrationDone = 0
+                    self.instructionStatus = -1
 
 
 app = wx.App()
