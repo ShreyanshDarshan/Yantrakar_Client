@@ -258,7 +258,7 @@ class Dashboard(wx.Frame):
         self.galleryLiveButton.SetForegroundColour(self.white)
         self.galleryLiveButton.SetPressColor(self.darkGrey)
 
-        self.galleryPauseButton = plateButtons.PlateButton(dashboardGalleryControls, -1, "", wx.Bitmap("ui_elements/pause button.png"), wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL | plateButtons.PB_STYLE_SQUARE)
+        self.galleryPauseButton = plateButtons.PlateButton(dashboardGalleryControls, -1, "", wx.Bitmap("ui_elements/pause.png"), wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL | plateButtons.PB_STYLE_SQUARE)
         self.isPlaying = True
         self.galleryPauseButton.SetMaxSize((40, -1))
         self.galleryPauseButton.SetBackgroundColour(self.darkGrey)
@@ -407,11 +407,11 @@ class Dashboard(wx.Frame):
 
     def toggle_play(self, event):
         if self.isPlaying:
-            self.galleryPauseButton.SetBitmap(wx.Bitmap("ui_elements/play button.png"))
+            self.galleryPauseButton.SetBitmap(wx.Bitmap("ui_elements/play.png"))
             self.isLive = False
             self.isPlaying = False
         else:
-            self.galleryPauseButton.SetBitmap(wx.Bitmap("ui_elements/pause button.png"))
+            self.galleryPauseButton.SetBitmap(wx.Bitmap("ui_elements/pause.png"))
             self.isPlaying = True
 
     # def go_live(self, event):
@@ -420,9 +420,9 @@ class Dashboard(wx.Frame):
 import random 
 
 y = []
-for i in range (10):
-    y.append(random.randrange(0, 10, 1))
-x = np.arange(10)
+for i in range (200):
+    y.append(random.randrange(0, 200, 1))
+x = np.arange(200)
 # y = np.random()
 plt.style.use(u'dark_background')
 fig = plt.figure()
