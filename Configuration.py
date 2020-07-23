@@ -443,6 +443,7 @@ class MyFrame1 ( wx.Frame ):
             for i in range(1,numberOfCamera):
                 fgsizer.Children[11*i].Window.SetValue(str(i))
             self.numberOfCamera=numberOfCamera
+            self.lastCameraIndex=fgsizer.Children[11*(numberOfCamera-1)+1].Window.GetValue()
             if cameraIndex in data:
                 data.pop(cameraIndex)
                 with open('cameraDatabase.json','w') as jsonFile:
