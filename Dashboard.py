@@ -120,11 +120,18 @@ class Dashboard(wx.Frame):
 
         NavIconSize = wx.Size(20, 20)
 
+        self.DashboardIcon = self.scaleIcons(self.DashboardIcon, NavIconSize)
+        self.ConfigIcon = self.scaleIcons(self.ConfigIcon, NavIconSize)
+        self.CalibrationIcon = self.scaleIcons(self.CalibrationIcon, NavIconSize)
+        self.HelpIcon = self.scaleIcons(self.HelpIcon, NavIconSize)
+        self.UserIcon = self.scaleIcons(self.UserIcon, NavIconSize)
+
         self.DashboardIcon.SetSize(NavIconSize)
         self.ConfigIcon.SetSize(NavIconSize)
         self.CalibrationIcon.SetSize(NavIconSize)
         self.HelpIcon.SetSize(NavIconSize)
         self.UserIcon.SetSize(NavIconSize)
+
 
         self.SetFont(self.fontNormal)
         self.SetBackgroundColour(self.Grey)
@@ -377,6 +384,11 @@ class Dashboard(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.pauseSlideShow, self.waitTimer)
 
         self.Bind(wx.EVT_SIZE, self.mainWindowSizeChange)
+
+    def scaleIcons(self, iconBitmap, iconSize):
+        image = wx.Bitmap.ConvertToImage(iconBitmap)
+        image = image.Scale(iconSize[0], iconSize[1], wx.IMAGE_QUALITY_HIGH)
+        return wx.Bitmap(image)
 
     def updateGalleryPanel(self):
         if(self.noOfSlides > 1):
