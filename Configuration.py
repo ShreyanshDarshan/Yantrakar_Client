@@ -71,7 +71,7 @@ class MyFrame1 ( wx.Panel ):
         self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
         # self.dashboardNavButton.SetPressColor(self.darkGrey)
 
-        self.dashboardNavButton.Bind(wx.EVT_BUTTON, self.dashboardNavButtonClicked)
+        #self.dashboardNavButton.Bind(wx.EVT_BUTTON, self.dashboardNavButtonClicked)
 
          # Add Config button on Navbar
         self.cameraConfigNavButton = wx.Button(self.navPanel, -1, u"  Camera Config", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
@@ -680,13 +680,19 @@ class MyFrame1 ( wx.Panel ):
         self.parent.current_page = 1
         self.parent.changePage()
 
+        return event
+
     def cameraConfigNavButtonClicked(self, event):
         self.parent.current_page = 2
         self.parent.changePage()
 
+        return event
+
     def calibrationNavButtonClicked(self, event):
         self.parent.current_page = 3
         self.parent.changePage()
+
+        return event
 
 class MyApp(wx.App):
     def OnInit(self):
