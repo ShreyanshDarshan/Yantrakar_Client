@@ -91,7 +91,7 @@ class Calibration(wx.Panel):
         self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
         # self.dashboardNavButton.SetPressColor(self.darkGrey)
 
-        self.dashboardNavButton.Bind(wx.EVT_BUTTON, self.dashboardNavButtonClicked)
+        #self.dashboardNavButton.Bind(wx.EVT_BUTTON, self.dashboardNavButtonClicked)
 
         # Add Config button on Navbar
         self.cameraConfigNavButton = wx.Button(self.navPanel, -1, u"  Camera Config", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
@@ -113,7 +113,7 @@ class Calibration(wx.Panel):
         self.calibrationNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
         self.calibrationNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
         self.calibrationNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.calibrationNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.Grey))
+        self.calibrationNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.calibrationNavButtonClicked(evt), self.Grey))
         # self.calibrationNavButton.SetFont(self.fontBold)
         self.calibrationNavButton.SetMinSize(wx.Size(200, 50))
         # self.calibrationNavButton.SetPressColor(self.darkGrey)
@@ -481,13 +481,19 @@ class Calibration(wx.Panel):
         self.parent.current_page = 1
         self.parent.changePage()
 
+        return event
+
     def cameraConfigNavButtonClicked(self, event):
         self.parent.current_page = 2
         self.parent.changePage()
 
+        return event
+
     def calibrationNavButtonClicked(self, event):
         self.parent.current_page = 3
         self.parent.changePage()
+
+        return event
 
 
 #app = wx.App()
