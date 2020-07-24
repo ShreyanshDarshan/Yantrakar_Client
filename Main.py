@@ -14,17 +14,18 @@ class MainFrame(wx.Frame):
         self.initUI()
 
     def changePage(self):
+        timeout = 1000
         if(self.current_page == 1):
+            self.dashboardPage.Show()
             self.configPage.Hide()
             self.calibPage.Hide()
-            self.dashboardPage.Show()
         elif(self.current_page == 2):
             self.configPage.Show()
             self.calibPage.Hide()
             self.dashboardPage.Hide()
         elif(self.current_page == 3):
-            self.configPage.Hide()
             self.calibPage.Show()
+            self.configPage.Hide()
             self.dashboardPage.Hide()
 
         self.Layout()

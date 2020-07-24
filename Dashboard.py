@@ -129,11 +129,11 @@ class Dashboard(wx.Panel):
         self.HelpIcon = self.scaleIcons(self.HelpIcon, NavIconSize)
         self.UserIcon = self.scaleIcons(self.UserIcon, NavIconSize)
 
-        self.DashboardIcon.SetSize(NavIconSize)
-        self.ConfigIcon.SetSize(NavIconSize)
-        self.CalibrationIcon.SetSize(NavIconSize)
-        self.HelpIcon.SetSize(NavIconSize)
-        self.UserIcon.SetSize(NavIconSize)
+        # self.DashboardIcon.SetSize(NavIconSize)
+        # self.ConfigIcon.SetSize(NavIconSize)
+        # self.CalibrationIcon.SetSize(NavIconSize)
+        # self.HelpIcon.SetSize(NavIconSize)
+        # self.UserIcon.SetSize(NavIconSize)
 
 
         self.SetFont(self.fontNormal)
@@ -159,7 +159,7 @@ class Dashboard(wx.Panel):
         self.dashboardNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
         self.dashboardNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
         self.dashboardNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.dashboardNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.dashboardNavButtonClicked(evt), self.Grey))
+        self.dashboardNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.Grey))
         # self.dashboardNavButton.SetFont(self.fontBold)
         self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
         # self.dashboardNavButton.SetPressColor(self.darkGrey)
@@ -389,6 +389,10 @@ class Dashboard(wx.Panel):
         self.Bind(wx.EVT_TIMER, self.pauseSlideShow, self.waitTimer)
 
         self.Bind(wx.EVT_SIZE, self.mainWindowSizeChange)
+
+        self.SetWindowStyleFlag(wx.TRANSPARENT_WINDOW)
+        print ("can set transparent")
+        print (self.CanSetTransparent())
 
     def scaleIcons(self, iconBitmap, iconSize):
         image = wx.Bitmap.ConvertToImage(iconBitmap)

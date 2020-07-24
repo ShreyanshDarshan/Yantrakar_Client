@@ -1,38 +1,50 @@
 {
-  "000001": {
-    "cameraAlias": "Main Gate",
-    "cameraID": "Admin",
-    "cameraIP": "192.100.0.106",
-    "cameraPassword": "Shrinivas",
-    "cameraStatus": {
-      "feedAvailable": false,
-      "calibAvailable": false,
-      "isPaused": true
+    "000001": {
+        "CalibrationData": null,
+        "cameraAlias": "Main Gate",
+        "cameraID": "Admin",
+        "cameraIP": "192.100.0.106",
+        "cameraPassword": "Shrinivas",
+        "cameraStatus": {
+            "calibAvailable": false,
+            "feedAvailable": false,
+            "isPaused": true
+        }
     },
-    "CalibrationMatrix": null
-  },
-  "000002": {
-    "cameraAlias": "LBS Hall",
-    "cameraID": "Admin",
-    "cameraIP": "192.100.0.107",
-    "cameraPassword": "Shrinivas1",
-    "cameraStatus": {
-      "feedAvailable": false,
-      "calibAvailable": false,
-      "isPaused": false
+    "000002": {
+        "CalibrationData": null,
+        "cameraAlias": "LBS Hall",
+        "cameraID": "Admin",
+        "cameraIP": "192.100.0.107",
+        "cameraPassword": "Shrinivas1",
+        "cameraStatus": {
+            "calibAvailable": false,
+            "feedAvailable": false,
+            "isPaused": true
+        }
     },
-    "CalibrationMatrix": null
-  },
-  "000003": {
-    "cameraAlias": "2.2",
-    "cameraID": "Admin",
-    "cameraIP": "192.100.0.108",
-    "cameraPassword": "Shrinivas2",
-    "cameraStatus": {
-      "feedAvailable": false,
-      "calibAvailable": false,
-      "isPaused": false
+    "000003": {
+        "CalibrationMatrix": null,
+        "cameraAlias": "2.2",
+        "cameraID": "Admin",
+        "cameraIP": "192.100.0.108",
+        "cameraPassword": "Shrinivas3",
+        "cameraStatus": {
+            "calibAvailable": false,
+            "feedAvailable": false,
+            "isPaused": true
+        }
     },
-    "CalibrationMatrix": null
-  }
+    "000004": {
+        "CalibrationData": null,
+        "cameraAlias": "3da",
+        "cameraID": "afsaf",
+        "cameraIP": "afdafa",
+        "cameraPassword": "afqsaaf",
+        "cameraStatus": {
+            "calibAvailable": false,
+            "feedAvailable": false,
+            "isPaused": true
+        }
+    }
 }
