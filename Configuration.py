@@ -20,6 +20,7 @@ class MyFrame1 ( wx.Panel ):
         self.lightGrey = wx.Colour(100, 100, 100)
         self.faintWhite = wx.Colour(200, 200, 200)
         self.white = wx.Colour(255, 255, 255)
+        self.slightlyLightGrey = wx.Colour(80, 80, 80)
         self.fontNormal = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.fontBold = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 
@@ -92,14 +93,17 @@ class MyFrame1 ( wx.Panel ):
         
         self.numberOfCamera=1
 
-        self.m_button1 = plateButtons.PlateButton( self.m_panel1, wx.ID_ANY, u"+ Add New Camera", None, wx.DefaultPosition, wx.Size( -1,40 ), plateButtons.PB_STYLE_SQUARE)
+        self.m_button1 = wx.Button( self.m_panel1, wx.ID_ANY, u"+ Add New Camera", wx.DefaultPosition, wx.Size( -1,40 ), wx.BU_AUTODRAW | wx.BORDER_NONE)
         self.m_button1.SetFont( wx.Font( 12, 70, 90, 90, False, wx.EmptyString ) )
         self.m_button1.Bind(wx.EVT_BUTTON,lambda evt: (
                 self.addNewCamera(evt,fgSizer4,self.m_scrolledWindow1)
             ))
+        self.m_button1.SetForegroundColour(self.white)
         self.m_button1.SetBackgroundColour(self.darkGrey)
-        self.m_button1.SetPressColor(self.darkGrey)
-        self.m_button1.SetForegroundColour( self.faintWhite )
+        self.m_button1.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.m_button1.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
+        self.m_button1.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
+        self.m_button1.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         
         bSizer6.Add( self.m_button1, 0, wx.ALL, 5 )
         
@@ -108,21 +112,27 @@ class MyFrame1 ( wx.Panel ):
         
         bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_button2 = plateButtons.PlateButton( self.m_panel1, wx.ID_ANY, u"Stop All", None, wx.DefaultPosition, wx.Size( -1,40 ), plateButtons.PB_STYLE_SQUARE )
+        self.m_button2 = wx.Button( self.m_panel1, wx.ID_ANY, u"Stop All", wx.DefaultPosition, wx.Size( -1,40 ), wx.BU_AUTODRAW | wx.BORDER_NONE)
         self.m_button2.SetFont( wx.Font( 12, 70, 90, 90, False, wx.EmptyString ) )
         self.m_button2.Bind(wx.EVT_BUTTON,lambda evt: self.stopAll(evt,fgSizer4))
+        self.m_button2.SetForegroundColour(self.white)
         self.m_button2.SetBackgroundColour(self.darkGrey)
-        self.m_button2.SetPressColor(self.darkGrey)
-        self.m_button2.SetForegroundColour( self.faintWhite )
+        self.m_button2.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.m_button2.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
+        self.m_button2.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
+        self.m_button2.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         
         bSizer7.Add( self.m_button2, 0, wx.ALL, 5 )
         
-        self.m_button3 = plateButtons.PlateButton( self.m_panel1, wx.ID_ANY, u"Start All", None, wx.DefaultPosition, wx.Size( -1,40 ), 0 )
+        self.m_button3 = wx.Button( self.m_panel1, wx.ID_ANY, u"Start All", wx.DefaultPosition, wx.Size( -1,40 ), wx.BU_AUTODRAW | wx.BORDER_NONE)
         self.m_button3.SetFont( wx.Font( 12, 70, 90, 90, False, wx.EmptyString ) )
         self.m_button3.Bind(wx.EVT_BUTTON,lambda evt: self.startAll(evt,fgSizer4))
+        self.m_button3.SetForegroundColour(self.white)
         self.m_button3.SetBackgroundColour(self.darkGrey)
-        self.m_button3.SetPressColor(self.darkGrey)
-        self.m_button3.SetForegroundColour( self.faintWhite )
+        self.m_button3.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.m_button3.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
+        self.m_button3.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
+        self.m_button3.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
 
         bSizer7.Add( self.m_button3, 0, wx.ALL, 5 )
         
@@ -337,22 +347,25 @@ class MyFrame1 ( wx.Panel ):
         m_button81 = wx.Button( m_scrolledWindow1, wx.ID_ANY, InputData[5], wx.DefaultPosition, wx.Size( -1,34 ), style = wx.BORDER_NONE ,name=name+"_edit")
         m_button81.SetFont( wx.Font( 11, 70, 90, 90, False, wx.EmptyString ) )
         m_button81.name=name+"_edit"
-        m_button81.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.lightGrey))
-        m_button81.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
         m_button81.Bind(wx.EVT_BUTTON,self.editButtonClick)
-        m_button81.SetBackgroundColour(self.darkGrey)
         m_button81.SetForegroundColour(self.faintWhite)
+        m_button81.SetBackgroundColour(self.darkGrey)
+        m_button81.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        m_button81.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
+        m_button81.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
+        m_button81.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         fgSizer.Add( m_button81, 0, wx.ALL|wx.EXPAND, 5 )
         
         m_button82 = wx.Button( m_scrolledWindow1, wx.ID_ANY, u"Delete", wx.DefaultPosition, wx.Size( -1,34 ), style = wx.BORDER_NONE,name=name+"_delete")
         m_button82.SetFont( wx.Font( 11, 70, 90, 90, False, wx.EmptyString ) )
         m_button82.name=name+"_delete"
         m_button82.Bind(wx.EVT_BUTTON,lambda evt: self.deleteButtonClick(evt,fgSizer,m_scrolledWindow1))
-        m_button82.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.lightGrey))
-        m_button82.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        m_button82.SetWindowStyleFlag(wx.BORDER_NONE)
-        m_button82.SetBackgroundColour(self.darkGrey)
         m_button82.SetForegroundColour(self.faintWhite)
+        m_button82.SetBackgroundColour(self.darkGrey)
+        m_button82.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        m_button82.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
+        m_button82.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
+        m_button82.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         # m_button82.Bind(wx.EVT_ENTER_WINDOW, )
         fgSizer.Add( m_button82, 0, wx.ALL|wx.EXPAND, 5 )
         
@@ -383,6 +396,11 @@ class MyFrame1 ( wx.Panel ):
         m_button8.SetFont( wx.Font( 11, 70, 90, 90, False, wx.EmptyString ) )
         m_button8.Bind(wx.EVT_BUTTON, lambda evt: self.configureButtonClicked(evt, m_textCtrl2.GetValue()))
         fgSizer.Add( m_button8, 0, wx.ALL|wx.EXPAND, 5 )
+
+    def scaleIcons(self, iconBitmap, iconSize):
+        image = wx.Bitmap.ConvertToImage(iconBitmap)
+        image = image.Scale(iconSize[0], iconSize[1], wx.IMAGE_QUALITY_HIGH)
+        return wx.Bitmap(image)
 
     def configureButtonClicked(self, event, value):
         print(value)

@@ -114,7 +114,6 @@ class Dashboard(wx.Panel):
         self.faintWhite = wx.Colour(200, 200, 200)
         self.white = wx.Colour(255, 255, 255)
 
-
         self.SetFont(self.fontNormal)
         self.SetBackgroundColour(self.Grey)
 
@@ -181,8 +180,8 @@ class Dashboard(wx.Panel):
         self.galleryLiveButton.SetForegroundColour(self.white)
         self.galleryLiveButton.SetPressColor(self.darkGrey)
 
-        self.galleryPauseButton = plateButtons.PlateButton(dashboardGalleryControls, -1, "", wx.Bitmap("ui_elements/play.png"), wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL | plateButtons.PB_STYLE_SQUARE)
-        self.isPlaying = False
+        self.galleryPauseButton = plateButtons.PlateButton(dashboardGalleryControls, -1, "", wx.Bitmap("ui_elements/pause.png"), wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL | plateButtons.PB_STYLE_SQUARE)
+        self.isPlaying = True
         self.galleryPauseButton.SetMaxSize((40, -1))
         self.galleryPauseButton.SetBackgroundColour(self.darkGrey)
         self.galleryPauseButton.SetFont(self.fontBold)
@@ -226,7 +225,7 @@ class Dashboard(wx.Panel):
         self.dashboardPanel.Layout()
         LayoutDashboard.Fit(self.dashboardPanel)
 
-        #LayoutMain.Add(self.navPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
+        #   LayoutMain.Add(self.navPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutMain.Add(self.dashboardPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
 
         self.LayoutDashboardGalleryView = wx.GridBagSizer(0, 0)
@@ -269,6 +268,10 @@ class Dashboard(wx.Panel):
         self.Bind(wx.EVT_TIMER, self.pauseSlideShow, self.waitTimer)
 
         self.Bind(wx.EVT_SIZE, self.mainWindowSizeChange)
+
+        self.SetWindowStyleFlag(wx.TRANSPARENT_WINDOW)
+        print ("can set transparent")
+        print (self.CanSetTransparent())
 
     def scaleIcons(self, iconBitmap, iconSize):
         image = wx.Bitmap.ConvertToImage(iconBitmap)

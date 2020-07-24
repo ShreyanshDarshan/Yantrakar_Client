@@ -39,6 +39,7 @@ class Calibration(wx.Panel):
         self.lightGrey = wx.Colour(100, 100, 100)
         self.faintWhite = wx.Colour(200, 200, 200)
         self.white = wx.Colour(255, 255, 255)
+        self.slightlyLightGrey = wx.Colour(80, 80, 80)
 
         self.capture = cv2.VideoCapture(0)
         ret, self.feed = self.capture.read()
@@ -88,18 +89,41 @@ class Calibration(wx.Panel):
 
         LayoutButtonPanel = wx.GridBagSizer(0, 0)
 
-        self.howToCalibButton = wx.Button(self.calibrationButtonsPanel, -1, "How to Calibrate?")
+        self.howToCalibButton = wx.Button(self.calibrationButtonsPanel, -1, "How to Calibrate?", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE)
+        self.howToCalibButton.SetForegroundColour(self.white)
+        self.howToCalibButton.SetBackgroundColour(self.darkGrey)
+        self.howToCalibButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.howToCalibButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
+        self.howToCalibButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
+        self.howToCalibButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+
         cameraAliasLabel = wx.StaticText(self.calibrationButtonsPanel, -1, "Camera Alias")
+        cameraAliasLabel.SetForegroundColour(self.faintWhite)
         self.cameraAliasEntry = wx.ComboBox(self.calibrationButtonsPanel, -1, size=(200, -1))
         self.cameraAliasEntry.SetEditable(wx.TE_READONLY)
         self.cameraAliasEntry.Bind(wx.EVT_COMBOBOX, self.cameraAliasEntryChanged)
-        self.calibrateStartButton = wx.Button(self.calibrationButtonsPanel, -1, "Start")
+        self.calibrateStartButton = wx.Button(self.calibrationButtonsPanel, -1, "Start", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE)
+        self.calibrateStartButton.SetForegroundColour(self.white)
+        self.calibrateStartButton.SetBackgroundColour(self.darkGrey)
+        self.calibrateStartButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.calibrateStartButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
+        self.calibrateStartButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
+        self.calibrateStartButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        
         self.calibrateStartButton.Bind(wx.EVT_BUTTON, self.calibStartButtonClicked)
-        self.calibrateSaveButton = wx.Button(self.calibrationButtonsPanel, -1, "Save")
+
+        self.calibrateSaveButton = wx.Button(self.calibrationButtonsPanel, -1, "Save", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE)
+        self.calibrateSaveButton.SetForegroundColour(self.white)
+        self.calibrateSaveButton.SetBackgroundColour(self.darkGrey)
+        self.calibrateSaveButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.calibrateSaveButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
+        self.calibrateSaveButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
+        self.calibrateSaveButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         self.calibrateSaveButton.Enable(False)
         self.calibrateSaveButton.Bind(wx.EVT_BUTTON, self.calibrateSaveButtonClicked)
 
         markerSideLabel = wx.StaticText(self.calibrationButtonsPanel, -1, "Marker Side Dimension (in cm)")
+        markerSideLabel.SetForegroundColour(self.faintWhite)
         self.markerSideEntry = wx.TextCtrl(self.calibrationButtonsPanel, -1, "14.0")
 
         LayoutButtonPanel.Add((0, 0), wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.EXPAND | wx.ALL, 10)
@@ -157,6 +181,7 @@ class Calibration(wx.Panel):
         LayoutInstructionPanel = wx.BoxSizer(wx.VERTICAL)
 
         self.instructionText = wx.StaticText(self.instructionPanel, -1, "", style=wx.ALIGN_CENTER)
+        self.instructionText.SetForegroundColour(self.faintWhite)
         self.instructionText.Wrap(280)
         #self.instructionText.SetMinSize((-1, 20))
         self.instructionImage = wx.Panel(self.instructionPanel, -1)
@@ -297,6 +322,13 @@ class Calibration(wx.Panel):
             # if(status == 2)
             # Set instruction text to Calibration Complete
 
+    def changeColor(self, event, newcolor):
+        event.GetEventObject().SetBackgroundColour(newcolor)
+
+    def scaleIcons(self, iconBitmap, iconSize):
+        image = wx.Bitmap.ConvertToImage(iconBitmap)
+        image = image.Scale(iconSize[0], iconSize[1], wx.IMAGE_QUALITY_HIGH)
+        return wx.Bitmap(image)
 
     def calibStartButtonClicked(self, event):
         if(self.cameraAliasEntry.GetSelection() is wx.NOT_FOUND):
