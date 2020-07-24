@@ -20,23 +20,8 @@ class MyFrame1 ( wx.Panel ):
         self.lightGrey = wx.Colour(100, 100, 100)
         self.faintWhite = wx.Colour(200, 200, 200)
         self.white = wx.Colour(255, 255, 255)
-        self.slightlyLightGrey = wx.Colour(80, 80, 80)
         self.fontNormal = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.fontBold = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-
-        self.DashboardIcon = wx.Bitmap("ui_elements/Dashboard.png")
-        self.ConfigIcon = wx.Bitmap("ui_elements/Config.png")
-        self.CalibrationIcon = wx.Bitmap("ui_elements/Calibration.png")
-        self.HelpIcon = wx.Bitmap("ui_elements/Help.png")
-        self.UserIcon = wx.Bitmap("ui_elements/User.png")
-
-        NavIconSize = wx.Size(20, 20)
-
-        self.DashboardIcon = self.scaleIcons(self.DashboardIcon, NavIconSize)
-        self.ConfigIcon = self.scaleIcons(self.ConfigIcon, NavIconSize)
-        self.CalibrationIcon = self.scaleIcons(self.CalibrationIcon, NavIconSize)
-        self.HelpIcon = self.scaleIcons(self.HelpIcon, NavIconSize)
-        self.UserIcon = self.scaleIcons(self.UserIcon, NavIconSize)
 
         self.lastCameraIndex="01"
         self.didUpdate=False
@@ -48,110 +33,11 @@ class MyFrame1 ( wx.Panel ):
 
         LayoutMain = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.navPanel = wx.Panel(self, pos=wx.DefaultPosition)
-        self.navPanel.SetBackgroundColour(self.darkGrey)
-
-        LayoutnavPanel = wx.BoxSizer(wx.VERTICAL)
-
-        LayoutnavPanelUpper = wx.GridBagSizer(0, 0)
-        LayoutnavPanelUpper.SetFlexibleDirection(wx.BOTH)
-        LayoutnavPanelUpper.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
-
-        self.SetFont(self.fontNormal)
-
-        self.dashboardNavButton = wx.Button(self.navPanel, -1, u"  Dashboard", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.dashboardNavButton.SetForegroundColour(self.white)
-        self.dashboardNavButton.SetBackgroundColour(self.darkGrey)
-        self.dashboardNavButton.SetBitmap(self.DashboardIcon)
-        self.dashboardNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.dashboardNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.dashboardNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.dashboardNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.dashboardNavButtonClicked(evt), self.darkGrey))
-        # self.dashboardNavButton.SetFont(self.fontBold)
-        self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
-        # self.dashboardNavButton.SetPressColor(self.darkGrey)
-
-        #self.dashboardNavButton.Bind(wx.EVT_BUTTON, self.dashboardNavButtonClicked)
-
-         # Add Config button on Navbar
-        self.cameraConfigNavButton = wx.Button(self.navPanel, -1, u"  Camera Config", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.cameraConfigNavButton.SetForegroundColour(self.white)
-        self.cameraConfigNavButton.SetBackgroundColour(self.Grey)
-        self.cameraConfigNavButton.SetBitmap(self.ConfigIcon)
-        self.cameraConfigNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.cameraConfigNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.cameraConfigNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.cameraConfigNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.Grey))
-        # self.cameraConfigNavButton.SetFont(self.fontBold)
-        self.cameraConfigNavButton.SetMinSize(wx.Size(200, 50))
-        # self.cameraConfigNavButton.SetPressColor(self.darkGrey)
-
-        # Add Calibration button on Navbar
-        self.calibrationNavButton = wx.Button(self.navPanel, -1, u"  Calibration", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.calibrationNavButton.SetForegroundColour(self.white)
-        self.calibrationNavButton.SetBackgroundColour(self.darkGrey)
-        self.calibrationNavButton.SetBitmap(self.CalibrationIcon)
-        self.calibrationNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.calibrationNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.calibrationNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.calibrationNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.calibrationNavButtonClicked(evt), self.Grey))
-        # self.calibrationNavButton.SetFont(self.fontBold)
-        self.calibrationNavButton.SetMinSize(wx.Size(200, 50))
-        # self.calibrationNavButton.SetPressColor(self.darkGrey)
-
-        # Add Help button on Navbar
-        self.helpNavButton = wx.Button(self.navPanel, -1, u"  Help", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.helpNavButton.SetForegroundColour(self.white)
-        self.helpNavButton.SetBackgroundColour(self.darkGrey)
-        self.helpNavButton.SetBitmap(self.HelpIcon)
-        self.helpNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.helpNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.helpNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.helpNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.Grey))
-        # self.helpNavButton.SetFont(self.fontBold)
-        self.helpNavButton.SetMinSize(wx.Size(200, 50))
-        # self.helpNavButton.SetPressColor(self.darkGrey)
-
-        # add all nav bar buttons
-        LayoutnavPanelUpper.Add(self.dashboardNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-        LayoutnavPanelUpper.Add(self.cameraConfigNavButton, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-        LayoutnavPanelUpper.Add(self.calibrationNavButton, wx.GBPosition(2, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-        LayoutnavPanelUpper.Add(self.helpNavButton, wx.GBPosition(3, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-
-        # Make lower nav panel
-        LayoutnavPanelLower = wx.GridBagSizer(0, 0)
-        LayoutnavPanelLower.SetFlexibleDirection(wx.BOTH)
-        LayoutnavPanelLower.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
-
-        # Add User button on Navbar
-        self.userNavButton = wx.Button(self.navPanel, -1, u"  User", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.userNavButton.SetForegroundColour(self.white)
-        self.userNavButton.SetBackgroundColour(self.darkGrey)
-        self.userNavButton.SetBitmap(self.UserIcon)
-        self.userNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.userNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.userNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.userNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.Grey))
-        # self.userNavButton.SetFont(self.fontBold)
-        self.userNavButton.SetMinSize(wx.Size(200, 50))
-        # self.userNavButton.SetPressColor(self.darkGrey)
-
-        # add user button
-        LayoutnavPanelLower.Add(self.userNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-
-        # add upper and lower nav panel
-        LayoutnavPanel.Add(LayoutnavPanelUpper, 1, wx.EXPAND, 0)
-        LayoutnavPanel.Add(LayoutnavPanelLower, 0, wx.EXPAND, 0)
-
-        self.navPanel.SetSizer(LayoutnavPanel)
-        self.navPanel.Layout()
-        LayoutnavPanel.Fit(self.navPanel)
-
         self.configurationPanel = wx.ScrolledWindow(self, pos=wx.DefaultPosition, size=wx.DefaultSize,
                                                   style=wx.VSCROLL | wx.HSCROLL)
         self.configurationPanel.SetScrollRate(5, 5)
 
-        LayoutMain.Add(self.navPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
+        #LayoutMain.Add(self.navPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutMain.Add(self.configurationPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
 
         self.SetSizer(LayoutMain)
@@ -206,17 +92,14 @@ class MyFrame1 ( wx.Panel ):
         
         self.numberOfCamera=1
 
-        self.m_button1 = wx.Button( self.m_panel1, wx.ID_ANY, u"+ Add New Camera", wx.DefaultPosition, wx.Size( -1,40 ), wx.BU_AUTODRAW | wx.BORDER_NONE)
+        self.m_button1 = plateButtons.PlateButton( self.m_panel1, wx.ID_ANY, u"+ Add New Camera", None, wx.DefaultPosition, wx.Size( -1,40 ), plateButtons.PB_STYLE_SQUARE)
         self.m_button1.SetFont( wx.Font( 12, 70, 90, 90, False, wx.EmptyString ) )
         self.m_button1.Bind(wx.EVT_BUTTON,lambda evt: (
                 self.addNewCamera(evt,fgSizer4,self.m_scrolledWindow1)
             ))
-        self.m_button1.SetForegroundColour(self.white)
         self.m_button1.SetBackgroundColour(self.darkGrey)
-        self.m_button1.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.m_button1.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.m_button1.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        self.m_button1.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.m_button1.SetPressColor(self.darkGrey)
+        self.m_button1.SetForegroundColour( self.faintWhite )
         
         bSizer6.Add( self.m_button1, 0, wx.ALL, 5 )
         
@@ -225,27 +108,21 @@ class MyFrame1 ( wx.Panel ):
         
         bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_button2 = wx.Button( self.m_panel1, wx.ID_ANY, u"Stop All", wx.DefaultPosition, wx.Size( -1,40 ), wx.BU_AUTODRAW | wx.BORDER_NONE)
+        self.m_button2 = plateButtons.PlateButton( self.m_panel1, wx.ID_ANY, u"Stop All", None, wx.DefaultPosition, wx.Size( -1,40 ), plateButtons.PB_STYLE_SQUARE )
         self.m_button2.SetFont( wx.Font( 12, 70, 90, 90, False, wx.EmptyString ) )
         self.m_button2.Bind(wx.EVT_BUTTON,lambda evt: self.stopAll(evt,fgSizer4))
-        self.m_button2.SetForegroundColour(self.white)
         self.m_button2.SetBackgroundColour(self.darkGrey)
-        self.m_button2.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.m_button2.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.m_button2.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        self.m_button2.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.m_button2.SetPressColor(self.darkGrey)
+        self.m_button2.SetForegroundColour( self.faintWhite )
         
         bSizer7.Add( self.m_button2, 0, wx.ALL, 5 )
         
-        self.m_button3 = wx.Button( self.m_panel1, wx.ID_ANY, u"Start All", wx.DefaultPosition, wx.Size( -1,40 ), wx.BU_AUTODRAW | wx.BORDER_NONE)
+        self.m_button3 = plateButtons.PlateButton( self.m_panel1, wx.ID_ANY, u"Start All", None, wx.DefaultPosition, wx.Size( -1,40 ), 0 )
         self.m_button3.SetFont( wx.Font( 12, 70, 90, 90, False, wx.EmptyString ) )
         self.m_button3.Bind(wx.EVT_BUTTON,lambda evt: self.startAll(evt,fgSizer4))
-        self.m_button3.SetForegroundColour(self.white)
         self.m_button3.SetBackgroundColour(self.darkGrey)
-        self.m_button3.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.m_button3.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.m_button3.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        self.m_button3.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.m_button3.SetPressColor(self.darkGrey)
+        self.m_button3.SetForegroundColour( self.faintWhite )
 
         bSizer7.Add( self.m_button3, 0, wx.ALL, 5 )
         
@@ -460,25 +337,22 @@ class MyFrame1 ( wx.Panel ):
         m_button81 = wx.Button( m_scrolledWindow1, wx.ID_ANY, InputData[5], wx.DefaultPosition, wx.Size( -1,34 ), style = wx.BORDER_NONE ,name=name+"_edit")
         m_button81.SetFont( wx.Font( 11, 70, 90, 90, False, wx.EmptyString ) )
         m_button81.name=name+"_edit"
-        m_button81.Bind(wx.EVT_BUTTON,self.editButtonClick)
-        m_button81.SetForegroundColour(self.faintWhite)
-        m_button81.SetBackgroundColour(self.darkGrey)
-        m_button81.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        m_button81.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.lightGrey))
         m_button81.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        m_button81.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        m_button81.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        m_button81.Bind(wx.EVT_BUTTON,self.editButtonClick)
+        m_button81.SetBackgroundColour(self.darkGrey)
+        m_button81.SetForegroundColour(self.faintWhite)
         fgSizer.Add( m_button81, 0, wx.ALL|wx.EXPAND, 5 )
         
         m_button82 = wx.Button( m_scrolledWindow1, wx.ID_ANY, u"Delete", wx.DefaultPosition, wx.Size( -1,34 ), style = wx.BORDER_NONE,name=name+"_delete")
         m_button82.SetFont( wx.Font( 11, 70, 90, 90, False, wx.EmptyString ) )
         m_button82.name=name+"_delete"
         m_button82.Bind(wx.EVT_BUTTON,lambda evt: self.deleteButtonClick(evt,fgSizer,m_scrolledWindow1))
-        m_button82.SetForegroundColour(self.faintWhite)
-        m_button82.SetBackgroundColour(self.darkGrey)
-        m_button82.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        m_button82.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.lightGrey))
         m_button82.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        m_button82.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        m_button82.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        m_button82.SetWindowStyleFlag(wx.BORDER_NONE)
+        m_button82.SetBackgroundColour(self.darkGrey)
+        m_button82.SetForegroundColour(self.faintWhite)
         # m_button82.Bind(wx.EVT_ENTER_WINDOW, )
         fgSizer.Add( m_button82, 0, wx.ALL|wx.EXPAND, 5 )
         
@@ -509,11 +383,6 @@ class MyFrame1 ( wx.Panel ):
         m_button8.SetFont( wx.Font( 11, 70, 90, 90, False, wx.EmptyString ) )
         m_button8.Bind(wx.EVT_BUTTON, lambda evt: self.configureButtonClicked(evt, m_textCtrl2.GetValue()))
         fgSizer.Add( m_button8, 0, wx.ALL|wx.EXPAND, 5 )
-
-    def scaleIcons(self, iconBitmap, iconSize):
-        image = wx.Bitmap.ConvertToImage(iconBitmap)
-        image = image.Scale(iconSize[0], iconSize[1], wx.IMAGE_QUALITY_HIGH)
-        return wx.Bitmap(image)
 
     def configureButtonClicked(self, event, value):
         print(value)
@@ -675,24 +544,6 @@ class MyFrame1 ( wx.Panel ):
     
     def changeColor(self, event, newcolor):
         event.GetEventObject().SetBackgroundColour(newcolor)
-
-    def dashboardNavButtonClicked(self, event):
-        self.parent.current_page = 1
-        self.parent.changePage()
-
-        return event
-
-    def cameraConfigNavButtonClicked(self, event):
-        self.parent.current_page = 2
-        self.parent.changePage()
-
-        return event
-
-    def calibrationNavButtonClicked(self, event):
-        self.parent.current_page = 3
-        self.parent.changePage()
-
-        return event
 
 class MyApp(wx.App):
     def OnInit(self):
