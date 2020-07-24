@@ -1,0 +1,73 @@
+import numpy as np
+import cv2
+
+class MotionDetector():
+
+    def __init__(self):
+
+        self.sdThresh = 8
+        self.k = 5
+        self.framesList = []
+
+    def distMap(self, frame1, frame2):
+        """outputs pythagorean distance between two frames"""
+        frame1_32 = np.float32(frame1)
+        frame2_32 = np.float32(frame2)
+        diff32 = frame1_32 - frame2_32
+        # norm32 = np.sqrt(diff32[:,:,0]**2 + diff32[:,:,1]**2 + diff32[:,:,2]**2)/np.sqrt(255**2 + 255**2 + 255**2)
+        norm32 = np.sqrt(diff32[:, :] ** 2) / np.sqrt(255 ** 2)
+        dist = np.uint8(norm32 * 255)
+        return dist
+
+    def detect(self, frame):
+        new_width = int(480)
+        new_height = int((frame.shape[0] / frame.shape[1]) * new_width)
+
+        frame = cv2.resize(frame, (new_width, new_height))
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        avg_dev = 0
+
+        if(len(self.framesList)):
+
+            for i in range(0, self.k):
+                dist = self.distMap(self.framesList[i], frame)
+
+                mod = cv2.GaussianBlur(dist, (9, 9), 0)
+                # apply thresholding
+                _, thresh = cv2.threshold(mod, 100, 255, 0)
+                # calculate st dev test
+                _, stDev = cv2.meanStdDev(mod)
+                avg_dev = avg_dev + stDev
+                if (i < self.k - 1):
+                    self.framesList[i] = self.framesList[i + 1]
+
+            self.framesList[self.k - 1] = frame
+            avg_dev = avg_dev / self.k
+
+            if(avg_dev > self.sdThresh):
+                return 1
+
+        else:
+            for i in range(0, self.k):
+                self.framesList.append(frame)
+
+        return 0
+
+detector = MotionDetector()
+
+cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
+
+cap = cv2.VideoCapture(0)
+while(True):
+    _, frame = cap.read()
+
+    if detector.detect(frame):
+            print("Motion detected..");
+
+    cv2.imshow('frame', frame)
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()
