@@ -11,13 +11,16 @@ class MotionDetector():
 
     def distMap(self, frame1, frame2):
         """outputs pythagorean distance between two frames"""
-        frame1_32 = np.float32(frame1)
-        frame2_32 = np.float32(frame2)
-        diff32 = frame1_32 - frame2_32
+        # frame1_32 = np.float32(frame1)
+        # frame2_32 = np.float32(frame2)
+        # diff32 = frame1_32 - frame2_32
         # norm32 = np.sqrt(diff32[:,:,0]**2 + diff32[:,:,1]**2 + diff32[:,:,2]**2)/np.sqrt(255**2 + 255**2 + 255**2)
-        norm32 = np.sqrt(diff32[:, :] ** 2) / np.sqrt(255 ** 2)
-        dist = np.uint8(norm32 * 255)
-        return dist
+        # norm32 = np.sqrt(diff32[:, :] ** 2) / np.sqrt(255 ** 2)
+        # dist = np.uint8(norm32 * 255) 
+        dst = cv2.absdiff(frame1, frame2)
+        # norm32 = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
+        # dist = np.uint8(norm32)
+        return dst
 
     def detect(self, frame):
         new_width = int(480)
@@ -33,9 +36,10 @@ class MotionDetector():
             for i in range(0, self.k):
                 dist = self.distMap(self.framesList[i], frame)
 
-                mod = cv2.GaussianBlur(dist, (9, 9), 0)
+                mod = cv2.GaussianBlur(dist, (3, 3), 0)
                 # apply thresholding
                 _, thresh = cv2.threshold(mod, 100, 255, 0)
+                cv2.imshow('thresh', thresh)
                 # calculate st dev test
                 _, stDev = cv2.meanStdDev(mod)
                 avg_dev = avg_dev + stDev
@@ -59,15 +63,24 @@ detector = MotionDetector()
 cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
 
 cap = cv2.VideoCapture(0)
+
+import time
+
+count = 0
+start = time.time()
+
 while(True):
-    _, frame = cap.read()
-
-    if detector.detect(frame):
-            print("Motion detected..");
-
+    ret, frame = cap.read()
+    if (ret == False):
+        break
+    detector.detect(frame)
+    # if detector.detect(frame):
+            # print("Motion detected..")
+    count+=1
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == 27:
         break
 
+print (count/(time.time() - start))
 cap.release()
 cv2.destroyAllWindows()
