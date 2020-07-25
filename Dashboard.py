@@ -1,9 +1,12 @@
+import datetime
+
 import wx
 import wx.lib.platebtn as plateButtons
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import json
+import mysql.connector as mysql
 
 class DashboardGallerySlide(wx.Panel):
 
@@ -96,9 +99,14 @@ class Dashboard(wx.Panel):
 
         self.parent = parent
 
-        self.noOfSlides = 3
+        #self.noOfSlides = 3
+        self.noOfSlides = 0
         self.slideSpeed = 10
         self.SlidesList = []
+
+        self.db = mysql.connect(host="localhost", user="root", passwd="Nishant_sql", database="test")
+        self.cursor = self.db.cursor()
+        self.databaseName = "cameraDatabaseFinal"
 
         self.cameraList = {}
 
@@ -140,6 +148,9 @@ class Dashboard(wx.Panel):
         durationLabel.SetForegroundColour(self.faintWhite)
         self.durationEntry = wx.ComboBox(self.dashboardPanel, -1)
         self.durationEntry.Append("All Days")
+        self.durationEntry.Append("Today")
+        self.durationEntry.Append("Last 2 days")
+        self.durationEntry.Append("Last 3 days")
         self.durationEntry.SetSelection(0)
 
         self.viewButton = wx.Button(self.dashboardPanel, -1, "View", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE)
@@ -148,7 +159,7 @@ class Dashboard(wx.Panel):
         self.viewButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
         self.viewButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
         self.viewButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.viewButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.Grey))
+        self.viewButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.viewButtonClicked(evt), self.Grey))
         self.viewButton.SetFont(self.fontBold)
 
         LayoutDashboardControls.Add(wx.Size(0, 0), 1, wx.EXPAND, 0)
@@ -215,14 +226,14 @@ class Dashboard(wx.Panel):
         LayoutDashboardGallery.Fit(DashboardGalleryPanel)
 
 
-        DashboardGraphPanel = wx.StaticBitmap(self.dashboardPanel, -1, wx.Bitmap("plot.png"), pos=wx.DefaultPosition, size=wx.Size(1100, 300))
-        DashboardGraphPanel.SetBackgroundColour(self.Grey)
-        # DashboardGraphPanel.AutoLayout()
-        DashboardGraphPanel.SetMinSize((-1, 500))
+        self.DashboardGraphPanel = wx.StaticBitmap(self.dashboardPanel, -1, wx.Bitmap("plot.png"), pos=wx.DefaultPosition, size=wx.Size(1100, 300))
+        self.DashboardGraphPanel.SetBackgroundColour(self.Grey)
+        # self.DashboardGraphPanel.AutoLayout()
+        self.DashboardGraphPanel.SetMinSize((-1, 500))
 
         LayoutDashboard.Add(LayoutDashboardControls, proportion=0, flag=wx.EXPAND | wx.ALL, border=30)
         LayoutDashboard.Add(DashboardGalleryPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=30)
-        LayoutDashboard.Add(DashboardGraphPanel, proportion=1, flag=wx.ALIGN_CENTER, border=30)
+        LayoutDashboard.Add(self.DashboardGraphPanel, proportion=1, flag=wx.ALIGN_CENTER, border=30)
 
         self.dashboardPanel.SetSizer(LayoutDashboard)
         self.dashboardPanel.Layout()
@@ -233,17 +244,17 @@ class Dashboard(wx.Panel):
 
         self.LayoutDashboardGalleryView = wx.GridBagSizer(0, 0)
 
-        slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "ui_elements/test.png", "10:00 AM", "camera#1", "CAM1", self.lightGrey, self.darkGrey, self.white)
-        slide2 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "ui_elements/test.png", "1:00 PM", "camera#2", "CAM2", self.lightGrey, self.darkGrey, self.white)
-        slide3 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "ui_elements/test.png", "1:00 PM", "camera#3", "CAM3", self.lightGrey, self.darkGrey, self.white)
+        #slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "ui_elements/test.png", "10:00 AM", "camera#1", "CAM1", self.lightGrey, self.darkGrey, self.white)
+        #slide2 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "ui_elements/test.png", "1:00 PM", "camera#2", "CAM2", self.lightGrey, self.darkGrey, self.white)
+        #slide3 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "ui_elements/test.png", "1:00 PM", "camera#3", "CAM3", self.lightGrey, self.darkGrey, self.white)
 
-        self.SlidesList.append(slide1)
-        self.SlidesList.append(slide2)
-        self.SlidesList.append(slide3)
+        #self.SlidesList.append(slide1)
+        #self.SlidesList.append(slide2)
+        #self.SlidesList.append(slide3)
 
-        self.LayoutDashboardGalleryView.Add(slide1, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 0)
-        self.LayoutDashboardGalleryView.Add(slide2, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL, 0)
-        self.LayoutDashboardGalleryView.Add(slide3, wx.GBPosition(0, 2), wx.GBSpan(1, 1), wx.ALL, 0)
+        #self.LayoutDashboardGalleryView.Add(slide1, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 0)
+        #self.LayoutDashboardGalleryView.Add(slide2, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL, 0)
+        #self.LayoutDashboardGalleryView.Add(slide3, wx.GBPosition(0, 2), wx.GBSpan(1, 1), wx.ALL, 0)
 
         self.dashboardGalleryView.SetSizer(self.LayoutDashboardGalleryView)
         self.LayoutDashboardGalleryView.Fit(self.dashboardGalleryView)
@@ -277,6 +288,144 @@ class Dashboard(wx.Panel):
         print ("can set transparent")
         print (self.CanSetTransparent())
 
+    def getImageNames(self, numberOfDays, cameraID):
+        noOfDates = 0
+        dateList = []
+        if(cameraID is None):
+            print("HERE")
+            query = """SELECT frameID
+                            FROM """ + self.databaseName + """ 
+                            WHERE process_flag=2"""
+            today = int(datetime.datetime.now().day)
+            self.cursor.execute(query)
+            imageNames = self.cursor.fetchall()
+            print(imageNames)
+            print(len(imageNames))
+            imagesToBeDisplayed = []
+            for names in imageNames:
+                day = int(names[0][6:8])
+                if (not day in dateList):
+                    noOfDates = noOfDates + 1
+                    dateList.append(day)
+                if (day > today - numberOfDays):
+                    imagesToBeDisplayed.append(names[0])
+            return imagesToBeDisplayed, noOfDates, dateList
+        else:
+            query = """SELECT frameID
+                    FROM """ + self.databaseName + """ 
+                    WHERE cameraId=%s AND process_flag=2"""
+            today = int(datetime.datetime.now().day)
+            values = (cameraID,)
+            self.cursor.execute(query, values)
+            imageNames = self.cursor.fetchall()
+            imagesToBeDisplayed = []
+            for names in imageNames:
+                day = int(names[0][6:8])
+                if(not day in dateList):
+                    noOfDates = noOfDates + 1
+                    dateList.append(day)
+                if (day > today - numberOfDays):
+                    imagesToBeDisplayed.append(names[0])
+            return imagesToBeDisplayed, noOfDates, dateList
+
+    def viewButtonClicked(self, event):
+        cameraAlias = self.cameraAliasEntry.GetValue()
+        cameraID = ""
+        noOfDays = 0
+        ""
+        #print(cameraAlias)
+        if(cameraAlias == "All Cameras"):
+            cameraID = None
+        else:
+            cameraID = self.cameraList[cameraAlias]
+        duration = self.durationEntry.GetValue()
+
+        if(duration == "All Days"):
+            noOfDays = 31
+        elif(duration == 'Today'):
+            noOfDays = 1
+        else:
+            noOfDays = duration.split(' ')
+            noOfDays = int(noOfDays[1])
+
+        imageNameList, noOfDates, dateList = self.getImageNames(noOfDays, cameraID)
+        self.noOfSlides = len(imageNameList)
+        self.addSlides(imageNameList)
+        self.updateGalleryPanel()
+        self.plotData(imageNameList, noOfDates, dateList)
+        return event
+
+    #Graph with fixed time interval
+    # def plotData(self, imageNameList, noOfDates, dateList):
+    #     timeRange = 2
+    #
+    #     y = [0] * int(noOfDates * 12)
+    #     x_list = [item for item in range(1, int((noOfDates * 12) + 1))]
+    #
+    #     for img in imageNameList:
+    #         for i in range(0, int(24/timeRange)):
+    #                     if((int(i*timeRange) < int(img[8:10]) < int(i*timeRange + timeRange)) or (int(img[8:10]) == int(i*timeRange + timeRange) and int(img[10:12]) == 0) or (int(img[8:10]) == int(i*timeRange) and int(img[10:12]) > 0)):
+    #                         DateIndex = dateList.index(int(img[6:8]))
+    #                         y[int(DateIndex * (24 / timeRange) + i)] = y[int(DateIndex * (24 / timeRange) + i)] + 1
+    #                         continue
+    #
+    #     x_labels = []
+    #     for dates in dateList:
+    #         for i in range(0, int(24/timeRange)):
+    #             x_labels.append("Date:\n" + str(dates) + "\nTIME:\n" + str((i*timeRange)) + "-" + str(((i+1))*timeRange))
+    #
+    #     plt.style.use(u'dark_background')
+    #     fig = plt.figure()
+    #     plt.xticks(x_list, x_labels)
+    #     ax = plt.subplot(111)
+    #     ax.plot(x_list, y, label='$y = numbers')
+    #     plt.title('Legend inside')
+    #     ax.legend()
+    #     # plt.show()
+    #     fig.set_size_inches(15, 5)
+    #     fig.tight_layout()
+    #     fig.savefig('plot.png', transparent=True)
+    #     self.DashboardGraphPanel.SetBitmap(wx.Bitmap("plot.png"))
+    #     self.DashboardGraphPanel.Refresh()
+    #     self.Layout()
+    #     pass
+
+    # Graph with variable time interval
+    def plotData(self, imageNameList, noOfDates, dateList):
+        minTimeInterval = 1
+        timeRange = int(24 * noOfDates / (24 / minTimeInterval))
+
+        y = [0] * 24
+        x_list = [item for item in range(1, int((24 / minTimeInterval) + 1))]
+
+        for img in  imageNameList:
+            for i in range(0, int(24/timeRange)):
+                if((int(i*timeRange) < int(img[8:10]) < int(i*timeRange + timeRange)) or (int(img[8:10]) == int(i*timeRange + timeRange) and int(img[10:12]) == 0) or (int(img[8:10]) == int(i*timeRange) and int(img[10:12]) > 0)):
+                    DateIndex = dateList.index(int(img[6:8]))
+                    y[int(DateIndex * (24 / timeRange) + i)] = y[int(DateIndex * (24 / timeRange) + i)] + 1
+                    continue
+
+        x_labels = []
+        for dates in dateList:
+            for i in range(0, int(24/timeRange)):
+                x_labels.append("Date:\n" + str(dates) + "\nTIME:\n" + str((i*timeRange)) + "-" + str(((i+1))*timeRange))
+
+        plt.style.use(u'dark_background')
+        fig = plt.figure()
+        plt.xticks(x_list, x_labels)
+        ax = plt.subplot(111)
+        ax.plot(x_list, y, label='$y = numbers')
+        plt.title('Legend inside')
+        ax.legend()
+        # plt.show()
+        fig.set_size_inches(15, 5)
+        fig.tight_layout()
+        fig.savefig('plot.png', transparent=True)
+        self.DashboardGraphPanel.SetBitmap(wx.Bitmap("plot.png"))
+        self.DashboardGraphPanel.Refresh()
+        self.Layout()
+
+
     def updateCameraAliasList(self):
         self.cameraAliasEntry.Clear()
         self.cameraAliasEntry.Append("All Cameras")
@@ -298,8 +447,12 @@ class Dashboard(wx.Panel):
 
     def addSlides(self, imgNameList):
 
-        for i in self.SlidesList:
-            i.Remove(self.LayoutDashboardGalleryView)
+        self.isPlaying = False
+        self.timer.Stop()
+        self.LayoutDashboardGalleryView.Clear(True)
+
+        #for i in self.SlidesList:
+        #    i.Remove(self.LayoutDashboardGalleryView)
         self.SlidesList.clear()
 
         slideNo = 0
@@ -308,11 +461,12 @@ class Dashboard(wx.Panel):
             cameraID = i[0:6]
             cameraAlias = list(self.cameraList.keys())[list(self.cameraList.values()).index(cameraID)]
 
-            slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), i, time, cameraID, cameraAlias, self.lightGrey, self.darkGrey, self.white)
+            slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), i + ".png", time, cameraID, cameraAlias, self.lightGrey, self.darkGrey, self.white)
             self.SlidesList.append(slide1)
             self.LayoutDashboardGalleryView.Add(slide1, wx.GBPosition(0, slideNo), wx.GBSpan(1, 1), wx.ALL, 0)
             slideNo = slideNo + 1
         self.Layout()
+        self.timer.Start(1)
 
 
         #For drawing line
