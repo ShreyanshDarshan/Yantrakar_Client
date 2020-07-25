@@ -11,18 +11,20 @@ import os
 
 class Transformation():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd="Shrinivas#100", database="test")
+        self.db=mysql.connect(host="localhost",user="root",passwd="darshan_sql", database="test")
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         # self.createDatabase()
         # self.addValues()
         # self.printAllData()
-        # self.getDataDatabase()
-        # self.getDataJson()
-        # self.processData()
-        # self.deleteFiles()
-        # self.editDatabse()
-        # self.printAllData()
+        self.getDataDatabase()
+        self.getDataJson()
+        self.processData()
+        self.deleteFiles()
+        self.editDatabse()
+        self.printAllData()
+        
+        self.image_extension=".png"
     
     def createDatabase(self):
         query="""CREATE TABLE """ +self.databaseName +""" 
@@ -50,7 +52,8 @@ class Transformation():
         
     def printAllData(self):
         query="""SELECT *
-                FROM """+self.databaseName
+                FROM """+self.databaseName+""" 
+                LIMIT 40"""
         self.cursor.execute(query)
         
         print(self.cursor.fetchall())
@@ -61,22 +64,20 @@ class Transformation():
                 WHERE process_flag=1"""
         self.cursor.execute(query)
         self.dbData=self.cursor.fetchall()
-        pointsStringList= self.dbData[0][3].split(",")
-
-        points =[]
-
-        for pointsString in pointsStringList:
-            pointStringList=pointsString.split()
-            points.append((int(pointStringList[0]),int(pointStringList[1])))
-
+        
         self.dbDataProcessed={}
-
+        
         for dbDataItem in self.dbData:
+            pointsStringList= dbDataItem[3].split(",")
+            
+            points =[]
+
+            for pointsString in pointsStringList:
+                pointStringList=pointsString.split()
+                points.append((int(pointStringList[0]),int(pointStringList[1])))
+                
             self.dbDataProcessed.update({
-                dbDataItem[0]:{
-                    "frameID": dbDataItem[1],
-                    "points": points
-                }
+                dbDataItem[1]: points
             })
     
     def getDataJson(self):
@@ -140,11 +141,11 @@ class Transformation():
     def processData(self):
         self.violatedPointsData={}
             
-        for cameraKey, dbData in self.dbDataProcessed.items():
-            points=combinations(dbData["points"],2)
+        for frameID, dbData in self.dbDataProcessed.items():
+            points=combinations(dbData,2)
             violatedPoints=[]
             for point1,point2 in points:
-                    distance=self.findWorldDistance(self.cameraDataProcessed[cameraKey]["calibrationMatrix"],self.cameraDataProcessed[cameraKey]["worldRatio"], point1, point2)
+                    distance=self.findWorldDistance(self.cameraDataProcessed[frameID[0:6]]["calibrationMatrix"],self.cameraDataProcessed[frameID[0:6]]["worldRatio"], point1, point2)
                     if(point1 == point2):
                         continue
                     elif(distance == -1):
@@ -152,37 +153,39 @@ class Transformation():
                     elif(distance  < 150):
                         violatedPoints.append((point1,point2))
             self.violatedPointsData.update({
-                cameraKey: violatedPoints
+                frameID: violatedPoints
             })
 
     def deleteFiles(self):
-        for cameraKey,violatedPoints in self.violatedPointsData.items():
+        for frameID,violatedPoints in self.violatedPointsData.items():
             if(len(violatedPoints)==0):
-                deleteFile=self.dbDataProcessed[cameraKey]["frameID"]+".png"
+                deleteFile=frameID+self.image_extension
             
                 os.remove('e:/SHRINIVAS/KGP/SocialDistancingUIDesktop/'+deleteFile)
     
     def editDatabse(self):
-        for cameraKey in self.dbDataProcessed.keys():
-            if(len(self.violatedPointsData[cameraKey])!=0):
-                violationString=self.getStringFromViolatedPoints(self.violatedPointsData[cameraKey])
+        for frameID in self.dbDataProcessed.keys():
+            if(len(self.violatedPointsData[frameID])!=0):
+                violationString=self.getStringFromViolatedPoints(self.violatedPointsData[frameID])
                 query = """UPDATE """+self.databaseName +"""
                     SET 
                         violations=%s,
                         process_flag=2
                     WHERE 
                         frameID=%s"""
-                values=(violationString,self.dbDataProcessed[cameraKey]["frameID"])
+                values=(violationString,frameID)
                 self.cursor.execute(query,values)
             else:
                 query="DELETE FROM "+self.databaseName +" WHERE frameID=%s"
-                values=(self.dbDataProcessed[cameraKey]["frameID"],)
+                values=(frameID,)
             
                 self.cursor.execute(query,values)
         
         self.db.commit()
 
     def getStringFromViolatedPoints(self,violatedPoints):
+        if(len(violatedPoints)>10):
+            violatedPoints=violatedPoints[0:10]
         violationString=''
         for pointSet in violatedPoints:
             mainString=str(pointSet[0][0])+' '+str(pointSet[0][1])+'|'+str(pointSet[1][0])+' '+str(pointSet[1][1])

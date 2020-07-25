@@ -258,6 +258,7 @@ class Dashboard(wx.Panel):
         #self.Show(True)
 
         self.updateGalleryPanel()
+        self.updateCameraAliasList()
 
         self.gallerySlider.Bind(wx.EVT_SLIDER, self.onGallerySlider)
 
