@@ -16,6 +16,7 @@ class MainFrame(wx.Frame):
     def changePage(self):
         timeout = 1000
         if(self.current_page == 1):
+            self.dashboardPage.updateCameraAliasList()
             self.dashboardPage.Show()
             self.configPage.Hide()
             self.calibPage.Hide()
@@ -24,6 +25,7 @@ class MainFrame(wx.Frame):
             self.calibPage.Hide()
             self.dashboardPage.Hide()
         elif(self.current_page == 3):
+            self.calibPage.updateCameraAliasList()
             self.calibPage.Show()
             self.configPage.Hide()
             self.dashboardPage.Hide()

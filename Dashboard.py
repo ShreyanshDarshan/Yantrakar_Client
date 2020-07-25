@@ -3,6 +3,7 @@ import wx.lib.platebtn as plateButtons
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 
 class DashboardGallerySlide(wx.Panel):
 
@@ -98,6 +99,8 @@ class Dashboard(wx.Panel):
         self.noOfSlides = 3
         self.slideSpeed = 10
         self.SlidesList = []
+
+        self.cameraList = {}
 
         self.SetMinSize((1100, 750))
         self.initUI()
@@ -247,12 +250,12 @@ class Dashboard(wx.Panel):
 
         LayoutDashboardControls = wx.BoxSizer(wx.HORIZONTAL)
 
-        cameraIDLabel = wx.StaticText(self.dashboardPanel, -1, "Camera ID")
-        cameraIDLabel.SetForegroundColour(self.faintWhite)
+        cameraAliasLabel = wx.StaticText(self.dashboardPanel, -1, "Camera Alias")
+        cameraAliasLabel.SetForegroundColour(self.faintWhite)
 
-        self.cameraIDEntry = wx.ComboBox(self.dashboardPanel, -1, "", wx.DefaultPosition, wx.DefaultSize, [], wx.BORDER_NONE)
-        self.cameraIDEntry.Append("All Cameras")
-        self.cameraIDEntry.SetSelection(0)
+        self.cameraAliasEntry = wx.ComboBox(self.dashboardPanel, -1, "", wx.DefaultPosition, wx.DefaultSize, [], wx.BORDER_NONE)
+        self.cameraAliasEntry.Append("All Cameras")
+        self.cameraAliasEntry.SetSelection(0)
 
         durationLabel = wx.StaticText(self.dashboardPanel, -1, "Duration")
         durationLabel.SetForegroundColour(self.faintWhite)
@@ -270,8 +273,8 @@ class Dashboard(wx.Panel):
         self.viewButton.SetFont(self.fontBold)
 
         LayoutDashboardControls.Add(wx.Size(0, 0), 1, wx.EXPAND, 0)
-        LayoutDashboardControls.Add(cameraIDLabel, 2, wx.ALL, 0)
-        LayoutDashboardControls.Add(self.cameraIDEntry, 2, wx.ALL, 0)
+        LayoutDashboardControls.Add(cameraAliasLabel, 2, wx.ALL, 0)
+        LayoutDashboardControls.Add(self.cameraAliasEntry, 2, wx.ALL, 0)
         LayoutDashboardControls.Add(wx.Size(0, 0), 1, wx.EXPAND, 0)
         LayoutDashboardControls.Add(durationLabel, 2, wx.ALL, 0)
         LayoutDashboardControls.Add(self.durationEntry, 2, wx.ALL, 0)
@@ -376,6 +379,7 @@ class Dashboard(wx.Panel):
         #self.Show(True)
 
         self.updateGalleryPanel()
+        self.updateCameraAliasList()
 
         self.gallerySlider.Bind(wx.EVT_SLIDER, self.onGallerySlider)
 
@@ -393,6 +397,61 @@ class Dashboard(wx.Panel):
         self.SetWindowStyleFlag(wx.TRANSPARENT_WINDOW)
         print ("can set transparent")
         print (self.CanSetTransparent())
+
+    def updateCameraAliasList(self):
+        self.cameraAliasEntry.Clear()
+        self.cameraAliasEntry.Append("All Cameras")
+        self.cameraAliasEntry.SetSelection(0)
+        try:
+            with open("cameraDatabase.json", 'r') as jsonFile:
+                self.cameraDatabase = json.load(jsonFile)
+                for key in self.cameraDatabase:
+                    self.cameraList[self.cameraDatabase[key]['cameraAlias']] = key
+                    self.cameraAliasEntry.Append(self.cameraDatabase[key]['cameraAlias'])
+
+            self.cameraAliasEntry.Enable(True)
+            self.durationEntry.Enable(True)
+            self.viewButton.Enable(True)
+        except:
+            self.cameraAliasEntry.Enable(False)
+            self.durationEntry.Enable(False)
+            self.viewButton.Enable(False)
+
+    def addSlides(self, imgNameList):
+
+        for i in self.SlidesList:
+            i.Remove(self.LayoutDashboardGalleryView)
+        self.SlidesList.clear()
+
+        slideNo = 0
+        for i in imgNameList:
+            time = i[6:8] + " " + i[8:10] + ":" + i[10:12] + ":" + i[12:14] + ":" + i[14:18]
+            cameraID = i[0:6]
+            cameraAlias = list(self.cameraList.keys())[list(self.cameraList.values()).index(cameraID)]
+
+            slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), i, time, cameraID, cameraAlias, self.lightGrey, self.darkGrey, self.white)
+            self.SlidesList.append(slide1)
+            self.LayoutDashboardGalleryView.Add(slide1, wx.GBPosition(0, slideNo), wx.GBSpan(1, 1), wx.ALL, 0)
+            slideNo = slideNo + 1
+        self.Layout()
+
+
+        #For drawing line
+        # sampleItem = "10 20|30 40,100 120|150 200"
+        # pointList = sampleItem.split(',')
+
+        # for i in pointList:
+        #    points = pointList[i].split('|')
+        #    point1 = points[0]
+        #    point2 = points[1]
+        #    point1 = point1.split(' ')
+        #    point1 = (int(point1[0]), int(point1[1]))
+        #    point2 = point2.split(' ')
+        #    point2 = (int(point2[0]), int(point2[1]))
+        #    #cv2.line(img, point1, point2, (0, 0, 255), 1)
+        #    #cv2.imwrite(imgname, img)
+        pass
+
 
     def scaleIcons(self, iconBitmap, iconSize):
         image = wx.Bitmap.ConvertToImage(iconBitmap)
@@ -525,8 +584,8 @@ class MainFrame(wx.Frame):
 
         self.SetFont(wx.Font(15, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
         self.panel = wx.Panel(self, pos=(0, 0), size=self.size)
-        cameraIDLabel = wx.StaticText(self.panel, label="Camera ID", pos=(50, 40), size=(100, 40))
-        self.cameraIDEntry = wx.ComboBox(self.panel, pos=(180, 35), size=(200, 40))
+        cameraAliasLabel = wx.StaticText(self.panel, label="Camera ID", pos=(50, 40), size=(100, 40))
+        self.cameraAliasEntry = wx.ComboBox(self.panel, pos=(180, 35), size=(200, 40))
         self.viewButton = wx.Button(self.panel, pos=(420, 30), size=(100, 40), label="View")
         self.viewButton.SetBackgroundColour(wx.Colour(wx.WHITE))
 
