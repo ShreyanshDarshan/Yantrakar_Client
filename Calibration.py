@@ -49,129 +49,11 @@ class Calibration(wx.Panel):
 
         LayoutMain = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.navPanel = wx.Panel(self, pos=wx.DefaultPosition)
-        self.navPanel.SetBackgroundColour(self.darkGrey)
-
-        LayoutnavPanel = wx.BoxSizer(wx.VERTICAL)
-
-        LayoutnavPanelUpper = wx.GridBagSizer(0, 0)
-        LayoutnavPanelUpper.SetFlexibleDirection(wx.BOTH)
-        LayoutnavPanelUpper.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
-
-        self.DashboardIcon = wx.Bitmap("ui_elements/Dashboard.png")
-        self.ConfigIcon = wx.Bitmap("ui_elements/Config.png")
-        self.CalibrationIcon = wx.Bitmap("ui_elements/Calibration.png")
-        self.HelpIcon = wx.Bitmap("ui_elements/Help.png")
-        self.UserIcon = wx.Bitmap("ui_elements/User.png")
-
-        NavIconSize = wx.Size(20, 20)
-
-        self.DashboardIcon = self.scaleIcons(self.DashboardIcon, NavIconSize)
-        self.ConfigIcon = self.scaleIcons(self.ConfigIcon, NavIconSize)
-        self.CalibrationIcon = self.scaleIcons(self.CalibrationIcon, NavIconSize)
-        self.HelpIcon = self.scaleIcons(self.HelpIcon, NavIconSize)
-        self.UserIcon = self.scaleIcons(self.UserIcon, NavIconSize)
-
-        self.DashboardIcon.SetSize(NavIconSize)
-        self.ConfigIcon.SetSize(NavIconSize)
-        self.CalibrationIcon.SetSize(NavIconSize)
-        self.HelpIcon.SetSize(NavIconSize)
-        self.UserIcon.SetSize(NavIconSize)
-
-        # Add Dashboard button on Navbar
-        self.dashboardNavButton = wx.Button(self.navPanel, -1, u"  Dashboard", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.dashboardNavButton.SetForegroundColour(self.white)
-        self.dashboardNavButton.SetBackgroundColour(self.darkGrey)
-        self.dashboardNavButton.SetBitmap(self.DashboardIcon)
-        self.dashboardNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.dashboardNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.dashboardNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.dashboardNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.dashboardNavButtonClicked(evt), self.darkGrey))
-        # self.dashboardNavButton.SetFont(self.fontBold)
-        self.dashboardNavButton.SetMinSize(wx.Size(200, 50))
-        # self.dashboardNavButton.SetPressColor(self.darkGrey)
-
-        #self.dashboardNavButton.Bind(wx.EVT_BUTTON, self.dashboardNavButtonClicked)
-
-        # Add Config button on Navbar
-        self.cameraConfigNavButton = wx.Button(self.navPanel, -1, u"  Camera Config", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.cameraConfigNavButton.SetForegroundColour(self.white)
-        self.cameraConfigNavButton.SetBackgroundColour(self.darkGrey)
-        self.cameraConfigNavButton.SetBitmap(self.ConfigIcon)
-        self.cameraConfigNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.cameraConfigNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.cameraConfigNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.cameraConfigNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.cameraConfigNavButtonClicked(evt), self.Grey))
-        # self.cameraConfigNavButton.SetFont(self.fontBold)
-        self.cameraConfigNavButton.SetMinSize(wx.Size(200, 50))
-
-        # Add Calibration button on Navbar
-        self.calibrationNavButton = wx.Button(self.navPanel, -1, u"  Calibration", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.calibrationNavButton.SetForegroundColour(self.white)
-        self.calibrationNavButton.SetBackgroundColour(self.darkGrey)
-        self.calibrationNavButton.SetBitmap(self.CalibrationIcon)
-        self.calibrationNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.calibrationNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.calibrationNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.calibrationNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.calibrationNavButtonClicked(evt), self.Grey))
-        # self.calibrationNavButton.SetFont(self.fontBold)
-        self.calibrationNavButton.SetMinSize(wx.Size(200, 50))
-        # self.calibrationNavButton.SetPressColor(self.darkGrey)
-
-        # Add Help button on Navbar
-        self.helpNavButton = wx.Button(self.navPanel, -1, u"  Help", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.helpNavButton.SetForegroundColour(self.white)
-        self.helpNavButton.SetBackgroundColour(self.darkGrey)
-        self.helpNavButton.SetBitmap(self.HelpIcon)
-        self.helpNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.helpNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.helpNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.helpNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.Grey))
-        # self.helpNavButton.SetFont(self.fontBold)
-        self.helpNavButton.SetMinSize(wx.Size(200, 50))
-        # self.helpNavButton.SetPressColor(self.darkGrey)
-
-        # add all nav bar buttons
-        LayoutnavPanelUpper.Add(self.dashboardNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-        LayoutnavPanelUpper.Add(self.cameraConfigNavButton, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-        LayoutnavPanelUpper.Add(self.calibrationNavButton, wx.GBPosition(2, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-        LayoutnavPanelUpper.Add(self.helpNavButton, wx.GBPosition(3, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-
-        # Make lower nav panel
-        LayoutnavPanelLower = wx.GridBagSizer(0, 0)
-        LayoutnavPanelLower.SetFlexibleDirection(wx.BOTH)
-        LayoutnavPanelLower.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
-
-        # Add User button on Navbar
-        # Add User button on Navbar
-        self.userNavButton = wx.Button(self.navPanel, -1, u"  User", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE | wx.BU_LEFT)
-        self.userNavButton.SetForegroundColour(self.white)
-        self.userNavButton.SetBackgroundColour(self.darkGrey)
-        self.userNavButton.SetBitmap(self.UserIcon)
-        self.userNavButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.Grey))
-        self.userNavButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
-        self.userNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
-        self.userNavButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.Grey))
-        # self.userNavButton.SetFont(self.fontBold)
-        self.userNavButton.SetMinSize(wx.Size(200, 50))
-        # self.userNavButton.SetPressColor(self.darkGrey)
-
-        # add user button
-        LayoutnavPanelLower.Add(self.userNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
-
-        # add upper and lower nav panel
-        LayoutnavPanel.Add(LayoutnavPanelUpper, 1, wx.EXPAND, 0)
-        LayoutnavPanel.Add(LayoutnavPanelLower, 0, wx.EXPAND, 0)
-
-        self.navPanel.SetSizer(LayoutnavPanel)
-        self.navPanel.Layout()
-        LayoutnavPanel.Fit(self.navPanel)
-
         self.calibrationPanel = wx.ScrolledWindow(self, pos=wx.DefaultPosition, size=wx.DefaultSize,
                                                 style=wx.VSCROLL | wx.HSCROLL)
         self.calibrationPanel.SetScrollRate(5, 5)
 
-        LayoutMain.Add(self.navPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
+        #LayoutMain.Add(self.navPanel, proportion=0, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutMain.Add(self.calibrationPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
 
         self.SetSizer(LayoutMain)
@@ -477,24 +359,6 @@ class Calibration(wx.Panel):
                     self.markerSideEntry.Enable(False)
                     self.calibrater.calibrationDone = 0
                     self.instructionStatus = -1
-
-    def dashboardNavButtonClicked(self, event):
-        self.parent.current_page = 1
-        self.parent.changePage()
-
-        return event
-
-    def cameraConfigNavButtonClicked(self, event):
-        self.parent.current_page = 2
-        self.parent.changePage()
-
-        return event
-
-    def calibrationNavButtonClicked(self, event):
-        self.parent.current_page = 3
-        self.parent.changePage()
-
-        return event
 
 
 #app = wx.App()
