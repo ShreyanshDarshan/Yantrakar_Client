@@ -387,7 +387,7 @@ class MyFrame1 ( wx.Panel ):
         else:
             statusIcon=wx.Bitmap("ui_elements/status-red.png",wx.BITMAP_TYPE_ANY)
         statusIcon.SetSize(wx.Size(30, 30))
-        m_bpButton7 = plateButtons.PlateButton( m_scrolledWindow1, wx.ID_ANY, "", statusIcon, wx.DefaultPosition, wx.Size(43, -1), plateButtons.PB_STYLE_SQUARE )
+        m_bpButton7 = plateButtons.PlateButton( m_scrolledWindow1, wx.ID_ANY, "", statusIcon, wx.DefaultPosition, wx.Size(43, -1), plateButtons.PB_STYLE_SQUARE,name=name+"_status" )
         m_bpButton7.SetBackgroundColour(self.lightGrey)
         m_bpButton7.SetPressColor(self.darkGrey)
         fgSizer.Add( m_bpButton7, 0, wx.ALIGN_CENTER|wx.ALL, 0 )
@@ -580,7 +580,7 @@ class MyFrame1 ( wx.Panel ):
 
     def sendUpdate(self):
         updateFile = open("Update.txt","r")
-        UpdateIndex = (file1.read())
+        UpdateIndex = (updateFile.read())
         updateFile.close()
         updateFile = open("Update.txt","w")
         updateFile.write(str(UpdateIndex + 1))
@@ -590,18 +590,35 @@ class MyFrame1 ( wx.Panel ):
         if self.IsShown():
             print("checking Update")
             updateFile = open("Update.txt","r")
-            self.newUpdateIndex = (file1.read())
+            self.newUpdateIndex = (updateFile.read())
             self.updateFile.close()
             if newUpdateIndex != oldUpdateIndex:
                 print ("getting data")
+                self.changeStatus()
             self.timer.Start(self.refreshrate)
+            
+    def changeStatus(self):
+        with open('cameraDatabase.json','r') as jsonFile:
+            data=json.load(jsonFile)
+        for camera in data.items():
+            feedAvailable=camera[1]["cameraStatus"]["feedAvailable"]
+            calibAvailable=camera[1]["cameraStatus"]["calibAvailable"]
+            if(feedAvailable and calibAvailable):
+                statusIcon=wx.Bitmap("ui_elements/status-green.png",wx.BITMAP_TYPE_ANY)
+            elif(feedAvailable and not calibAvailable):
+                statusIcon=wx.Bitmap("ui_elements/status-yellow.png",wx.BITMAP_TYPE_ANY)
+            else:
+                statusIcon=wx.Bitmap("ui_elements/status-red.png",wx.BITMAP_TYPE_ANY)
+            window.FindWindowByName(camera[0]+"_status")
+            window.SetBitmap(statusIcon)
+            
 
 class MyApp(wx.App):
     def OnInit(self):
         self.frame=MyFrame1(None)
-        #self.frame.Show()
+        # self.frame.Show()
 
         return True
 
-#app=MyApp()
-#app.MainLoop()
+# app=MyApp()
+# app.MainLoop()
