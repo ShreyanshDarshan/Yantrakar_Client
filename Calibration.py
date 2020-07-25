@@ -237,6 +237,7 @@ class Calibration(wx.Panel):
 
 
     def updateCameraAliasList(self):
+        self.cameraAliasEntry.Clear()
         try:
             with open("cameraDatabase.json", 'r') as jsonFile:
                 self.cameraDatabase = json.load(jsonFile)
