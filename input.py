@@ -89,16 +89,26 @@ class Input():
         
         with open('cameraDatabase.json','w') as jsonFile:
             json.dump(cameraData,jsonFile)
+            self.sendUpdate()
+
+    def sendUpdate(self):
+        updateFile = open("Update.txt","r")
+        UpdateIndex = (file1.read())
+        updateFile.close()
+        updateFile = open("Update.txt","w")
+        updateFile.write(str(UpdateIndex + 1))
+        updateFile.close()
 
 if __name__ == "__main__":
     input=Input()
     oldUpdateIndex = 0
     newUpdateIndex = 0
     while(True):
-        file1 = open("Update.txt","r")
+        updateFile = open("Update.txt","r")
         newUpdateIndex = (file1.read())
+        updateFile.close()
         if newUpdateIndex != oldUpdateIndex:
-            print ("get json data") # get json data
+            input.getDataJson()
         oldUpdateIndex = newUpdateIndex
         input.getFrames()   
         cv2.waitKey(1000)

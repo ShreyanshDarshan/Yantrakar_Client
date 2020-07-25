@@ -196,4 +196,12 @@ class Transformation():
         return violationString
 
 if __name__ == "__main__":
-    Transformation()
+    transform = Transformation()
+    oldUpdateIndex = 0
+    newUpdateIndex = 0
+    while(True):
+        updateFile = open("Update.txt","r")
+        newUpdateIndex = (file1.read())
+        updateFile.close()
+        if newUpdateIndex != oldUpdateIndex:
+            transform.getDataJson()

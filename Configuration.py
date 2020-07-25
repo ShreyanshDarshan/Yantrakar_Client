@@ -13,6 +13,15 @@ class MyFrame1 ( wx.Panel ):
 
         self.parent = parent
 
+
+        self.refreshrate = 1000
+        self.timer = wx.Timer(self)
+        self.timer.Start(self.refreshrate)
+        self.Bind(wx.EVT_TIMER, self.checkUpdate)
+
+        self.oldUpdateIndex = 0
+        self.newUpdateIndex = 0
+
         self.darkOrange = wx.Colour(255, 191, 0)
         self.lightOrange = wx.Colour(248, 217, 122)
         self.darkGrey = wx.Colour(50, 50, 50)
@@ -277,6 +286,7 @@ class MyFrame1 ( wx.Panel ):
         with open('cameraDatabase.json','w') as jsonFile:
             json.dump(data,jsonFile,sort_keys=True, indent=4)
         
+        self.sendUpdate()
         self.didUpdate=True
     
     def startAll(self,event,sizer):
@@ -290,7 +300,8 @@ class MyFrame1 ( wx.Panel ):
                 cameraData["cameraStatus"]["isPaused"]=False
         with open('cameraDatabase.json','w') as jsonFile:
             json.dump(data,jsonFile,sort_keys=True, indent=4)
-            
+        
+        self.sendUpdate()
         self.didUpdate=True
 
     def makeOneRow(self,fgSizer,m_scrolledWindow1,InputData,name,canEdit,isPause,status):
@@ -420,7 +431,8 @@ class MyFrame1 ( wx.Panel ):
             window.SetBitmap(wx.Bitmap("ui_elements/play.png",wx.BITMAP_TYPE_ANY))
         else:
             window.SetBitmap(wx.Bitmap("ui_elements/pause.png",wx.BITMAP_TYPE_ANY))
-            
+        
+        self.sendUpdate()
         self.didUpdate=True
     
     def deleteButtonClick(self,event,fgsizer,parent):
@@ -446,6 +458,7 @@ class MyFrame1 ( wx.Panel ):
                 with open('cameraDatabase.json','w') as jsonFile:
                     json.dump(data,jsonFile,sort_keys=True, indent=4)
             
+            self.sendUpdate()
             self.didUpdate=True
         else:
             window.SetLabel("Delete")
@@ -534,6 +547,8 @@ class MyFrame1 ( wx.Panel ):
                 })
             with open('cameraDatabase.json','w') as jsonFile:
                 json.dump(data,jsonFile,sort_keys=True, indent=4)
+
+            self.sendUpdate()
             self.didUpdate=True
             
     def addNewCamera(self,evt,fgSizer,window):
@@ -562,6 +577,24 @@ class MyFrame1 ( wx.Panel ):
     
     def changeColor(self, event, newcolor):
         event.GetEventObject().SetBackgroundColour(newcolor)
+
+    def sendUpdate(self):
+        updateFile = open("Update.txt","r")
+        UpdateIndex = (file1.read())
+        updateFile.close()
+        updateFile = open("Update.txt","w")
+        updateFile.write(str(UpdateIndex + 1))
+        updateFile.close()
+
+    def checkUpdate(self, event):
+        if self.IsShown():
+            print("checking Update")
+            updateFile = open("Update.txt","r")
+            self.newUpdateIndex = (file1.read())
+            self.updateFile.close()
+            if newUpdateIndex != oldUpdateIndex:
+                print ("getting data")
+            self.timer.Start(self.refreshrate)
 
 class MyApp(wx.App):
     def OnInit(self):

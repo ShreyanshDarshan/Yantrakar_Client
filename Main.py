@@ -257,6 +257,7 @@ class MainFrame(wx.Frame):
             self.dashboardPage.Show(True)
         elif (self.current_page == 2):
             self.configPage.Show(True)
+            self.configPage.timer.Start(self.configPage.refreshrate)
         elif (self.current_page == 3):
             self.calibPage.updateCameraAliasList()
             self.calibPage.Show(True)
