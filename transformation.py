@@ -11,7 +11,7 @@ import os
 
 class Transformation():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd="Shrinivas#100", database="test")
+        self.db=mysql.connect(host="localhost",user="root",passwd="darshan_sql", database="test")
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         # self.createDatabase()

@@ -6,7 +6,7 @@ import json
 
 class Input():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd="Shrinivas#100", database="test")
+        self.db=mysql.connect(host="localhost",user="root",passwd="darshan_sql", database="test")
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         self.cameraDataProcessed={
@@ -24,7 +24,7 @@ class Input():
         self.initialiseCameras()
         
     def getDataJson(self):
-        with open('e:/SHRINIVAS/KGP/SocialDistancingUIDesktop/cameraDatabase.json','r') as jsonFile:
+        with open('cameraDatabase.json','r') as jsonFile:
             cameraData=json.load(jsonFile)
 
         self.cameraDataProcessed= {}
@@ -45,7 +45,7 @@ class Input():
     def initialiseCameras(self):
         self.cap={}
         for camerakey,cameraData in self.cameraDataProcessed.items():
-            self.cap[camerakey] = cv2.VideoCapture(cameraData["url"])
+            self.cap[camerakey] = cv2.VideoCapture("test_video/cctvhigh.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
@@ -58,7 +58,7 @@ class Input():
                 ret, frame=camera.read()
                 if(ret):
                     frame=cv2.resize(frame,(256,256))
-                    cv2.imwrite("e:/SHRINIVAS/KGP/SocialDistancingUIDesktop/"+key+timestamp+".png",frame)
+                    cv2.imwrite("FRAMES/"+key+timestamp+".png",frame)
                     cv2.imshow("img",frame)
                     self.cameraDataProcessed[key]["counter"]=0
                     self.editDatabase(key+timestamp,key)
@@ -82,18 +82,24 @@ class Input():
         self.db.commit()
 
     def editJson(self,key):
-        with open('e:/SHRINIVAS/KGP/SocialDistancingUIDesktop/cameraDatabase.json','r') as jsonFile:
+        with open('cameraDatabase.json','r') as jsonFile:
             cameraData=json.load(jsonFile)
         
         cameraData[key]["cameraStatus"]["feedAvailable"]=False
         
-        with open('e:/SHRINIVAS/KGP/SocialDistancingUIDesktop/cameraDatabase.json','w') as jsonFile:
+        with open('cameraDatabase.json','w') as jsonFile:
             json.dump(cameraData,jsonFile)
-
 
 if __name__ == "__main__":
     input=Input()
+    oldUpdateIndex = 0
+    newUpdateIndex = 0
     while(True):
+        file1 = open("Update.txt","r")
+        newUpdateIndex = (file1.read())
+        if newUpdateIndex != oldUpdateIndex:
+            print ("get json data") # get json data
+        oldUpdateIndex = newUpdateIndex
         input.getFrames()   
         cv2.waitKey(1000)
         
