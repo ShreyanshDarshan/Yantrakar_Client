@@ -7,7 +7,7 @@
         "cameraPassword": "Shrinivas",
         "cameraStatus": {
             "calibAvailable": false,
-            "feedAvailable": false,
+            "feedAvailable": true,
             "isPaused": true
         }
     },
@@ -24,7 +24,7 @@
         }
     },
     "000003": {
-        "CalibrationMatrix": null,
+        "CalibrationData": null,
         "cameraAlias": "2.2",
         "cameraID": "Admin",
         "cameraIP": "192.100.0.108",

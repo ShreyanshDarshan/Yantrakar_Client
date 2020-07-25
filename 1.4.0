@@ -1,0 +1,27 @@
+Collecting gluoncv
+  Downloading https://files.pythonhosted.org/packages/fa/81/37a00609cb53da3671adb106b9bc03fb1c029ad5a8db4bc668283e65703d/gluoncv-0.7.0-py2.py3-none-any.whl (752kB)
+Collecting mxnet-mkl
+  Downloading https://files.pythonhosted.org/packages/d0/02/2500284ab4de0dd748866c3bfde171634eed48c04eb2eac9aa6c82a741bc/mxnet_mkl-1.5.0-py2.py3-none-win_amd64.whl (54.8MB)
+Requirement already satisfied, skipping upgrade: matplotlib in c:\programdata\anaconda3\lib\site-packages (from gluoncv) (2.2.3)
+Collecting portalocker (from gluoncv)
+  Downloading https://files.pythonhosted.org/packages/3b/e7/ceef002a300a98a208232fab593183249b6964b306ee7dabb29908419cca/portalocker-1.7.1-py2.py3-none-any.whl
+Requirement already satisfied, skipping upgrade: numpy in c:\users\shreyansh darshan\appdata\roaming\python\python37\site-packages (from gluoncv) (1.16.6)
+Requirement already satisfied, skipping upgrade: scipy in c:\programdata\anaconda3\lib\site-packages (from gluoncv) (1.2.1)
+Requirement already satisfied, skipping upgrade: Pillow in c:\programdata\anaconda3\lib\site-packages (from gluoncv) (5.3.0)
+Requirement already satisfied, skipping upgrade: tqdm in c:\programdata\anaconda3\lib\site-packages (from gluoncv) (4.28.1)
+Requirement already satisfied, skipping upgrade: requests in c:\users\shreyansh darshan\appdata\roaming\python\python37\site-packages (from gluoncv) (2.18.4)
+Requirement already satisfied, skipping upgrade: graphviz<0.9.0,>=0.8.1 in c:\users\shreyansh darshan\appdata\roaming\python\python37\site-packages (from mxnet-mkl) (0.8.4)
+Requirement already satisfied, skipping upgrade: cycler>=0.10 in c:\programdata\anaconda3\lib\site-packages (from matplotlib->gluoncv) (0.10.0)
+Requirement already satisfied, skipping upgrade: pyparsing!=2.0.4,!=2.1.2,!=2.1.6,>=2.0.1 in c:\programdata\anaconda3\lib\site-packages (from matplotlib->gluoncv) (2.3.0)
+Requirement already satisfied, skipping upgrade: python-dateutil>=2.1 in c:\programdata\anaconda3\lib\site-packages (from matplotlib->gluoncv) (2.7.5)
+Requirement already satisfied, skipping upgrade: pytz in c:\programdata\anaconda3\lib\site-packages (from matplotlib->gluoncv) (2018.7)
+Requirement already satisfied, skipping upgrade: six>=1.10 in c:\programdata\anaconda3\lib\site-packages (from matplotlib->gluoncv) (1.12.0)
+Requirement already satisfied, skipping upgrade: kiwisolver>=1.0.1 in c:\programdata\anaconda3\lib\site-packages (from matplotlib->gluoncv) (1.0.1)
+Requirement already satisfied, skipping upgrade: pywin32!=226; platform_system == "Windows" in c:\programdata\anaconda3\lib\site-packages (from portalocker->gluoncv) (223)
+Requirement already satisfied, skipping upgrade: certifi>=2017.4.17 in c:\programdata\anaconda3\lib\site-packages (from requests->gluoncv) (2019.6.16)
+Requirement already satisfied, skipping upgrade: chardet<3.1.0,>=3.0.2 in c:\programdata\anaconda3\lib\site-packages (from requests->gluoncv) (3.0.4)
+Requirement already satisfied, skipping upgrade: idna<2.7,>=2.5 in c:\users\shreyansh darshan\appdata\roaming\python\python37\site-packages (from requests->gluoncv) (2.6)
+Requirement already satisfied, skipping upgrade: urllib3<1.23,>=1.21.1 in c:\users\shreyansh darshan\appdata\roaming\python\python37\site-packages (from requests->gluoncv) (1.22)
+Requirement already satisfied, skipping upgrade: setuptools in c:\programdata\anaconda3\lib\site-packages (from kiwisolver>=1.0.1->matplotlib->gluoncv) (40.6.2)
+Installing collected packages: portalocker, gluoncv, mxnet-mkl
+Successfully installed gluoncv-0.7.0 mxnet-mkl-1.5.0 portalocker-1.7.1

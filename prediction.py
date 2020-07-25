@@ -5,10 +5,11 @@ from PIL import Image
 # import boto3
 import numpy as np
 import json
+import os
 
 class Predict():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd="Shrinivas#100", database="test")
+        self.db=mysql.connect(host="localhost",user="root",passwd="darshan_sql", database="test")
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         self.ctx = mx.gpu() if mx.context.num_gpus() else mx.cpu()
@@ -21,13 +22,19 @@ class Predict():
                 ORDER BY SUBSTRING(frameID, 7) 
                 LIMIT 40"""
         self.cursor.execute(query)
-        return self.cursor.fetchall()
-            
+        imageNames = self.cursor.fetchall()
+        print (imageNames)
+        for nm in imageNames:
+            if (os.path.isfile("./FRAMES/" + nm[0] + ".png") == False):
+                imageNames.remove(nm)
+        return imageNames
+
+
     def read_pics(self,img_names):
         imgs = []
 
         for name in img_names:
-            im = Image.open('e:/SHRINIVAS/KGP/SocialDistancingUIDesktop/'+name[0]+".jpg")
+            im = Image.open("FRAMES/"+name[0]+".png")
             im = (np.array(im)).reshape(256, 256, 3)
             imgs.append(im)
 
@@ -91,7 +98,9 @@ class Predict():
 
 if __name__ == "__main__":
     model=Predict()
-    imageNames=model.getNames()
-    if(len(imageNames)>10):
-        prediction=model.predict(imageNames)
-        model.editDatabase(prediction)
+    while True:
+        imageNames=model.getNames()
+        print (imageNames)
+        if(len(imageNames)>10):
+            prediction=model.predict(imageNames)
+            model.editDatabase(prediction)

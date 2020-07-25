@@ -93,7 +93,7 @@ class Input():
 
     def sendUpdate(self):
         updateFile = open("Update.txt","r")
-        UpdateIndex = (file1.read())
+        UpdateIndex = (updateFile.read())
         updateFile.close()
         updateFile = open("Update.txt","w")
         updateFile.write(str(UpdateIndex + 1))
@@ -101,14 +101,15 @@ class Input():
 
 if __name__ == "__main__":
     input=Input()
+    print (input.cameraDataProcessed)
     oldUpdateIndex = 0
     newUpdateIndex = 0
     while(True):
         updateFile = open("Update.txt","r")
-        newUpdateIndex = (file1.read())
+        newUpdateIndex = (updateFile.read())
         updateFile.close()
-        if newUpdateIndex != oldUpdateIndex:
-            input.getDataJson()
+        # if newUpdateIndex != oldUpdateIndex:
+            # input.getDataJson()
         oldUpdateIndex = newUpdateIndex
         input.getFrames()   
         cv2.waitKey(1000)

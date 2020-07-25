@@ -3,6 +3,7 @@ import Dashboard
 import Calibration
 import Configuration
 import Login
+import os
 
 class MainFrame(wx.Frame):
 
@@ -305,7 +306,6 @@ class MainFrame(wx.Frame):
         self.parent.current_page = 3
         self.parent.changePage()
         return event
-
 
 app = wx.App()
 window = MainFrame()

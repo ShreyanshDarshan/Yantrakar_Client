@@ -201,7 +201,7 @@ if __name__ == "__main__":
     newUpdateIndex = 0
     while(True):
         updateFile = open("Update.txt","r")
-        newUpdateIndex = (file1.read())
+        newUpdateIndex = (updateFile.read())
         updateFile.close()
         if newUpdateIndex != oldUpdateIndex:
             transform.getDataJson()
