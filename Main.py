@@ -2,6 +2,7 @@ import wx
 import Dashboard
 import Calibration
 import Configuration
+import Login
 
 class MainFrame(wx.Frame):
 
@@ -9,7 +10,7 @@ class MainFrame(wx.Frame):
         super(MainFrame, self).__init__(None, title="Yantrakar", size=(1100, 750))
         self.SetMinSize((1100, 750))
 
-        self.current_page = 1
+        self.current_page = 0
 
         self.initUI()
 
@@ -131,6 +132,21 @@ class MainFrame(wx.Frame):
         LayoutnavPanelLower.SetFlexibleDirection(wx.BOTH)
         LayoutnavPanelLower.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
 
+        # Add Logout button on Navbar
+        self.logoutNavButton = wx.Button(self.navPanel, -1, u"  Logout", wx.DefaultPosition, wx.DefaultSize,
+                                       wx.BORDER_NONE | wx.BU_LEFT)
+        self.logoutNavButton.SetForegroundColour(self.white)
+        self.logoutNavButton.SetBackgroundColour(self.darkGrey)
+        self.logoutNavButton.SetBitmap(self.UserIcon)
+        self.logoutNavButton.Bind(wx.EVT_ENTER_WINDOW, lambda evt: self.changeColor(evt, self.Grey, 0))
+        self.logoutNavButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.darkGrey, 1))
+        self.logoutNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.slightlyLightGrey, 0))
+        self.logoutNavButton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(self.logoutButtonClicked(evt), self.Grey, 1))
+        # self.logoutNavButton.SetFont(self.fontBold)
+        self.logoutNavButton.SetMinSize(wx.Size(200, 50))
+        # self.logoutNavButton.SetPressColor(self.darkGrey)
+        self.logoutNavButton.Enable(False)
+
         # Add User button on Navbar
         self.userNavButton = wx.Button(self.navPanel, -1, u"  User", wx.DefaultPosition, wx.DefaultSize,
                                        wx.BORDER_NONE | wx.BU_LEFT)
@@ -146,7 +162,8 @@ class MainFrame(wx.Frame):
         # self.userNavButton.SetPressColor(self.darkGrey)
 
         # add user button
-        LayoutnavPanelLower.Add(self.userNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+        LayoutnavPanelLower.Add(self.logoutNavButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 10)
+        LayoutnavPanelLower.Add(self.userNavButton, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 10)
 
         # add upper and lower nav panel
         LayoutnavPanel.Add(LayoutnavPanelUpper, 1, wx.EXPAND, 0)
@@ -168,19 +185,23 @@ class MainFrame(wx.Frame):
         self.dashboardPage = Dashboard.Dashboard(self.mainContainer)
         self.configPage = Configuration.MyFrame1(self.mainContainer)
         self.calibPage = Calibration.Calibration(self.mainContainer)
+        self.loginPage = Login.Login(self.mainContainer, self)
 
         LayoutMainContainer = wx.BoxSizer(wx.VERTICAL)
 
+        LayoutMainContainer.Add(self.loginPage, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutMainContainer.Add(self.dashboardPage, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutMainContainer.Add(self.configPage, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutMainContainer.Add(self.calibPage, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
 
+        self.loginPage.Hide()
         self.dashboardPage.Hide()
         self.configPage.Hide()
         self.calibPage.Hide()
 
-        self.changePage(None, 1)
-        self.updateNavColors(1)
+        self.changePage(None, 0)
+        self.updateNavColors(0)
+        self.updateNavAccess(0)
 
         self.mainContainer.SetSizer(LayoutMainContainer)
         #LayoutMainContainer.Fit(self.mainContainer)
@@ -190,45 +211,74 @@ class MainFrame(wx.Frame):
 
         self.Show(True)
 
+    def logoutButtonClicked(self, event):
+        self.updateNavAccess(0)
+        self.changePage(event, 0)
+        self.logoutNavButton.Enable(False)
+        return event
+
+    def onLogin(self, mode):
+        self.updateNavAccess(mode)
+        self.changePage(None, 1)
+        self.updateNavColors(1)
+        self.logoutNavButton.Enable(True)
+
+    def updateNavAccess(self, mode):
+        if(mode == 0):
+            self.dashboardNavButton.Enable(False)
+            self.cameraConfigNavButton.Enable(False)
+            self.calibrationNavButton.Enable(False)
+            self.helpNavButton.Enable(False)
+            self.userNavButton.Enable(False)
+        elif(mode == 1):
+            self.dashboardNavButton.Enable(True)
+            self.cameraConfigNavButton.Enable(True)
+            self.calibrationNavButton.Enable(True)
+            self.helpNavButton.Enable(True)
+            self.userNavButton.Enable(True)
+        elif(mode == 2):
+            self.dashboardNavButton.Enable(True)
+            self.cameraConfigNavButton.Enable(False)
+            self.calibrationNavButton.Enable(False)
+            self.helpNavButton.Enable(False)
+            self.userNavButton.Enable(False)
+
+
     def changePage(self, event, pageno):
         self.current_page = pageno
         self.dashboardPage.isPlaying = False
         self.dashboardPage.galleryPauseButton.SetBitmap(wx.Bitmap("ui_elements/play.png"))
+        self.dashboardPage.Hide()
+        self.configPage.Hide()
+        self.calibPage.Hide()
+        self.loginPage.Hide()
         if(self.current_page == 1):
+            self.dashboardPage.updateCameraAliasList()
             self.dashboardPage.Show(True)
-            self.configPage.Hide()
-            self.calibPage.Hide()
         elif (self.current_page == 2):
             self.configPage.Show(True)
-            self.dashboardPage.Hide()
-            self.calibPage.Hide()
         elif (self.current_page == 3):
+            self.calibPage.updateCameraAliasList()
             self.calibPage.Show(True)
-            self.configPage.Hide()
-            self.dashboardPage.Hide()
+        elif(self.current_page == 0):
+            self.loginPage.Show(True)
+            self.loginPage.passwordEntry.SetValue("")
         self.Layout()
         return event
 
     def updateNavColors(self, pageChange):
         if(pageChange):
+            self.dashboardNavButton.SetBackgroundColour(self.darkGrey)
+            self.cameraConfigNavButton.SetBackgroundColour(self.darkGrey)
+            self.calibrationNavButton.SetBackgroundColour(self.darkGrey)
+            self.helpNavButton.SetBackgroundColour(self.darkGrey)
+            self.userNavButton.SetBackgroundColour(self.darkGrey)
             if(self.current_page == 1):
                 self.dashboardNavButton.SetBackgroundColour(self.Grey)
-                self.cameraConfigNavButton.SetBackgroundColour(self.darkGrey)
-                self.calibrationNavButton.SetBackgroundColour(self.darkGrey)
-                self.helpNavButton.SetBackgroundColour(self.darkGrey)
-                self.userNavButton.SetBackgroundColour(self.darkGrey)
             elif (self.current_page == 2):
-                self.dashboardNavButton.SetBackgroundColour(self.darkGrey)
                 self.cameraConfigNavButton.SetBackgroundColour(self.Grey)
-                self.calibrationNavButton.SetBackgroundColour(self.darkGrey)
-                self.helpNavButton.SetBackgroundColour(self.darkGrey)
-                self.userNavButton.SetBackgroundColour(self.darkGrey)
             elif (self.current_page == 3):
-                self.dashboardNavButton.SetBackgroundColour(self.darkGrey)
-                self.cameraConfigNavButton.SetBackgroundColour(self.darkGrey)
                 self.calibrationNavButton.SetBackgroundColour(self.Grey)
-                self.helpNavButton.SetBackgroundColour(self.darkGrey)
-                self.userNavButton.SetBackgroundColour(self.darkGrey)
 
 
     def scaleIcons(self, iconBitmap, iconSize):
