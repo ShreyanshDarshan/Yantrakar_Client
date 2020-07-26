@@ -13,7 +13,7 @@ class Predict():
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         self.ctx = mx.gpu() if mx.context.num_gpus() else mx.cpu()
-        self.net=self.get_model()
+        self.net=self.get_model()   
         
     def getNames(self):
         query="""SELECT frameID
