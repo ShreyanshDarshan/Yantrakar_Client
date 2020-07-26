@@ -78,7 +78,8 @@ class Transformation():
 
             for pointsString in pointsStringList:
                 pointStringList=pointsString.split()
-                points.append((int(pointStringList[0]),int(pointStringList[1])))
+                if(len(pointStringList)>0):
+                    points.append((int(pointStringList[0]),int(pointStringList[1])))
                 
             self.dbDataProcessed.update({
                 dbDataItem[1]: points
@@ -200,15 +201,15 @@ class Transformation():
         return violationString
 
 if __name__ == "__main__":
-    transform = Transformation()
-    tranformation.getDataJson()
+    transformation = Transformation()
+    transformation.getDataJson()
     oldUpdateIndex = 0
     newUpdateIndex = 0
     while(True):
-        tranformation.getDataDatabase()
-        tranformation.processData()
-        tranformation.deleteFiles()
-        tranformation.editDatabse()
+        transformation.getDataDatabase()
+        transformation.processData()
+        transformation.deleteFiles()
+        transformation.editDatabse()
         updateFile = open("Update.txt","r")
         newUpdateIndex = (updateFile.read())
         updateFile.close()
