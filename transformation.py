@@ -55,6 +55,7 @@ class Transformation():
         self.db.commit()
         
     def printAllData(self):
+        self.db.reconnect()
         query="""SELECT *
                 FROM """+self.databaseName+""" 
                 LIMIT 40"""
@@ -63,6 +64,7 @@ class Transformation():
         print(self.cursor.fetchall())
     
     def getDataDatabase(self):
+        self.db.reconnect()
         query="""SELECT *
                 FROM """ +self.databaseName +"""
                 WHERE process_flag=1"""
@@ -172,6 +174,7 @@ class Transformation():
         for frameID in self.dbDataProcessed.keys():
             if(len(self.violatedPointsData[frameID])!=0):
                 violationString=self.getStringFromViolatedPoints(self.violatedPointsData[frameID])
+                self.db.reconnect()
                 query = """UPDATE """+self.databaseName +"""
                     SET 
                         violations=%s,

@@ -75,6 +75,7 @@ class Input():
                     self.editJson(key)
     
     def editDatabase(self,frameID,cameraID):
+        self.db.reconnect()
         query= """INSERT INTO """ +self.databaseName +"""
                 (cameraId, 
                 frameID, 

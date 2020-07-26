@@ -23,6 +23,7 @@ class Predict():
         self.image_extension=".png"
         
     def getNames(self):
+        self.db.reconnect()
         query="""SELECT frameID
                 FROM """ +self.databaseName +"""
                 WHERE process_flag=0
@@ -92,6 +93,7 @@ class Predict():
     def editDatabase(self,data):
         for name,coords in data.items():
             pointsString=self.getStringFromPoints(coords)
+            self.db.reconnect()
             query = """UPDATE """+self.databaseName +"""
                     SET 
                         coordinates=%s,
