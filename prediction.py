@@ -6,26 +6,28 @@ from PIL import Image
 import numpy as np
 import json
 import os
+import time
 
 class Predict():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd="darshan_sql", database="test")
+        self.db=mysql.connect(host="localhost",user="root",passwd="Shrinivas#100", database="test")
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         self.ctx = mx.gpu() if mx.context.num_gpus() else mx.cpu()
         self.net=self.get_model()   
+        
+        self.image_extension=".png"
         
     def getNames(self):
         query="""SELECT frameID
                 FROM """ +self.databaseName +"""
                 WHERE process_flag=0
                 ORDER BY SUBSTRING(frameID, 7) 
-                LIMIT 40"""
+                LIMIT 5"""
         self.cursor.execute(query)
         imageNames = self.cursor.fetchall()
-        print (imageNames)
         for nm in imageNames:
-            if (os.path.isfile("./FRAMES/" + nm[0] + ".png") == False):
+            if (os.path.isfile("./FRAMES/" + nm[0] + self.image_extension) == False):
                 imageNames.remove(nm)
         return imageNames
 
@@ -34,7 +36,7 @@ class Predict():
         imgs = []
 
         for name in img_names:
-            im = Image.open("FRAMES/"+name[0]+".png")
+            im = Image.open("./FRAMES/"+name[0]+self.image_extension)
             im = (np.array(im)).reshape(256, 256, 3)
             imgs.append(im)
 
@@ -101,6 +103,8 @@ if __name__ == "__main__":
     while True:
         imageNames=model.getNames()
         print (imageNames)
-        if(len(imageNames)>10):
+        if(len(imageNames)>0):
             prediction=model.predict(imageNames)
             model.editDatabase(prediction)
+            print(prediction)
+        time.sleep(1)

@@ -6,9 +6,10 @@ import json
 
 class Input():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd="darshan_sql", database="test")
+        self.db=mysql.connect(host="localhost",user="root",passwd="Shrinivas#100", database="test")
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
+        self.image_extension=".png"
         self.cameraDataProcessed={
             "000001":{
                 "url": "rtsp://shrinivas:khiste@192.168.43.100:8080/h264_pcm.sdp",
@@ -45,7 +46,7 @@ class Input():
     def initialiseCameras(self):
         self.cap={}
         for camerakey,cameraData in self.cameraDataProcessed.items():
-            self.cap[camerakey] = cv2.VideoCapture("test_video/cctvhigh.mp4") # cv2.VideoCapture(cameraData["url"])
+            self.cap[camerakey] = cv2.VideoCapture("./test_video/cctvhigh.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
@@ -58,15 +59,15 @@ class Input():
                 ret, frame=camera.read()
                 if(ret):
                     frame=cv2.resize(frame,(256,256))
-                    cv2.imwrite("FRAMES/"+key+timestamp+".png",frame)
-                    cv2.imshow("img",frame)
+                    cv2.imwrite("./FRAMES/"+key+timestamp+self.image_extension,frame)
+                    # cv2.imshow("img",frame)
                     self.cameraDataProcessed[key]["counter"]=0
                     self.editDatabase(key+timestamp,key)
                 else:
                     self.cameraDataProcessed[key]["counter"]=self.cameraDataProcessed[key]["counter"]+1
                 if(self.cameraDataProcessed[key]["counter"]>5):
                     self.cameraDataProcessed[key]["isPaused"]=True
-                    print("yo")
+                    # print("yo")
                     self.editJson(key)
     
     def editDatabase(self,frameID,cameraID):
@@ -110,7 +111,7 @@ def beginInput():
         newUpdateIndex = (updateFile.read())
         updateFile.close()
         # if newUpdateIndex != oldUpdateIndex:
-            # input.getDataJson()
+        #     input.getDataJson()
         oldUpdateIndex = newUpdateIndex
         input.getFrames()   
         cv2.waitKey(1000)
