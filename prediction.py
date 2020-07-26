@@ -8,9 +8,13 @@ import json
 import os
 import time
 
+passFile = open("pass.txt","r")
+mysql_pass = passFile.readline()
+passFile.close()
+
 class Predict():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd="Shrinivas#100", database="test")
+        self.db=mysql.connect(host="localhost",user="root",passwd=mysql_pass, database="test")
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         self.ctx = mx.gpu() if mx.context.num_gpus() else mx.cpu()
@@ -51,7 +55,7 @@ class Predict():
 
     def predict(self,img_names):
 
-        x = self.read_pics(imageNames)
+        x = self.read_pics(img_names)
 
         # net = get_model()
 
@@ -98,7 +102,8 @@ class Predict():
             self.cursor.execute(query,values)
         self.db.commit()
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+def beginPrediction():
     model=Predict()
     while True:
         imageNames=model.getNames()

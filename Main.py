@@ -4,6 +4,7 @@ import Calibration
 import Configuration
 import Login
 import input
+import prediction
 import os
 import multiprocessing as mp
 
@@ -319,5 +320,7 @@ if __name__ == '__main__':
     # info('main line')
     GUI = mp.Process(target=initGUI)
     Input = mp.Process(target=input.beginInput)
+    Predict = mp.Process(target=prediction.beginPrediction)
     GUI.start()
     Input.start()
+    Predict.start()
