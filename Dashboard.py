@@ -295,7 +295,7 @@ class Dashboard(wx.Panel):
             print("HERE")
             query = """SELECT frameID
                             FROM """ + self.databaseName + """ 
-                            WHERE process_flag=2"""
+                            WHERE process_flag=0"""
             today = int(datetime.datetime.now().day)
             self.cursor.execute(query)
             imageNames = self.cursor.fetchall()
@@ -304,7 +304,7 @@ class Dashboard(wx.Panel):
             imagesToBeDisplayed = []
             for names in imageNames:
                 day = int(names[0][6:8])
-                if (not day in dateList):
+                if ((not day in dateList) and (day > today - numberOfDays)):
                     noOfDates = noOfDates + 1
                     dateList.append(day)
                 if (day > today - numberOfDays):
@@ -313,7 +313,7 @@ class Dashboard(wx.Panel):
         else:
             query = """SELECT frameID
                     FROM """ + self.databaseName + """ 
-                    WHERE cameraId=%s AND process_flag=2"""
+                    WHERE cameraId=%s AND process_flag=0"""
             today = int(datetime.datetime.now().day)
             values = (cameraID,)
             self.cursor.execute(query, values)
@@ -321,7 +321,7 @@ class Dashboard(wx.Panel):
             imagesToBeDisplayed = []
             for names in imageNames:
                 day = int(names[0][6:8])
-                if(not day in dateList):
+                if((not day in dateList) and (day > today - numberOfDays)):
                     noOfDates = noOfDates + 1
                     dateList.append(day)
                 if (day > today - numberOfDays):

@@ -5,7 +5,8 @@ class MotionDetector():
 
     def __init__(self):
 
-        self.sdThresh = 8
+        self.sdThresh = 9.0
+        self.sdThreshMax = 27
         self.k = 5
         self.framesList = []
 
@@ -49,7 +50,7 @@ class MotionDetector():
             self.framesList[self.k - 1] = frame
             avg_dev = avg_dev / self.k
 
-            if(avg_dev > self.sdThresh):
+            if(avg_dev > self.sdThresh and avg_dev < self.sdThreshMax):
                 return 1
 
         else:
