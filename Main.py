@@ -5,20 +5,21 @@ import Configuration
 import Login
 import input
 import prediction
+import transformation
 import os
 import multiprocessing as mp
 
 class MainFrame(wx.Frame):
 
-    def __init__(self):
+    def __init__(self, updateIndex):
         super(MainFrame, self).__init__(None, title="Yantrakar", size=(1100, 750))
         self.SetMinSize((1100, 750))
 
         self.current_page = 0
 
-        self.initUI()
+        self.initUI(updateIndex)
 
-    def initUI(self):
+    def initUI(self, updateIndex):
         self.fontNormal = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.fontBold = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
         self.darkOrange = wx.Colour(255, 191, 0)
@@ -187,7 +188,7 @@ class MainFrame(wx.Frame):
         self.Layout()
 
         self.dashboardPage = Dashboard.Dashboard(self.mainContainer)
-        self.configPage = Configuration.MyFrame1(self.mainContainer)
+        self.configPage = Configuration.MyFrame1(self.mainContainer, updateIndex)
         self.calibPage = Calibration.Calibration(self.mainContainer)
         self.loginPage = Login.Login(self.mainContainer, self)
 
@@ -310,17 +311,18 @@ class MainFrame(wx.Frame):
         self.parent.changePage()
         return event
 
-def initGUI():
+def initGUI(updateIndex):
     app = wx.App()
-    window = MainFrame()
+    window = MainFrame(updateIndex)
     app.MainLoop()
 
 if __name__ == '__main__':
-    # num = mp.Value('i', 10)
-    # info('main line')
-    GUI = mp.Process(target=initGUI)
-    Input = mp.Process(target=input.beginInput)
-    # Predict = mp.Process(target=prediction.beginPrediction)
+    updateIndex = mp.Value('i', 0)
+    GUI = mp.Process(target=initGUI, args=(updateIndex,))
+    Input = mp.Process(target=input.beginInput, args=(updateIndex,))
+    Predict = mp.Process(target=prediction.beginPrediction)
+    Transform = mp.Process(target=transformation.beginTransformation, args=(updateIndex,))
     GUI.start()
     Input.start()
-    # Predict.start()
+    Predict.start()
+    Transform.start()

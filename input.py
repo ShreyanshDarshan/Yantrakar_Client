@@ -55,7 +55,7 @@ class Input():
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             
-    def getFrames(self):
+    def getFrames(self,updateIndex):
         time=datetime.datetime.now()
         timestamp=str(time.day).zfill(2)+str(time.hour).zfill(2)+str(time.minute).zfill(2)+str(time.second).zfill(2)+str(time.microsecond)[0:3]
         for key,camera in self.cap.items():
@@ -72,7 +72,7 @@ class Input():
                 if(self.cameraDataProcessed[key]["counter"]>5):
                     self.cameraDataProcessed[key]["isPaused"]=True
                     # print("yo")
-                    self.editJson(key)
+                    self.editJson(key,updateIndex)
     
     def editDatabase(self,frameID,cameraID):
         self.db.reconnect()
@@ -87,7 +87,7 @@ class Input():
         self.cursor.execute(query,values)
         self.db.commit()
 
-    def editJson(self,key):
+    def editJson(self,key,updateIndex):
         with open('cameraDatabase.json','r') as jsonFile:
             cameraData=json.load(jsonFile)
         
@@ -95,31 +95,32 @@ class Input():
         
         with open('cameraDatabase.json','w') as jsonFile:
             json.dump(cameraData,jsonFile)
-            self.sendUpdate()
+            self.sendUpdate(updateIndex)
 
-    def sendUpdate(self):
-        updateFile = open("Update.txt","r")
-        UpdateIndex = (updateFile.read())
-        updateFile.close()
-        updateFile = open("Update.txt","w")
-        updateFile.write(str(UpdateIndex + 1))
-        updateFile.close()
+    def sendUpdate(self, updateIndex):
+        updateIndex += 1
+        print("sending update from input.py")
+        # updateFile = open("Update.txt","r")
+        # UpdateIndex = (updateFile.read())
+        # updateFile.close()
+        # updateFile = open("Update.txt","w")
+        # updateFile.write(str(UpdateIndex + 1))
+        # updateFile.close()
+
 
 # if __name__ == "__main__":
-def beginInput():
+def beginInput(updateIndex):
     input=Input()
     print (input.cameraDataProcessed)
-    oldUpdateIndex = 0
-    newUpdateIndex = 0
+    oldUpdateIndex = updateIndex
     while(True):
-        updateFile = open("Update.txt","r")
-        newUpdateIndex = (updateFile.read())
-        updateFile.close()
-        # if newUpdateIndex != oldUpdateIndex:
+        if updateIndex != oldUpdateIndex:
+            print("getting json data in input.py")
         #     input.getDataJson()
-        oldUpdateIndex = newUpdateIndex
-        input.getFrames()   
+        oldUpdateIndex = updateIndex
+        input.getFrames(updateIndex)   
         cv2.waitKey(1000)
         
-# beginInput()
+# up = 0
+# beginInput(up)
 #'rtsp://shrinivas:khiste@192.168.43.69'

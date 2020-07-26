@@ -168,7 +168,7 @@ class Transformation():
             if(len(violatedPoints)==0):
                 deleteFile=frameID+self.image_extension
             
-                os.remove('./FRAME/'+deleteFile)
+                os.remove('./FRAMES/'+deleteFile)
     
     def editDatabse(self):
         for frameID in self.dbDataProcessed.keys():
@@ -203,18 +203,16 @@ class Transformation():
                 violationString=mainString
         return violationString
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+def beginTransformation(updateIndex):
     transformation = Transformation()
     transformation.getDataJson()
     oldUpdateIndex = 0
-    newUpdateIndex = 0
     while(True):
         transformation.getDataDatabase()
         transformation.processData()
         transformation.deleteFiles()
         transformation.editDatabse()
-        updateFile = open("Update.txt","r")
-        newUpdateIndex = (updateFile.read())
-        updateFile.close()
-        if newUpdateIndex != oldUpdateIndex:
+        if updateIndex != oldUpdateIndex:
             transformation.getDataJson()
+            oldUpdateIndex = updateIndex

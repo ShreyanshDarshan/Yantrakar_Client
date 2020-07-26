@@ -7,7 +7,7 @@ import wx.lib.platebtn as plateButtons
 
 class MyFrame1 ( wx.Panel ):
     
-    def __init__( self, parent ):
+    def __init__( self, parent, updateIndex):
         #wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 1182,785 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         wx.Frame.__init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size(1182, 785))
 
@@ -17,9 +17,10 @@ class MyFrame1 ( wx.Panel ):
         self.refreshrate = 1000
         self.timer = wx.Timer(self)
         self.timer.Start(self.refreshrate)
-        self.Bind(wx.EVT_TIMER, self.checkUpdate)
+        # self.Bind(wx.EVT_TIMER, self.checkUpdate)
+        self.Bind(wx.EVT_TIMER, lambda evt: self.checkUpdate(evt, updateIndex))
 
-        self.oldUpdateIndex = 0
+        self.oldUpdateIndex = updateIndex
         self.newUpdateIndex = 0
 
         self.darkOrange = wx.Colour(255, 191, 0)
@@ -125,7 +126,7 @@ class MyFrame1 ( wx.Panel ):
         self.m_button2.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         self.m_button2.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
         self.m_button2.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        self.m_button2.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.stopAll(evt,fgSizer4), self.slightlyLightGrey))
+        self.m_button2.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.stopAll(evt,fgSizer4,updateIndex), self.slightlyLightGrey))
         
         bSizer7.Add( self.m_button2, 0, wx.ALL, 5 )
         
@@ -137,7 +138,7 @@ class MyFrame1 ( wx.Panel ):
         self.m_button3.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         self.m_button3.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
         self.m_button3.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        self.m_button3.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.startAll(evt,fgSizer4), self.slightlyLightGrey))
+        self.m_button3.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.startAll(evt,fgSizer4,updateIndex), self.slightlyLightGrey))
 
         bSizer7.Add( self.m_button3, 0, wx.ALL, 5 )
         
@@ -270,7 +271,7 @@ class MyFrame1 ( wx.Panel ):
     def __del__( self ):
         pass
     
-    def stopAll(self,event,sizer):
+    def stopAll(self,event,sizer,updateIndex):
         numberOfItems=int(len(sizer.Children)/10)
         for i in range(1,numberOfItems):
             sizer.Children[11*i+9].Window.SetBitmap(wx.Bitmap("ui_elements/play.png",wx.BITMAP_TYPE_ANY))
@@ -282,11 +283,11 @@ class MyFrame1 ( wx.Panel ):
         with open('cameraDatabase.json','w') as jsonFile:
             json.dump(data,jsonFile,sort_keys=True, indent=4)
         
-        self.sendUpdate()
+        self.sendUpdate(updateIndex)
         self.didUpdate=True
         return event
     
-    def startAll(self,event,sizer):
+    def startAll(self,event,sizer,updateIndex):
         numberOfItems=int(len(sizer.Children)/10)
         for i in range(1,numberOfItems):
             sizer.Children[11*i+9].Window.SetBitmap(wx.Bitmap("ui_elements/pause.png",wx.BITMAP_TYPE_ANY))
@@ -298,7 +299,7 @@ class MyFrame1 ( wx.Panel ):
         with open('cameraDatabase.json','w') as jsonFile:
             json.dump(data,jsonFile,sort_keys=True, indent=4)
         
-        self.sendUpdate()
+        self.sendUpdate(updateIndex)
         self.didUpdate=True
 
         return event
@@ -363,7 +364,7 @@ class MyFrame1 ( wx.Panel ):
         m_button81.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         m_button81.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
         m_button81.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        m_button81.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.editButtonClick(evt), self.slightlyLightGrey))
+        m_button81.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.editButtonClick(evt, updateIndex), self.slightlyLightGrey))
         fgSizer.Add( m_button81, 0, wx.ALL|wx.EXPAND, 5 )
         
         m_button82 = wx.Button( m_scrolledWindow1, wx.ID_ANY, u"Delete", wx.DefaultPosition, wx.Size( -1,34 ), style = wx.BORDER_NONE,name=name+"_delete")
@@ -375,7 +376,7 @@ class MyFrame1 ( wx.Panel ):
         m_button82.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         m_button82.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
         m_button82.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        m_button82.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.deleteButtonClick(evt,fgSizer,m_scrolledWindow1), self.slightlyLightGrey))
+        m_button82.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.deleteButtonClick(evt,fgSizer,m_scrolledWindow1,updateIndex), self.slightlyLightGrey))
         # m_button82.Bind(wx.EVT_ENTER_WINDOW, )
         fgSizer.Add( m_button82, 0, wx.ALL|wx.EXPAND, 5 )
         
@@ -397,7 +398,8 @@ class MyFrame1 ( wx.Panel ):
         m_bpButton7 = wx.BitmapButton( m_scrolledWindow1, wx.ID_ANY, controlIcon, wx.DefaultPosition, wx.Size(43, -1) , wx.BU_AUTODRAW, name=name+"_control" )
         m_bpButton7.name=name+"_control"
         m_bpButton7.SetBackgroundColour(self.lightGrey)
-        m_bpButton7.Bind(wx.EVT_BUTTON,self.controlButtonClick)
+        # m_bpButton7.Bind(wx.EVT_BUTTON,self.controlButtonClick)
+        m_bpButton7.Bind(wx.EVT_BUTTON, lambda evt:  self.controlButtonClick(evt, updateIndex))
         m_bpButton7.SetForegroundColour(self.darkGrey)
         fgSizer.Add( m_bpButton7, 0, wx.ALIGN_CENTER|wx.ALL, 0 )
         
@@ -421,7 +423,7 @@ class MyFrame1 ( wx.Panel ):
         print(value)
         return event
 
-    def controlButtonClick(self,event):
+    def controlButtonClick(self,event,updateIndex):
         name=event.GetEventObject().name
         cameraIndex=name[0:6]
         
@@ -437,10 +439,10 @@ class MyFrame1 ( wx.Panel ):
         else:
             window.SetBitmap(wx.Bitmap("ui_elements/pause.png",wx.BITMAP_TYPE_ANY))
         
-        self.sendUpdate()
+        self.sendUpdate(updateIndex)
         self.didUpdate=True
     
-    def deleteButtonClick(self,event,fgsizer,parent):
+    def deleteButtonClick(self,event,fgsizer,parent,updateIndex):
         name=event.GetEventObject().name
         cameraIndex=name[0:6]
         
@@ -463,7 +465,7 @@ class MyFrame1 ( wx.Panel ):
                 with open('cameraDatabase.json','w') as jsonFile:
                     json.dump(data,jsonFile,sort_keys=True, indent=4)
             
-            self.sendUpdate()
+            self.sendUpdate(updateIndex)
             self.didUpdate=True
         else:
             window.SetLabel("Delete")
@@ -488,7 +490,7 @@ class MyFrame1 ( wx.Panel ):
             window.SetEditable(False)
         return event
 
-    def editButtonClick(self,event):
+    def editButtonClick(self,event,updateIndex):
         name=event.GetEventObject().name
         cameraIndex=name[0:6]
 
@@ -554,7 +556,7 @@ class MyFrame1 ( wx.Panel ):
             with open('cameraDatabase.json','w') as jsonFile:
                 json.dump(data,jsonFile,sort_keys=True, indent=4)
 
-            self.sendUpdate()
+            self.sendUpdate(updateIndex)
             self.didUpdate=True
         return event
             
@@ -586,23 +588,25 @@ class MyFrame1 ( wx.Panel ):
     def changeColor(self, event, newcolor):
         event.GetEventObject().SetBackgroundColour(newcolor)
 
-    def sendUpdate(self):
-        updateFile = open("Update.txt","r")
-        UpdateIndex = (updateFile.read())
-        updateFile.close()
-        updateFile = open("Update.txt","w")
-        updateFile.write(str(UpdateIndex + 1))
-        updateFile.close()
+    def sendUpdate(self, updateIndex):
+        updateIndex += 1
+        print ("sending update from configuration")
+        # updateFile = open("Update.txt","r")
+        # UpdateIndex = (updateFile.read())
+        # updateFile.close()
+        # updateFile = open("Update.txt","w")
+        # updateFile.write(str(UpdateIndex + 1))
+        # updateFile.close()
 
-    def checkUpdate(self, event):
+    def checkUpdate(self, event, updateIndex):
         if self.IsShown():
             print("checking Update")
-            updateFile = open("Update.txt","r")
-            self.newUpdateIndex = (updateFile.read())
-            updateFile.close()
-            if self.newUpdateIndex != self.oldUpdateIndex:
+            # updateFile = open("Update.txt","r")
+            # self.newUpdateIndex = (updateFile.read())
+            # updateFile.close()
+            if self.oldUpdateIndex != updateIndex:
                 print ("getting data")
-                self.oldUpdateIndex = self.newUpdateIndex             
+                self.oldUpdateIndex = updateIndex             
                 self.changeStatus()
             self.timer.Start(self.refreshrate)
             
@@ -623,8 +627,8 @@ class MyFrame1 ( wx.Panel ):
             
 
 class MyApp(wx.App):
-    def OnInit(self):
-        self.frame=MyFrame1(None)
+    def OnInit(self, updateIndex):
+        self.frame=MyFrame1(updateIndex)
         # self.frame.Show()
 
         return True

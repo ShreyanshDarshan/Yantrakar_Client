@@ -5,14 +5,16 @@ passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
 passFile.close()
 
+db = mysql.connect(
+    host = "localhost",
+    user = "root",
+    passwd = mysql_pass,
+    database = "test"
+)
 
 while (True):
-    db = mysql.connect(
-        host = "localhost",
-        user = "root",
-        passwd = mysql_pass,
-        database = "test"
-    )
+
+    db.reconnect()
 
     cursor = db.cursor()
     print ("getting data")
