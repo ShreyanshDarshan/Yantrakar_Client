@@ -104,7 +104,7 @@ class Dashboard(wx.Panel):
         self.slideSpeed = 10
         self.SlidesList = []
 
-        self.db = mysql.connect(host="localhost", user="root", passwd="Nishant_sql", database="test")
+        self.db = mysql.connect(host="localhost", user="root", passwd="darshan_sql", database="test")
         self.cursor = self.db.cursor()
         self.databaseName = "cameraDatabaseFinal"
 

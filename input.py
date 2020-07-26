@@ -100,7 +100,8 @@ class Input():
         updateFile.write(str(UpdateIndex + 1))
         updateFile.close()
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+def beginInput():
     input=Input()
     print (input.cameraDataProcessed)
     oldUpdateIndex = 0
@@ -115,5 +116,5 @@ if __name__ == "__main__":
         input.getFrames()   
         cv2.waitKey(1000)
         
-
+# beginInput()
 #'rtsp://shrinivas:khiste@192.168.43.69'

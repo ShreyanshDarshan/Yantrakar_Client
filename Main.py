@@ -3,7 +3,9 @@ import Dashboard
 import Calibration
 import Configuration
 import Login
+import input
 import os
+import multiprocessing as mp
 
 class MainFrame(wx.Frame):
 
@@ -307,6 +309,15 @@ class MainFrame(wx.Frame):
         self.parent.changePage()
         return event
 
-app = wx.App()
-window = MainFrame()
-app.MainLoop()
+def initGUI():
+    app = wx.App()
+    window = MainFrame()
+    app.MainLoop()
+
+if __name__ == '__main__':
+    # num = mp.Value('i', 10)
+    # info('main line')
+    GUI = mp.Process(target=initGUI)
+    Input = mp.Process(target=input.beginInput)
+    GUI.start()
+    Input.start()
