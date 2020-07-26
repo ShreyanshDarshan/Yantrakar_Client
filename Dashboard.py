@@ -296,6 +296,7 @@ class Dashboard(wx.Panel):
         noOfDates = 0
         dateList = []
         if(cameraID is None):
+            self.db.reconnect()
             print("HERE")
             query = """SELECT frameID
                             FROM """ + self.databaseName + """ 
@@ -315,6 +316,7 @@ class Dashboard(wx.Panel):
                     imagesToBeDisplayed.append(names[0])
             return imagesToBeDisplayed, noOfDates, dateList
         else:
+            self.db.reconnect()
             query = """SELECT frameID
                     FROM """ + self.databaseName + """ 
                     WHERE cameraId=%s AND process_flag=0"""
