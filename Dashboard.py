@@ -295,7 +295,7 @@ class Dashboard(wx.Panel):
             print("HERE")
             query = """SELECT frameID
                             FROM """ + self.databaseName + """ 
-                            WHERE process_flag=0"""
+                            WHERE process_flag=2"""
             today = int(datetime.datetime.now().day)
             self.cursor.execute(query)
             imageNames = self.cursor.fetchall()
@@ -313,7 +313,7 @@ class Dashboard(wx.Panel):
         else:
             query = """SELECT frameID
                     FROM """ + self.databaseName + """ 
-                    WHERE cameraId=%s AND process_flag=0"""
+                    WHERE cameraId=%s AND process_flag=2"""
             today = int(datetime.datetime.now().day)
             values = (cameraID,)
             self.cursor.execute(query, values)
