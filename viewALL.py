@@ -14,10 +14,14 @@ db = mysql.connect(
 cursor = db.cursor()
 
 ## defining the Query
-query = "DELETE FROM cameradatabasefinal"
+query = "SELECT * FROM cameradatabasefinal"
 
-## executing the query
+## getting records from the table
 cursor.execute(query)
 
-## final step to tell the database that we have changed the table data
-db.commit()
+## fetching all records from the 'cursor' object
+records = cursor.fetchall()
+
+## Showing the data
+for record in records:
+    print(record)
