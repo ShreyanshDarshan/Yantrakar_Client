@@ -618,8 +618,8 @@ class MyFrame1 ( wx.Panel ):
                 statusIcon=wx.Bitmap("ui_elements/status-yellow.png",wx.BITMAP_TYPE_ANY)
             else:
                 statusIcon=wx.Bitmap("ui_elements/status-red.png",wx.BITMAP_TYPE_ANY)
-            window.FindWindowByName(camera[0]+"_status")
-            window.SetBitmap(statusIcon)
+            btn = self.FindWindowByName(camera[0]+"_status")
+            btn.SetBitmap(statusIcon)
             
 
 class MyApp(wx.App):
