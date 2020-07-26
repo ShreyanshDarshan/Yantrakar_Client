@@ -309,7 +309,7 @@ class Dashboard(wx.Panel):
             imagesToBeDisplayed = []
             for names in imageNames:
                 day = int(names[0][6:8])
-                if (not day in dateList):
+                if ((not day in dateList) and (day > today - numberOfDays)):
                     noOfDates = noOfDates + 1
                     dateList.append(day)
                 if (day > today - numberOfDays):
@@ -327,7 +327,7 @@ class Dashboard(wx.Panel):
             imagesToBeDisplayed = []
             for names in imageNames:
                 day = int(names[0][6:8])
-                if(not day in dateList):
+                if((not day in dateList) and (day > today - numberOfDays)):
                     noOfDates = noOfDates + 1
                     dateList.append(day)
                 if (day > today - numberOfDays):
