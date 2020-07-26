@@ -15,12 +15,12 @@ class Input():
         self.databaseName="cameraDatabaseFinal"
         self.image_extension=".png"
         self.cameraDataProcessed={
+            # "000001":{
+            #     "url": "rtsp://shrinivas:khiste@192.168.43.100:8080/h264_pcm.sdp",
+            #     "isPaused": False,
+            #     "counter": 0
+            # },
             "000001":{
-                "url": "rtsp://shrinivas:khiste@192.168.43.100:8080/h264_pcm.sdp",
-                "isPaused": False,
-                "counter": 0
-            },
-            "000002":{
                 "url": 0,
                 "isPaused": False,
                 "counter": 0

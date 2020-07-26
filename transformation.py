@@ -21,12 +21,12 @@ class Transformation():
         # self.createDatabase()
         # self.addValues()
         # self.printAllData()
-        self.getDataDatabase()
-        self.getDataJson()
-        self.processData()
-        self.deleteFiles()
-        self.editDatabse()
-        self.printAllData()
+        # self.getDataDatabase()
+        # self.getDataJson()
+        # self.processData()
+        # self.deleteFiles()
+        # self.editDatabse()
+        # self.printAllData()
         
         self.image_extension=".png"
     
@@ -85,7 +85,7 @@ class Transformation():
             })
     
     def getDataJson(self):
-        with open('e:/SHRINIVAS/KGP/SocialDistancingUIDesktop/cameraDatabase.json','r') as jsonFile:
+        with open('cameraDatabase.json','r') as jsonFile:
             cameraData=json.load(jsonFile)
 
         self.cameraDataProcessed= {}
@@ -165,7 +165,7 @@ class Transformation():
             if(len(violatedPoints)==0):
                 deleteFile=frameID+self.image_extension
             
-                os.remove('e:/SHRINIVAS/KGP/SocialDistancingUIDesktop/'+deleteFile)
+                os.remove('./FRAME/'+deleteFile)
     
     def editDatabse(self):
         for frameID in self.dbDataProcessed.keys():
@@ -201,9 +201,14 @@ class Transformation():
 
 if __name__ == "__main__":
     transform = Transformation()
+    tranformation.getDataJson()
     oldUpdateIndex = 0
     newUpdateIndex = 0
     while(True):
+        tranformation.getDataDatabase()
+        tranformation.processData()
+        tranformation.deleteFiles()
+        tranformation.editDatabse()
         updateFile = open("Update.txt","r")
         newUpdateIndex = (updateFile.read())
         updateFile.close()
