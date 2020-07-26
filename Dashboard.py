@@ -8,6 +8,10 @@ import numpy as np
 import json
 import mysql.connector as mysql
 
+passFile = open("pass.txt","r")
+mysql_pass = passFile.readline()
+passFile.close()
+
 class DashboardGallerySlide(wx.Panel):
 
     def __init__(self, parent, size, image, time, cameraID, cameraAlias, color1, color2, color3):
@@ -104,7 +108,7 @@ class Dashboard(wx.Panel):
         self.slideSpeed = 10
         self.SlidesList = []
 
-        self.db = mysql.connect(host="localhost", user="root", passwd="darshan_sql", database="test")
+        self.db = mysql.connect(host="localhost", user="root", passwd=mysql_pass, database="test")
         self.cursor = self.db.cursor()
         self.databaseName = "cameraDatabaseFinal"
 
@@ -565,21 +569,21 @@ class Dashboard(wx.Panel):
 
 import random 
 
-y = []
-for i in range (200):
-    y.append(random.randrange(0, 200, 1))
-x = np.arange(200)
-# y = np.random()
-plt.style.use(u'dark_background')
-fig = plt.figure()
-ax = plt.subplot(111)
-ax.plot(x, y, label='$y = numbers')
-plt.title('Legend inside')
-ax.legend()
-#plt.show()
-fig.set_size_inches(15, 5)
-fig.tight_layout()
-fig.savefig('plot.png', transparent=True)
+# y = []
+# for i in range (200):
+#     y.append(random.randrange(0, 200, 1))
+# x = np.arange(200)
+# # y = np.random()
+# plt.style.use(u'dark_background')
+# fig = plt.figure()
+# ax = plt.subplot(111)
+# ax.plot(x, y, label='$y = numbers')
+# plt.title('Legend inside')
+# ax.legend()
+# #plt.show()
+# fig.set_size_inches(15, 5)
+# fig.tight_layout()
+# fig.savefig('plot.png', transparent=True)
 
 #app = wx.App()
 #window = Dashboard(None)

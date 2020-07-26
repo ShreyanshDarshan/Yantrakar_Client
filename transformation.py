@@ -9,9 +9,13 @@ import os
 #delete unneccessary files and data
 #make changes in database
 
+passFile = open("pass.txt","r")
+mysql_pass = passFile.readline()
+passFile.close()
+
 class Transformation():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd="darshan_sql", database="test")
+        self.db=mysql.connect(host="localhost",user="root",passwd=mysql_pass, database="test")
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         # self.createDatabase()

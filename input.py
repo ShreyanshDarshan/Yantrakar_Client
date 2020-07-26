@@ -4,9 +4,13 @@ import datetime
 import mysql.connector as mysql
 import json
 
+passFile = open("pass.txt","r")
+mysql_pass = passFile.readline()
+passFile.close()
+
 class Input():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd="Shrinivas#100", database="test")
+        self.db=mysql.connect(host="localhost",user="root",passwd=mysql_pass, database="test")
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         self.image_extension=".png"
