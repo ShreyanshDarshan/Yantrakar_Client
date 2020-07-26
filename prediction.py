@@ -113,3 +113,5 @@ def beginPrediction():
             model.editDatabase(prediction)
             print(prediction)
         # time.sleep(1)
+
+# beginPrediction()

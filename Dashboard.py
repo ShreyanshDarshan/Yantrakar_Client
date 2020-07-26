@@ -299,7 +299,7 @@ class Dashboard(wx.Panel):
             print("HERE")
             query = """SELECT frameID
                             FROM """ + self.databaseName + """ 
-                            WHERE process_flag=2"""
+                            WHERE process_flag=0"""
             today = int(datetime.datetime.now().day)
             self.cursor.execute(query)
             imageNames = self.cursor.fetchall()
@@ -317,7 +317,7 @@ class Dashboard(wx.Panel):
         else:
             query = """SELECT frameID
                     FROM """ + self.databaseName + """ 
-                    WHERE cameraId=%s AND process_flag=2"""
+                    WHERE cameraId=%s AND process_flag=0"""
             today = int(datetime.datetime.now().day)
             values = (cameraID,)
             self.cursor.execute(query, values)
@@ -465,7 +465,7 @@ class Dashboard(wx.Panel):
             cameraID = i[0:6]
             cameraAlias = list(self.cameraList.keys())[list(self.cameraList.values()).index(cameraID)]
 
-            slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), i + ".png", time, cameraID, cameraAlias, self.lightGrey, self.darkGrey, self.white)
+            slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "./FRAMES/" + i + ".png", time, cameraID, cameraAlias, self.lightGrey, self.darkGrey, self.white)
             self.SlidesList.append(slide1)
             self.LayoutDashboardGalleryView.Add(slide1, wx.GBPosition(0, slideNo), wx.GBSpan(1, 1), wx.ALL, 0)
             slideNo = slideNo + 1

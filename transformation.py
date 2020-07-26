@@ -201,14 +201,14 @@ class Transformation():
 
 if __name__ == "__main__":
     transform = Transformation()
-    tranformation.getDataJson()
+    transform.getDataJson()
     oldUpdateIndex = 0
     newUpdateIndex = 0
     while(True):
-        tranformation.getDataDatabase()
-        tranformation.processData()
-        tranformation.deleteFiles()
-        tranformation.editDatabse()
+        transform.getDataDatabase()
+        transform.processData()
+        transform.deleteFiles()
+        transform.editDatabse()
         updateFile = open("Update.txt","r")
         newUpdateIndex = (updateFile.read())
         updateFile.close()
