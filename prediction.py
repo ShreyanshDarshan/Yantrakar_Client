@@ -107,4 +107,4 @@ if __name__ == "__main__":
             prediction=model.predict(imageNames)
             model.editDatabase(prediction)
             print(prediction)
-        time.sleep(1)
+        # time.sleep(1)
