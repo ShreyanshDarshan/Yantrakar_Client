@@ -189,7 +189,7 @@ class MainFrame(wx.Frame):
         self.Layout()
 
         self.dashboardPage = Dashboard.Dashboard(self.mainContainer)
-        self.configPage = Configuration.MyFrame1(self.mainContainer, updateIndex)
+        self.configPage = Configuration.MyFrame1(self.mainContainer, updateIndex, self)
         self.calibPage = Calibration.Calibration(self.mainContainer)
         self.loginPage = Login.Login(self.mainContainer, self)
 
@@ -312,6 +312,14 @@ class MainFrame(wx.Frame):
         self.parent.changePage()
         return event
 
+    def configPageCalibrateClicked(self, value):
+        self.changePage(None, 3)
+        self.updateNavColors(1)
+        index = list(self.calibPage.cameraList.keys()).index(value)
+        self.calibPage.cameraAliasEntry.SetSelection(index)
+        self.calibPage.cameraAliasEntryChanged(None)
+        pass
+
 def initGUI(updateIndex):
     app = wx.App()
     window = MainFrame(updateIndex)
@@ -320,11 +328,11 @@ def initGUI(updateIndex):
 if __name__ == '__main__':
     updateIndex = mp.Value('i', 0)
     GUI = mp.Process(target=initGUI, args=(updateIndex,))
-    Input = mp.Process(target=input.beginInput, args=(updateIndex,))
-    Predict = _thread.start_new_thread(prediction.beginPrediction, ())
-    Transform = mp.Process(target=transformation.beginTransformation, args=(updateIndex,))
+    #Input = mp.Process(target=input.beginInput, args=(updateIndex,))
+    #Predict = _thread.start_new_thread(prediction.beginPrediction, ())
+    #Transform = mp.Process(target=transformation.beginTransformation, args=(updateIndex,))
     GUI.start()
-    Input.start()
-    Transform.start()
+    #Input.start()
+    #Transform.start()
     # Predict = mp.Process(target=prediction.beginPrediction)
     # Predict.start()

@@ -4,6 +4,7 @@ import cv2
 import cameraCalib
 import json
 import numpy as np
+import motionDetector
 
 class Calibration(wx.Panel):
 
@@ -13,15 +14,25 @@ class Calibration(wx.Panel):
 
         self.parent = parent
 
+        self.motionDetectorFeedOn = False
         self.isCalibrating = False
         self.feedPlaying = False
         self.feedFPS = 30
         self.feed = None
         self.feedBitmap = None
 
+        self.motionDetector = motionDetector.MotionDetector()
         self.calibrater = cameraCalib.CameraCalibration()
 
         self.instructionStatus = -1
+
+        self.calibImage1 = wx.Bitmap("ui_elements/calibImg1.png")
+        self.calibImage2 = wx.Bitmap("ui_elements/calibImg2.png")
+        self.calibImage3 = wx.Bitmap("ui_elements/calibImg3.png")
+
+        self.calibImage1 = self.scaleImage(self.calibImage1, (300, 300))
+        self.calibImage2 = self.scaleImage(self.calibImage2, (300, 300))
+        self.calibImage3 = self.scaleImage(self.calibImage3, (300, 300))
 
         self.cameraDatabase = None
         self.cameraList = {}
@@ -108,9 +119,9 @@ class Calibration(wx.Panel):
         self.calibrateStartButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         self.calibrateStartButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
         self.calibrateStartButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        self.calibrateStartButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.calibrateStartButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.calibStartButtonClicked(evt), self.slightlyLightGrey))
         
-        self.calibrateStartButton.Bind(wx.EVT_BUTTON, self.calibStartButtonClicked)
+        #self.calibrateStartButton.Bind(wx.EVT_BUTTON, self.calibStartButtonClicked)
 
         self.calibrateSaveButton = wx.Button(self.calibrationButtonsPanel, -1, "Save", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE)
         self.calibrateSaveButton.SetForegroundColour(self.white)
@@ -118,13 +129,22 @@ class Calibration(wx.Panel):
         self.calibrateSaveButton.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         self.calibrateSaveButton.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
         self.calibrateSaveButton.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        self.calibrateSaveButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
+        self.calibrateSaveButton.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.calibrateSaveButtonClicked(evt), self.slightlyLightGrey))
         self.calibrateSaveButton.Enable(False)
-        self.calibrateSaveButton.Bind(wx.EVT_BUTTON, self.calibrateSaveButtonClicked)
+        #self.calibrateSaveButton.Bind(wx.EVT_BUTTON, self.calibrateSaveButtonClicked)
 
         markerSideLabel = wx.StaticText(self.calibrationButtonsPanel, -1, "Marker Side Dimension (in cm)")
         markerSideLabel.SetForegroundColour(self.faintWhite)
         self.markerSideEntry = wx.TextCtrl(self.calibrationButtonsPanel, -1, "14.0")
+
+        self.motionThresholdCheckbox = wx.CheckBox(self.calibrationButtonsPanel, -1, "Motion Detector Threshold")
+        self.motionThresholdCheckbox.Bind(wx.EVT_CHECKBOX, self.motionThresholdCheckboxChanged)
+        self.motionThresholdCheckbox.SetForegroundColour(self.faintWhite)
+        self.motionThresholdEntry = wx.TextCtrl(self.calibrationButtonsPanel, -1, "0.0")
+        self.motionThresholdEntry.Enable(False)
+        self.motionThresholdSlider = wx.Slider(self.calibrationButtonsPanel, -1, value=0, minValue=0, maxValue=150)
+        self.motionThresholdSlider.Enable(False)
+        self.motionThresholdSlider.Bind(wx.EVT_SLIDER, self.motionThresholdSliderChanged)
 
         LayoutButtonPanel.Add((0, 0), wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.EXPAND | wx.ALL, 10)
         LayoutButtonPanel.Add(self.howToCalibButton, wx.GBPosition(0, 1), wx.GBSpan(1, 2), wx.EXPAND | wx.ALL, 15)
@@ -136,9 +156,14 @@ class Calibration(wx.Panel):
         LayoutButtonPanel.Add(self.calibrateSaveButton, wx.GBPosition(0, 12), wx.GBSpan(1, 1), wx.EXPAND | wx.ALL, 15)
         LayoutButtonPanel.Add((0, 0), wx.GBPosition(0, 13), wx.GBSpan(1, 1), wx.EXPAND | wx.ALL, 10)
         LayoutButtonPanel.Add((0, 0), wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.EXPAND | wx.ALL, 10)
-        LayoutButtonPanel.Add(markerSideLabel, wx.GBPosition(1, 1), wx.GBSpan(1, 3), wx.EXPAND | wx.ALL, 15)
-        LayoutButtonPanel.Add(self.markerSideEntry, wx.GBPosition(1, 4), wx.GBSpan(1, 1), wx.EXPAND | wx.ALL, 15)
-        LayoutButtonPanel.Add((0, 0), wx.GBPosition(1, 5), wx.GBSpan(1, 9), wx.EXPAND | wx.ALL, 10)
+        LayoutButtonPanel.Add(self.motionThresholdCheckbox, wx.GBPosition(1, 1), wx.GBSpan(1, 3), wx.EXPAND | wx.ALL, 15)
+        LayoutButtonPanel.Add(self.motionThresholdEntry, wx.GBPosition(1, 4), wx.GBSpan(1, 1), wx.EXPAND | wx.ALL, 15)
+        LayoutButtonPanel.Add(self.motionThresholdSlider, wx.GBPosition(1, 5), wx.GBSpan(1, 5), wx.EXPAND | wx.ALL, 15)
+        LayoutButtonPanel.Add((0, 0), wx.GBPosition(1, 10), wx.GBSpan(1, 4), wx.EXPAND | wx.ALL, 10)
+        LayoutButtonPanel.Add((0, 0), wx.GBPosition(2, 0), wx.GBSpan(1, 1), wx.EXPAND | wx.ALL, 10)
+        LayoutButtonPanel.Add(markerSideLabel, wx.GBPosition(2, 1), wx.GBSpan(1, 3), wx.EXPAND | wx.ALL, 15)
+        LayoutButtonPanel.Add(self.markerSideEntry, wx.GBPosition(2, 4), wx.GBSpan(1, 1), wx.EXPAND | wx.ALL, 15)
+        LayoutButtonPanel.Add((0, 0), wx.GBPosition(2, 5), wx.GBSpan(1, 9), wx.EXPAND | wx.ALL, 10)
 
         self.calibrationButtonsPanel.SetSizer(LayoutButtonPanel)
         LayoutButtonPanel.Fit(self.calibrationButtonsPanel)
@@ -184,7 +209,8 @@ class Calibration(wx.Panel):
         self.instructionText.SetForegroundColour(self.faintWhite)
         self.instructionText.Wrap(280)
         #self.instructionText.SetMinSize((-1, 20))
-        self.instructionImage = wx.Panel(self.instructionPanel, -1)
+        #self.instructionImage = wx.Panel(self.instructionPanel, -1)
+        self.instructionImage = wx.StaticBitmap(self.instructionPanel, -1, wx.NullBitmap)
         self.instructionImage.SetMinSize((300, 300))
         self.instructionImage.SetBackgroundColour(wx.BLACK)
 
@@ -205,6 +231,25 @@ class Calibration(wx.Panel):
 
         self.updateCameraAliasList()
 
+    def scaleImage(self, imageBitmap, imageSize):
+        image = wx.Bitmap.ConvertToImage(imageBitmap)
+        image = image.Scale(imageSize[0], imageSize[1], wx.IMAGE_QUALITY_HIGH)
+        return wx.Bitmap(image)
+
+    def motionThresholdSliderChanged(self, event):
+        value = self.motionThresholdSlider.GetValue()
+        value = 0.1 * value
+        self.motionThresholdEntry.SetValue("{:.1f}".format(value))
+
+    def motionThresholdCheckboxChanged(self, event):
+        if(self.motionThresholdCheckbox.GetValue()):
+            self.motionThresholdSlider.Enable(True)
+            self.motionDetectorFeedOn = True
+        else:
+            self.motionThresholdSlider.Enable(False)
+            self.motionDetectorFeedOn = False
+        pass
+
     def calibrateSaveButtonClicked(self, event):
         cameraID = self.cameraList[self.cameraAliasEntry.GetValue()]
         calibrationData = {
@@ -212,16 +257,21 @@ class Calibration(wx.Panel):
             'worldRatio': self.calibrater.worldRatio
         }
 
+        motionDetectorThreshold = float(self.motionThresholdEntry.GetValue())
+
         self.cameraDatabase[cameraID]['cameraStatus']['calibAvailable'] = True
         self.cameraDatabase[cameraID]['CalibrationData'] = calibrationData
+        self.cameraDatabase[cameraID]['motionDetectorThreshold'] = motionDetectorThreshold
 
         with open("cameraDatabase.json", 'w') as jsonFile:
             json.dump(self.cameraDatabase,jsonFile,sort_keys=True, indent=4)
 
         self.calibrateSaveButton.Enable(False)
+        return event
 
     def cameraAliasEntryChanged(self, event):
         if (not self.cameraAliasEntry.GetSelection() is wx.NOT_FOUND):
+            self.motionThresholdCheckbox.Enable(True)
             #if(self.cameraDatabase[self.cameraAliasEntry.ge])
             self.feedPlaying = True
             self.instructionStatus = - 1
@@ -234,6 +284,8 @@ class Calibration(wx.Panel):
                 self.calibrater.calibrationDone = 1
             else:
                 self.calibrater.calibrationDone = 0
+        else:
+            self.motionThresholdCheckbox.Enable(False)
 
 
     def updateCameraAliasList(self):
@@ -286,18 +338,21 @@ class Calibration(wx.Panel):
                     #print(self.calibrater.calibrationLEDStatus)
                     self.instructionStatus = self.calibrater.calibrationLEDStatus
                     if (self.calibrater.calibrationLEDStatus == 0):
+                        self.instructionImage.SetBitmap(self.calibImage1)
                         self.instructionText.SetLabel(
                             "Marker Not Found! Marker is either not present or too small to detect")
                         self.instructionText.Wrap(280)
                         self.instructionPanel.Refresh()
                         self.calibrationFeedPanel.Layout()
                     elif (self.calibrater.calibrationLEDStatus == 1):
+                        self.instructionImage.SetBitmap(self.calibImage2)
                         self.instructionText.SetLabel("Wait Calibrating! Do not move the marker")
                         self.instructionText.Wrap(280)
                         self.instructionPanel.Refresh()
                         self.calibrationFeedPanel.Layout()
                     else:
                         #print("Here")
+                        self.instructionImage.SetBitmap(self.calibImage3)
                         self.instructionText.SetLabel("CALIBRATION COMPLETE! Now you can remove marker")
                         self.instructionText.Wrap(280)
                         self.instructionPanel.Refresh()
@@ -310,9 +365,20 @@ class Calibration(wx.Panel):
                 else:
                     print(self.instructionStatus)
 
-            frame = cv2.cvtColor(self.feed, cv2.COLOR_BGR2RGB)
-            tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
-            self.scaleFeed(tmpBmp)
+            if(self.motionDetectorFeedOn):
+                result, thres = self.motionDetector.detect(self.feed, float(self.motionThresholdEntry.GetValue()))
+                if(not thres is None):
+                    frame = thres
+                    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+                    tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
+                else:
+                    frame = cv2.cvtColor(self.feed, cv2.COLOR_BGR2RGB)
+                    tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
+                self.scaleFeed(tmpBmp)
+            else:
+                frame = cv2.cvtColor(self.feed, cv2.COLOR_BGR2RGB)
+                tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
+                self.scaleFeed(tmpBmp)
             self.calibrationFeed.Refresh()
 
             # check calibration LED status with calibration code
@@ -334,17 +400,20 @@ class Calibration(wx.Panel):
     def calibStartButtonClicked(self, event):
         if(self.cameraAliasEntry.GetSelection() is wx.NOT_FOUND):
             self.instructionText.SetLabel("Select a camera to calibrate")
+            self.instructionImage.SetBitmap(wx.NullBitmap)
             self.instructionText.Wrap(280)
             self.calibrationFeedPanel.Layout()
         else:
             if(self.markerSideEntry.GetValue() == ""):
                 self.instructionText.SetLabel("Enter the marker length")
+                self.instructionImage.SetBitmap(wx.NullBitmap)
                 self.instructionText.Wrap(280)
                 self.calibrationFeedPanel.Layout()
             else:
                 #self.instructionText.SetLabel("")
                 #self.instructionPanel.Layout()
                 if(self.isCalibrating):
+                    self.instructionImage.SetBitmap(wx.NullBitmap)
                     self.isCalibrating = False
                     print(self.isCalibrating)
                     self.calibrateStartButton.SetLabel("Start")
@@ -359,6 +428,7 @@ class Calibration(wx.Panel):
                     self.markerSideEntry.Enable(False)
                     self.calibrater.calibrationDone = 0
                     self.instructionStatus = -1
+        return event
 
 
 #app = wx.App()
