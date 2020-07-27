@@ -7,12 +7,14 @@ import wx.lib.platebtn as plateButtons
 
 class MyFrame1 ( wx.Panel ):
     
-    def __init__( self, parent, updateIndex):
+    def __init__( self, parent, updateIndex, mainParent):
         #wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 1182,785 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         wx.Frame.__init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size(1182, 785))
 
         self.parent = parent
+        self.mainParent = mainParent
 
+        self.maxCameras = 5
 
         self.refreshrate = 1000
         self.timer = wx.Timer(self)
@@ -403,7 +405,7 @@ class MyFrame1 ( wx.Panel ):
         m_bpButton7.SetForegroundColour(self.darkGrey)
         fgSizer.Add( m_bpButton7, 0, wx.ALIGN_CENTER|wx.ALL, 0 )
         
-        m_button8 = wx.Button( m_scrolledWindow1, wx.ID_ANY, u"Configure", wx.DefaultPosition, wx.Size( -1,34 ), wx.BU_AUTODRAW | wx.BORDER_NONE, name=name+"_configure" )
+        m_button8 = wx.Button( m_scrolledWindow1, wx.ID_ANY, u"Calibrate", wx.DefaultPosition, wx.Size( -1,34 ), wx.BU_AUTODRAW | wx.BORDER_NONE, name=name+"_configure" )
         m_button8.SetFont( wx.Font( 11, 70, 90, 90, False, wx.EmptyString ) )
         # m_button8.Bind(wx.EVT_BUTTON, lambda evt: self.configureButtonClicked(evt, m_textCtrl2.GetValue()))
         m_button8.SetForegroundColour(self.faintWhite)
@@ -420,7 +422,7 @@ class MyFrame1 ( wx.Panel ):
         return wx.Bitmap(image)
 
     def configureButtonClicked(self, event, value):
-        print(value)
+        self.mainParent.configPageCalibrateClicked(value)
         return event
 
     def controlButtonClick(self,event,updateIndex):
@@ -551,6 +553,7 @@ class MyFrame1 ( wx.Panel ):
                         "isPaused":True,
                     },
                     "CalibrationData": None,
+                    "motionDetectorThreshold": 0.0,
                     }
                 })
             with open('cameraDatabase.json','w') as jsonFile:
@@ -562,9 +565,11 @@ class MyFrame1 ( wx.Panel ):
             
     def addNewCamera(self,evt,fgSizer,window,updateIndex):
         thisCameraIndex=self.lastCameraIndex[0:4]+str(int(self.lastCameraIndex[-2:])+1).zfill(2)
-        
-        self.makeOneRow(fgSizer,window,[thisCameraIndex,"","","","","Confirm"],thisCameraIndex,True,True,0, updateIndex)
-        self.numberOfCamera=self.numberOfCamera+1
+        if(self.numberOfCamera <= self.maxCameras):
+            self.makeOneRow(fgSizer,window,[thisCameraIndex,"","","","","Confirm"],thisCameraIndex,True,True,0, updateIndex)
+            self.numberOfCamera=self.numberOfCamera+1
+        else:
+            print("Max Camera limit reached")
         window.Layout()
         return evt
         
@@ -627,7 +632,7 @@ class MyFrame1 ( wx.Panel ):
             
 
 class MyApp(wx.App):
-    def OnInit(self, updateIndex):
+    def OnInit(self, updateIndex, mainParent):
         self.frame=MyFrame1(updateIndex)
         # self.frame.Show()
 

@@ -189,7 +189,7 @@ class MainFrame(wx.Frame):
         self.Layout()
 
         self.dashboardPage = Dashboard.Dashboard(self.mainContainer)
-        self.configPage = Configuration.MyFrame1(self.mainContainer, updateIndex)
+        self.configPage = Configuration.MyFrame1(self.mainContainer, updateIndex, self)
         self.calibPage = Calibration.Calibration(self.mainContainer)
         self.loginPage = Login.Login(self.mainContainer, self)
 
@@ -311,6 +311,14 @@ class MainFrame(wx.Frame):
         self.parent.current_page = 3
         self.parent.changePage()
         return event
+
+    def configPageCalibrateClicked(self, value):
+        self.changePage(None, 3)
+        self.updateNavColors(1)
+        index = list(self.calibPage.cameraList.keys()).index(value)
+        self.calibPage.cameraAliasEntry.SetSelection(index)
+        self.calibPage.cameraAliasEntryChanged(None)
+        pass
 
 def initGUI(updateIndex):
     app = wx.App()
