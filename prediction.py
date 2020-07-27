@@ -10,6 +10,7 @@ import time
 import mysql.connector as mysql
 import _thread
 import threading 
+import gzip
 
 passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
