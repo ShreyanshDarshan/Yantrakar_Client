@@ -23,7 +23,7 @@ class Predict():
         if(isLocal):
             self.ctx = mx.gpu() if mx.context.num_gpus() else mx.cpu()
             self.net = self.get_model()
-        self.image_extension=".png"
+        self.image_extension=".jpg"
 
     def getNames(self):
         self.db.reconnect()
@@ -31,7 +31,7 @@ class Predict():
                 FROM """ + self.databaseName + """
                 WHERE process_flag=0
                 ORDER BY SUBSTRING(frameID, 7) 
-                LIMIT 3"""
+                LIMIT 2"""
         self.cursor.execute(query)
         return self.cursor.fetchall()
 
@@ -171,12 +171,14 @@ class Predict():
 locks = []
 
 def startOnePrediction(imageNames, lambda_number, lockobject):
-    print (lambda_number)
-    print("A")
-    print(imageNames)
+    # print("LAMBDA NUMBER")
+    # print (lambda_number)
+    # print("A")
+    # print(imageNames)
     model=Predict(True)
     prediction=model.predict_local(imageNames)
     model.editDatabase(prediction)
+    # print("LAMBDA "+str(lambda_number)+" PREDICTION")
     print(prediction)
     lockobject.release()
 
@@ -191,21 +193,27 @@ def create_thread(img_names, lambda_number):
     # Pass it to the newly created thread which can release the lock once done
     _thread.start_new_thread(startOnePrediction, (img_names, lambda_number, a_lock))
 
-num_lambda = 1
+num_lambda = 2
 batch_size = 1
 def beginPrediction():
+    global locks
     model=Predict(True)
     while True:
         imageNames=model.getNames()
+        # print("IMAGE NAMES")
+        # print(imageNames)
         
         if(len(imageNames)>=batch_size*num_lambda):
-            
+            locks=[]
             # print (imageNames)
             for i in range(num_lambda):
-                section = imageNames[i*num_lambda:(i+1)*num_lambda]
+                section = imageNames[i*batch_size:(i+1)*batch_size]
                 create_thread(section, i)
 
             # Acquire all the locks, which means all the threads have released the locks
             all(lock.acquire() for lock in locks)
+            
+# if __name__ == "__main__":
+#     beginPrediction()
         
 
