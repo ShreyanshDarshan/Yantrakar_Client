@@ -3,6 +3,7 @@ import Dashboard
 import Calibration
 import Configuration
 import Login
+import UserPage
 import input
 import prediction
 # import transformation
@@ -162,7 +163,7 @@ class MainFrame(wx.Frame):
         self.userNavButton.Bind(wx.EVT_ENTER_WINDOW, lambda evt: self.changeColor(evt, self.Grey, 0))
         self.userNavButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.darkGrey, 1))
         self.userNavButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.slightlyLightGrey, 0))
-        self.userNavButton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(evt, self.Grey, 1))
+        self.userNavButton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(self.changePage(evt, 5), self.Grey, 1))
         # self.userNavButton.SetFont(self.fontBold)
         self.userNavButton.SetMinSize(wx.Size(200, 50))
         # self.userNavButton.SetPressColor(self.darkGrey)
@@ -192,6 +193,7 @@ class MainFrame(wx.Frame):
         self.configPage = Configuration.MyFrame1(self.mainContainer, updateIndex, self)
         self.calibPage = Calibration.Calibration(self.mainContainer)
         self.loginPage = Login.Login(self.mainContainer, self)
+        self.userPage = UserPage.User(self.mainContainer)
 
         LayoutMainContainer = wx.BoxSizer(wx.VERTICAL)
 
@@ -199,11 +201,13 @@ class MainFrame(wx.Frame):
         LayoutMainContainer.Add(self.dashboardPage, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutMainContainer.Add(self.configPage, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutMainContainer.Add(self.calibPage, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutMainContainer.Add(self.userPage, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
 
         self.loginPage.Hide()
         self.dashboardPage.Hide()
         self.configPage.Hide()
         self.calibPage.Hide()
+        self.userPage.Hide()
 
         self.changePage(None, 0)
         self.updateNavColors(0)
@@ -258,6 +262,7 @@ class MainFrame(wx.Frame):
         self.configPage.Hide()
         self.calibPage.Hide()
         self.loginPage.Hide()
+        self.userPage.Hide()
         if(self.current_page == 1):
             self.dashboardPage.updateCameraAliasList()
             self.dashboardPage.Show(True)
@@ -270,6 +275,8 @@ class MainFrame(wx.Frame):
         elif(self.current_page == 0):
             self.loginPage.Show(True)
             self.loginPage.passwordEntry.SetValue("")
+        elif(self.current_page == 5):
+            self.userPage.Show(True)
         self.Layout()
         return event
 
@@ -286,6 +293,8 @@ class MainFrame(wx.Frame):
                 self.cameraConfigNavButton.SetBackgroundColour(self.Grey)
             elif (self.current_page == 3):
                 self.calibrationNavButton.SetBackgroundColour(self.Grey)
+            elif (self.current_page == 5):
+                self.userNavButton.SetBackgroundColour(self.Grey)
 
 
     def scaleIcons(self, iconBitmap, iconSize):
