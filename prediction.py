@@ -85,7 +85,7 @@ class Predict():
 
         print(time.time()-start)
 
-        return res.content
+        return json.loads(res.content.decode('utf-8'))
 
     def read_pics_local(self, img_names):
         imgs = []
@@ -153,7 +153,7 @@ class Predict():
                         frameID=%s"""
             values = (pointsString, name)
             self.cursor.execute(query, values)
-        self.db.commit()
+            self.db.commit()
 
 
 # if __name__ == "__main__":
@@ -181,7 +181,7 @@ def startOnePrediction(imageNames, lambda_number, lockobject):
     print(imageNames)
     model=Predict(False)
     prediction=model.predict_api(imageNames)
-    # model.editDatabase(prediction)
+    model.editDatabase(prediction)
     print("LAMBDA "+str(lambda_number)+" PREDICTION")
     print(prediction)
     lockobject.release()
