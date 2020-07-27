@@ -34,7 +34,7 @@ class MyFrame1 ( wx.Panel ):
         self.fontNormal = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.fontBold = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 
-        self.lastCameraIndex="01"
+        self.lastCameraIndex="0001"
         self.didUpdate=False
         
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
@@ -591,19 +591,19 @@ class MyFrame1 ( wx.Panel ):
     def sendUpdate(self, updateIndex):
         updateIndex.value = updateIndex.value + 1
         print ("sending update from configuration")
-        # updateFile = open("Update.txt","r")
-        # UpdateIndex = (updateFile.read())
-        # updateFile.close()
-        # updateFile = open("Update.txt","w")
-        # updateFile.write(str(UpdateIndex + 1))
-        # updateFile.close()
+        updateFile = open("Update.txt","r")
+        UpdateIndex = (updateFile.read())
+        updateFile.close()
+        updateFile = open("Update.txt","w")
+        updateFile.write(str(UpdateIndex + 1))
+        updateFile.close()
 
     def checkUpdate(self, event, updateIndex):
         if self.IsShown():
             print("checking Update")
-            # updateFile = open("Update.txt","r")
-            # self.newUpdateIndex = (updateFile.read())
-            # updateFile.close()
+            updateFile = open("Update.txt","r")
+            self.newUpdateIndex = (updateFile.read())
+            updateFile.close()
             if self.oldUpdateIndex != updateIndex.value:
                 print ("getting data")
                 self.oldUpdateIndex = updateIndex.value             

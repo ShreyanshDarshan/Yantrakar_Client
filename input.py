@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import datetime
 import mysql.connector as mysql
+import multiprocessing as mp
 import json
 # import rtsp
 
@@ -15,19 +16,21 @@ class Input():
         self.cursor=self.db.cursor()
         self.databaseName="cameraDatabaseFinal"
         self.image_extension=".png"
-        self.cameraDataProcessed={
-            # "000001":{
-            #     "url": "rtsp://shrinivas:khiste@192.168.43.100:8080/h264_pcm.sdp",
-            #     "isPaused": False,
-            #     "counter": 0
-            # },
-            "000001":{
-                "url": 0,
-                "isPaused": False,
-                "counter": 0
-            }
-        }
+        self.getDataJson()
+        # self.cameraDataProcessed={
+        #     "000001":{
+        #         "url": "rtsp://shrinivas:khiste@192.168.43.100:8080/h264_pcm.sdp",
+        #         "isPaused": False,
+        #         "counter": 0
+        #     },
+        #     "000001":{
+        #         "url": 0,
+        #         "isPaused": False,
+        #         "counter": 0
+        #     }
+        # }
         self.initialiseCameras()
+        
         
     def getDataJson(self):
         with open('cameraDatabase.json','r') as jsonFile:
@@ -36,22 +39,23 @@ class Input():
         self.cameraDataProcessed= {}
 
         for cameraKey, cameraValue in cameraData.items():
-            if(cameraValue["CalibrationData"]!=None):
-                cameraMatrix= np.array(cameraValue["CalibrationData"]["calibrationMatrix"])
-                self.cameraDataProcessed.update({
-                    cameraKey:{
-                        "username": cameraValue["cameraID"],
-                        "password": cameraValue["cameraPassword"],
-                        "IP": cameraValue["cameraIP"],
-                        "isPaused": cameraValue["cameraStatus"]["isPaused"],
-                        "counter": 0,
-                    } 
-                })
+            # if(cameraValue["CalibrationData"]!=None):
+            # cameraMatrix= np.array(cameraValue["CalibrationData"]["calibrationMatrix"])
+            self.cameraDataProcessed.update({
+                cameraKey:{
+                    "username": cameraValue["cameraID"],
+                    "password": cameraValue["cameraPassword"],
+                    "IP": cameraValue["cameraIP"],
+                    "isPaused": cameraValue["cameraStatus"]["isPaused"],
+                    "counter": 0,
+                } 
+            })
+        # print(self.cameraDataProcessed)
                 
     def initialiseCameras(self):
         self.cap={}
         for camerakey,cameraData in self.cameraDataProcessed.items():
-            self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
+            self.cap[camerakey] = cv2.VideoCapture("rtsp://" + cameraData["username"]+":"+cameraData["password"]+"@"+cameraData["IP"]) # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
@@ -70,7 +74,7 @@ class Input():
                     self.editDatabase(key+timestamp,key)
                 else:
                     self.cameraDataProcessed[key]["counter"]=self.cameraDataProcessed[key]["counter"]+1
-                if(self.cameraDataProcessed[key]["counter"]>5):
+                if(self.cameraDataProcessed[key]["counter"]>3):
                     self.cameraDataProcessed[key]["isPaused"]=True
                     # print("yo")
                     self.editJson(key,updateIndex)
@@ -93,6 +97,7 @@ class Input():
             cameraData=json.load(jsonFile)
         
         cameraData[key]["cameraStatus"]["feedAvailable"]=False
+        cameraData[key]["cameraStatus"]["isPaused"]=True
         
         with open('cameraDatabase.json','w') as jsonFile:
             json.dump(cameraData,jsonFile)
@@ -101,23 +106,23 @@ class Input():
     def sendUpdate(self, updateIndex):
         updateIndex.value += 1
         print("sending update from input.py")
-        # updateFile = open("Update.txt","r")
-        # UpdateIndex = (updateFile.read())
-        # updateFile.close()
-        # updateFile = open("Update.txt","w")
-        # updateFile.write(str(UpdateIndex + 1))
-        # updateFile.close()
+        updateFile = open("Update.txt","r")
+        UpdateIndex = (updateFile.read())
+        updateFile.close()
+        updateFile = open("Update.txt","w")
+        updateFile.write(str(int(UpdateIndex) + 1))
+        updateFile.close()
 
 
 # if __name__ == "__main__":
+#     updateIndex = mp.Value('i', 0)
 def beginInput(updateIndex):
     input=Input()
-    print (input.cameraDataProcessed)
     oldUpdateIndex = updateIndex.value
     while(True):
         if updateIndex.value != oldUpdateIndex:
             print("getting json data in input.py")
-        #     input.getDataJson()
+            input.getDataJson()
         oldUpdateIndex = updateIndex.value
         input.getFrames(updateIndex)   
         cv2.waitKey(500)
