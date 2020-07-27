@@ -21,11 +21,11 @@ class Predict():
         self.db = mysql.connect(
             host="localhost", user="root", passwd=mysql_pass, database="test")
         self.cursor = self.db.cursor()
-        self.databaseName = "cameraDatabaseFinal7"
+        self.databaseName = "cameraDatabaseFinal"
         if(isLocal):
             self.ctx = mx.gpu() if mx.context.num_gpus() else mx.cpu()
             self.net = self.get_model()
-        self.image_extension=".jpg"
+        self.image_extension=".png"
 
     def getNames(self):
         self.db.reconnect()
@@ -109,7 +109,7 @@ class Predict():
 
         x = self.read_pics_local(img_names)
 
-        # net = get_model()
+        # net = self.get_model() 
 
         idx, prob, bbox = self.net(x)
         idx = idx.asnumpy()
@@ -179,9 +179,9 @@ def startOnePrediction(imageNames, lambda_number, lockobject):
     # print (lambda_number)
     # print("A")
     print(imageNames)
-    model=Predict(False)
-    prediction=model.predict_api(imageNames)
-    # model.editDatabase(prediction)
+    model=Predict(True)
+    prediction=model.predict_local(imageNames)
+    model.editDatabase(prediction)
     print("LAMBDA "+str(lambda_number)+" PREDICTION")
     print(prediction)
     lockobject.release()
@@ -197,8 +197,8 @@ def create_thread(img_names, lambda_number):
     # Pass it to the newly created thread which can release the lock once done
     _thread.start_new_thread(startOnePrediction, (img_names, lambda_number, a_lock))
 
-num_lambda = 2
-batch_size = 3
+num_lambda = 1
+batch_size = 1
 def beginPrediction():
     global locks
     model=Predict(True)
