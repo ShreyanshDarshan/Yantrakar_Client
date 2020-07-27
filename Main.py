@@ -5,7 +5,7 @@ import Configuration
 import Login
 import input
 import prediction
-import transformation
+# import transformation
 import os
 import multiprocessing as mp
 import _thread
@@ -327,12 +327,21 @@ def initGUI(updateIndex):
 
 if __name__ == '__main__':
     updateIndex = mp.Value('i', 0)
-    GUI = mp.Process(target=initGUI, args=(updateIndex,))
-    #Input = mp.Process(target=input.beginInput, args=(updateIndex,))
-    #Predict = _thread.start_new_thread(prediction.beginPrediction, ())
-    #Transform = mp.Process(target=transformation.beginTransformation, args=(updateIndex,))
-    GUI.start()
-    #Input.start()
-    #Transform.start()
-    # Predict = mp.Process(target=prediction.beginPrediction)
-    # Predict.start()
+    with mp.Manager() as manager:
+        shared_images = manager.list()
+        Input = mp.Process(target=input.beginInput, args=(updateIndex, shared_images))
+        Predict = mp.Process(target=prediction.beginPrediction, args=(shared_images,))
+        # Predict = _thread.start_new_thread(prediction.beginPrediction, ())
+        GUI = mp.Process(target=initGUI, args=(updateIndex,))
+        # Transform = mp.Process(target=transformation.beginTransformation, args=(updateIndex,))
+        GUI.start()
+        Input.start()
+        Predict.start()
+        # Transform.start()
+
+        print ("ajajajjajajjajajjjajajja")
+
+
+        while True:
+            # print(shared_images)
+            i=1
