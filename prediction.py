@@ -177,50 +177,60 @@ class Predict():
 
 locks = []
 
-def startOnePrediction(imageNames, lambda_number, lockobject):
+def startOnePrediction(imageNamesBuffer, lambda_number):
     # print("LAMBDA NUMBER")
     # print (lambda_number)
     # print("A")
-    print(imageNames)
-    model=Predict(True)
-    prediction=model.predict_local(imageNames)
-    model.editDatabase(prediction)
-    print("LAMBDA "+str(lambda_number)+" PREDICTION")
-    print(prediction)
+    while True:
+        num_img = len(imageNamesBuffer)
+        if (num_img > min_batch_size):
+            imageNames = imageNamesBuffer[0:min(batch_size, num_img)]
+            del imageNamesBuffer[0:min(batch_size, num_img)]
+            print(imageNames)
+            model=Predict(True)
+            prediction=model.predict_local(imageNames)
+            model.editDatabase(prediction)
+            print("LAMBDA "+str(lambda_number)+" PREDICTION")
+            print(prediction)
     # transformation.beginTransformation(updateIndex)
-    lockobject.release()
+    # lockobject.release()
 
 def create_thread(img_names, lambda_number):
     # Create a lock and acquire it
-    a_lock = _thread.allocate_lock()
-    a_lock.acquire()
+    # a_lock = _thread.allocate_lock()
+    # a_lock.acquire()
 
     # Store it in the global locks list
-    locks.append(a_lock)
+    # locks.append(a_lock)
 
     # Pass it to the newly created thread which can release the lock once done
-    _thread.start_new_thread(startOnePrediction, (img_names, lambda_number, a_lock))
+    _thread.start_new_thread(startOnePrediction, (img_names, lambda_number))
 
-num_lambda = 1
-batch_size = 1
+num_lambda = 2
+batch_size = 2
+min_batch_size = 1
 def beginPrediction(shared_images):
     global locks
     model=Predict(True)
+    thread_buffers = [[]]*num_lambda
+    for i in range(num_lambda):
+        create_thread(thread_buffers[i], i)
+
     while True:
+        len_img = len(shared_images)
+        # print("IMAGE NAMES")
+        # print(shared_images)
+        for i in range(num_lambda):
+            thread_buffers[i].extend(shared_images[int(i*(len_img/num_lambda)):int((i+1)*(len_img/num_lambda))])
         # imageNames=model.getNames()
-        imageNames=shared_images
-        print("IMAGE NAMES")
-        print(imageNames)
+        del shared_images[0:int(num_lambda*(len_img/num_lambda))]
         
-        if(len(imageNames)>=batch_size*num_lambda and imageNames):
-            locks=[]
+        # if(len(imageNames)>=batch_size*num_lambda and imageNames):
+            # locks=[]
             # print (imageNames)
-            for i in range(num_lambda):
-                section = imageNames[i*batch_size:(i+1)*batch_size]
-                create_thread(section, i)
 
             # Acquire all the locks, which means all the threads have released the locks
-            all(lock.acquire() for lock in locks)
+            # all(lock.acquire() for lock in locks)
             
 if __name__ == "__main__":
     beginPrediction()
