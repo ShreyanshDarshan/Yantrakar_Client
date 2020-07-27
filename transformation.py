@@ -54,14 +54,14 @@ class Transformation():
         self.cursor.execute(query)
         self.db.commit()
         
-    def printAllData(self):
-        self.db.reconnect()
-        query="""SELECT *
-                FROM """+self.databaseName+""" 
-                LIMIT 40"""
-        self.cursor.execute(query)
+    # def printAllData(self):
+    #     self.db.reconnect()
+    #     query="""SELECT *
+    #             FROM """+self.databaseName+""" 
+    #             LIMIT 40"""
+    #     self.cursor.execute(query)
         
-        print(self.cursor.fetchall())
+    #     print(self.cursor.fetchall())
     
     def getDataDatabase(self):
         self.db.reconnect()
@@ -87,6 +87,9 @@ class Transformation():
                 dbDataItem[1]: points
             })
     
+    def getDataSharedMemory(self, ):
+        i=1
+
     def getDataJson(self):
         with open('cameraDatabase.json','r') as jsonFile:
             cameraData=json.load(jsonFile)

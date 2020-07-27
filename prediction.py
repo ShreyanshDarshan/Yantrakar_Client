@@ -11,6 +11,8 @@ import mysql.connector as mysql
 import _thread
 import threading 
 import gzip
+import transformation
+import os
 
 passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
@@ -91,8 +93,9 @@ class Predict():
         imgs = []
         # print (img_names)
         for name in img_names:
+            # if os.path.isfile('./FRAMES/'+name[0]+self.image_extension) :
             im = Image.open(
-                './FRAMES/'+name[0]+self.image_extension)
+                './FRAMES/'+name+self.image_extension)
             im = (np.array(im)).reshape(256, 256, 3)
             imgs.append(im)
 
@@ -184,6 +187,7 @@ def startOnePrediction(imageNames, lambda_number, lockobject):
     model.editDatabase(prediction)
     print("LAMBDA "+str(lambda_number)+" PREDICTION")
     print(prediction)
+    # transformation.beginTransformation(updateIndex)
     lockobject.release()
 
 def create_thread(img_names, lambda_number):
@@ -199,15 +203,16 @@ def create_thread(img_names, lambda_number):
 
 num_lambda = 1
 batch_size = 1
-def beginPrediction():
+def beginPrediction(shared_images):
     global locks
     model=Predict(True)
     while True:
-        imageNames=model.getNames()
-        # print("IMAGE NAMES")
-        # print(imageNames)
+        # imageNames=model.getNames()
+        imageNames=shared_images
+        print("IMAGE NAMES")
+        print(imageNames)
         
-        if(len(imageNames)>=batch_size*num_lambda):
+        if(len(imageNames)>=batch_size*num_lambda and imageNames):
             locks=[]
             # print (imageNames)
             for i in range(num_lambda):

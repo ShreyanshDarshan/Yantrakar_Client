@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import mysql.connector as mysql
 import json
+import pandas as pd
 # import rtsp
 
 passFile = open("pass.txt","r")
@@ -56,7 +57,7 @@ class Input():
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             
-    def getFrames(self,updateIndex):
+    def getFrames(self,updateIndex,sharedMem):
         time=datetime.datetime.now()
         timestamp=str(time.day).zfill(2)+str(time.hour).zfill(2)+str(time.minute).zfill(2)+str(time.second).zfill(2)+str(time.microsecond)[0:3]
         for key,camera in self.cap.items():
@@ -67,7 +68,7 @@ class Input():
                     cv2.imwrite("./FRAMES/"+key+timestamp+self.image_extension,frame)
                     # cv2.imshow("img",frame)
                     self.cameraDataProcessed[key]["counter"]=0
-                    self.editDatabase(key+timestamp,key)
+                    self.editSheredMemory(key+timestamp,sharedMem)
                 else:
                     self.cameraDataProcessed[key]["counter"]=self.cameraDataProcessed[key]["counter"]+1
                 if(self.cameraDataProcessed[key]["counter"]>5):
@@ -75,18 +76,21 @@ class Input():
                     # print("yo")
                     self.editJson(key,updateIndex)
     
-    def editDatabase(self,frameID,cameraID):
-        self.db.reconnect()
-        query= """INSERT INTO """ +self.databaseName +"""
-                (cameraId, 
-                frameID, 
-                process_flag,
-                coordinates, 
-                violations) 
-                VALUES (%s,%s,%s,%s,%s)"""
-        values=(cameraID,frameID,0,None,None)
-        self.cursor.execute(query,values)
-        self.db.commit()
+    # def editDatabase(self,frameID,cameraID):
+    #     self.db.reconnect()
+    #     query= """INSERT INTO """ +self.databaseName +"""
+    #             (cameraId, 
+    #             frameID, 
+    #             process_flag,
+    #             coordinates, 
+    #             violations) 
+    #             VALUES (%s,%s,%s,%s,%s)"""
+    #     values=(cameraID,frameID,0,None,None)
+    #     self.cursor.execute(query,values)
+    #     self.db.commit()
+
+    def editSheredMemory (self, frameID, sharedMem):
+        sharedMem.append(frameID)
 
     def editJson(self,key,updateIndex):
         with open('cameraDatabase.json','r') as jsonFile:
@@ -110,7 +114,7 @@ class Input():
 
 
 # if __name__ == "__main__":
-def beginInput(updateIndex):
+def beginInput(updateIndex, shared_images):
     input=Input()
     print (input.cameraDataProcessed)
     oldUpdateIndex = updateIndex.value
@@ -119,7 +123,7 @@ def beginInput(updateIndex):
             print("getting json data in input.py")
         #     input.getDataJson()
         oldUpdateIndex = updateIndex.value
-        input.getFrames(updateIndex)   
+        input.getFrames(updateIndex, shared_images)   
         cv2.waitKey(500)
         
 # up = 0
