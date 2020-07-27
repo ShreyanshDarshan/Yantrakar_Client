@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import mysql.connector as mysql
 import json
+import rtsp
 
 passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
@@ -50,7 +51,7 @@ class Input():
     def initialiseCameras(self):
         self.cap={}
         for camerakey,cameraData in self.cameraDataProcessed.items():
-            self.cap[camerakey] = cv2.VideoCapture("./test_video/cctvhigh.mp4") # cv2.VideoCapture(cameraData["url"])
+            self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
@@ -98,7 +99,7 @@ class Input():
             self.sendUpdate(updateIndex)
 
     def sendUpdate(self, updateIndex):
-        updateIndex += 1
+        updateIndex.value += 1
         print("sending update from input.py")
         # updateFile = open("Update.txt","r")
         # UpdateIndex = (updateFile.read())
@@ -112,14 +113,14 @@ class Input():
 def beginInput(updateIndex):
     input=Input()
     print (input.cameraDataProcessed)
-    oldUpdateIndex = updateIndex
+    oldUpdateIndex = updateIndex.value
     while(True):
-        if updateIndex != oldUpdateIndex:
+        if updateIndex.value != oldUpdateIndex:
             print("getting json data in input.py")
         #     input.getDataJson()
-        oldUpdateIndex = updateIndex
+        oldUpdateIndex = updateIndex.value
         input.getFrames(updateIndex)   
-        cv2.waitKey(1000)
+        cv2.waitKey(300)
         
 # up = 0
 # beginInput(up)

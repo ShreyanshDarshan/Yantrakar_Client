@@ -20,7 +20,7 @@ class MyFrame1 ( wx.Panel ):
         # self.Bind(wx.EVT_TIMER, self.checkUpdate)
         self.Bind(wx.EVT_TIMER, lambda evt: self.checkUpdate(evt, updateIndex))
 
-        self.oldUpdateIndex = updateIndex
+        self.oldUpdateIndex = updateIndex.value
         self.newUpdateIndex = 0
 
         self.darkOrange = wx.Colour(255, 191, 0)
@@ -110,7 +110,7 @@ class MyFrame1 ( wx.Panel ):
         self.m_button1.Bind(wx.EVT_ENTER_WINDOW,lambda evt:  self.changeColor(evt, self.slightlyLightGrey))
         self.m_button1.Bind(wx.EVT_LEAVE_WINDOW,lambda evt:  self.changeColor(evt, self.darkGrey))
         self.m_button1.Bind(wx.EVT_LEFT_DOWN, lambda evt:  self.changeColor(evt, self.lightGrey))
-        self.m_button1.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.addNewCamera(evt,fgSizer4,self.m_scrolledWindow1), self.slightlyLightGrey))
+        self.m_button1.Bind(wx.EVT_LEFT_UP, lambda evt:  self.changeColor(self.addNewCamera(evt,fgSizer4,self.m_scrolledWindow1, updateIndex), self.slightlyLightGrey))
         
         bSizer6.Add( self.m_button1, 0, wx.ALL, 5 )
         
@@ -243,7 +243,7 @@ class MyFrame1 ( wx.Panel ):
         fgSizer4.Add( self.m_staticText10, 2, wx.ALIGN_CENTER|wx.ALL, 5 )
         
         #The First Input
-        self.addData(fgSizer4,self.m_scrolledWindow1)
+        self.addData(fgSizer4,self.m_scrolledWindow1, updateIndex)
         
         self.m_scrolledWindow1.SetSizer( fgSizer4 )
         self.m_scrolledWindow1.Layout()
@@ -304,7 +304,7 @@ class MyFrame1 ( wx.Panel ):
 
         return event
 
-    def makeOneRow(self,fgSizer,m_scrolledWindow1,InputData,name,canEdit,isPause,status):
+    def makeOneRow(self,fgSizer,m_scrolledWindow1,InputData,name,canEdit,isPause,status, updateIndex):
         m_textCtrl0 = wx.TextCtrl( m_scrolledWindow1, wx.ID_ANY, str(self.numberOfCamera), wx.DefaultPosition, wx.Size( -1,-1 ), style=wx.BORDER_NONE | wx.TE_CENTER,name=name+"_number" )
         m_textCtrl0.SetFont( wx.Font( 12, 70, 90, 90, False, wx.EmptyString ) )
         m_textCtrl0.SetMinSize( wx.Size( 35,-1 ) )
@@ -560,15 +560,15 @@ class MyFrame1 ( wx.Panel ):
             self.didUpdate=True
         return event
             
-    def addNewCamera(self,evt,fgSizer,window):
+    def addNewCamera(self,evt,fgSizer,window,updateIndex):
         thisCameraIndex=self.lastCameraIndex[0:4]+str(int(self.lastCameraIndex[-2:])+1).zfill(2)
         
-        self.makeOneRow(fgSizer,window,[thisCameraIndex,"","","","","Confirm"],thisCameraIndex,True,True,0)
+        self.makeOneRow(fgSizer,window,[thisCameraIndex,"","","","","Confirm"],thisCameraIndex,True,True,0, updateIndex)
         self.numberOfCamera=self.numberOfCamera+1
         window.Layout()
         return evt
         
-    def addData(self,fgSizer,window):
+    def addData(self,fgSizer,window, updateIndex):
         with open('cameraDatabase.json','r') as jsonFile:
             data=json.load(jsonFile)
             cameras=data.items()
@@ -581,7 +581,7 @@ class MyFrame1 ( wx.Panel ):
                     status=1
                 else:
                     status=0
-                self.makeOneRow(fgSizer,window,[camera[0],camera[1]["cameraAlias"],camera[1]["cameraID"],camera[1]["cameraIP"],camera[1]["cameraPassword"],"Edit"],camera[0],False,camera[1]["cameraStatus"]["isPaused"],status)
+                self.makeOneRow(fgSizer,window,[camera[0],camera[1]["cameraAlias"],camera[1]["cameraID"],camera[1]["cameraIP"],camera[1]["cameraPassword"],"Edit"],camera[0],False,camera[1]["cameraStatus"]["isPaused"],status, updateIndex)
                 self.numberOfCamera=self.numberOfCamera+1
                 self.lastCameraIndex=camera[0]
     
@@ -589,7 +589,7 @@ class MyFrame1 ( wx.Panel ):
         event.GetEventObject().SetBackgroundColour(newcolor)
 
     def sendUpdate(self, updateIndex):
-        updateIndex += 1
+        updateIndex.value = updateIndex.value + 1
         print ("sending update from configuration")
         # updateFile = open("Update.txt","r")
         # UpdateIndex = (updateFile.read())
@@ -604,9 +604,9 @@ class MyFrame1 ( wx.Panel ):
             # updateFile = open("Update.txt","r")
             # self.newUpdateIndex = (updateFile.read())
             # updateFile.close()
-            if self.oldUpdateIndex != updateIndex:
+            if self.oldUpdateIndex != updateIndex.value:
                 print ("getting data")
-                self.oldUpdateIndex = updateIndex             
+                self.oldUpdateIndex = updateIndex.value             
                 self.changeStatus()
             self.timer.Start(self.refreshrate)
             
