@@ -120,7 +120,7 @@ def beginInput(updateIndex):
         #     input.getDataJson()
         oldUpdateIndex = updateIndex.value
         input.getFrames(updateIndex)   
-        cv2.waitKey(300)
+        cv2.waitKey(500)
         
 # up = 0
 # beginInput(up)

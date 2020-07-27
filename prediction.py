@@ -8,6 +8,7 @@ import pickle
 import base64
 import time
 import mysql.connector as mysql
+import _thread
 
 passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
@@ -166,12 +167,45 @@ class Predict():
 #     # model.editDatabase(prediction)
 #     print(prediction)
 
+
+locks = []
+
+def startOnePrediction(imageNames, lambda_number, lockobject):
+    print (lambda_number)
+    print("A")
+    print(imageNames)
+    model=Predict(True)
+    prediction=model.predict_local(imageNames)
+    model.editDatabase(prediction)
+    print(prediction)
+    lockobject.release()
+
+def create_thread(img_names, lambda_number):
+    # Create a lock and acquire it
+    a_lock = _thread.allocate_lock()
+    a_lock.acquire()
+
+    # Store it in the global locks list
+    locks.append(a_lock)
+
+    # Pass it to the newly created thread which can release the lock once done
+    _thread.start_new_thread(startOnePrediction, (img_names, lambda_number, a_lock))
+
+num_lambda = 1
+batch_size = 1
 def beginPrediction():
     model=Predict(True)
     while True:
         imageNames=model.getNames()
-        print (imageNames)
-        if(len(imageNames)>0):
-            prediction=model.predict_local(imageNames)
-            model.editDatabase(prediction)
-            print(prediction)
+        
+        if(len(imageNames)>=batch_size*num_lambda):
+            
+            # print (imageNames)
+            for i in range(num_lambda):
+                section = imageNames[i*num_lambda:(i+1)*num_lambda]
+                create_thread(section, i)
+
+            # Acquire all the locks, which means all the threads have released the locks
+            all(lock.acquire() for lock in locks)
+        
+

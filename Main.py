@@ -319,12 +319,12 @@ def initGUI(updateIndex):
 
 if __name__ == '__main__':
     updateIndex = mp.Value('i', 0)
+    Predict = _thread.start_new_thread(prediction.beginPrediction, ())
     GUI = mp.Process(target=initGUI, args=(updateIndex,))
     Input = mp.Process(target=input.beginInput, args=(updateIndex,))
-    Predict = _thread.start_new_thread(prediction.beginPrediction, ())
+    # Predict = mp.Process(target=prediction.beginPrediction)
     Transform = mp.Process(target=transformation.beginTransformation, args=(updateIndex,))
     GUI.start()
     Input.start()
-    Transform.start()
-    # Predict = mp.Process(target=prediction.beginPrediction)
     # Predict.start()
+    Transform.start()
