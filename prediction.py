@@ -9,6 +9,7 @@ import base64
 import time
 import mysql.connector as mysql
 import _thread
+import threading 
 
 passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
@@ -19,7 +20,7 @@ class Predict():
         self.db = mysql.connect(
             host="localhost", user="root", passwd=mysql_pass, database="test")
         self.cursor = self.db.cursor()
-        self.databaseName = "cameraDatabaseFinal"
+        self.databaseName = "cameraDatabaseFinal7"
         if(isLocal):
             self.ctx = mx.gpu() if mx.context.num_gpus() else mx.cpu()
             self.net = self.get_model()
@@ -31,10 +32,10 @@ class Predict():
                 FROM """ + self.databaseName + """
                 WHERE process_flag=0
                 ORDER BY SUBSTRING(frameID, 7) 
-                LIMIT 2"""
+                LIMIT 6"""
         self.cursor.execute(query)
         return self.cursor.fetchall()
-
+    
     def read_pics_api(self, img_names):
         imgs = []
 
@@ -44,6 +45,46 @@ class Predict():
             imgs.append(im)
 
         return imgs
+    
+    def predict_api(self, imageNames):
+        # """file = open('/home/karan/conv/foo.b64', 'rb')
+
+        # temp = file.read()
+
+        # """
+        imgs = self.read_pics_api(imageNames)
+
+        l = []
+
+        print(len(imgs))
+
+        for i in range(len(imgs)):
+
+            dictionary = {}
+            dictionary['name'] = imageNames[i][0]
+
+            dictionary['data'] = [imgs[i]]
+
+            l.append(dictionary)
+
+        temp = pickle.dumps(l)
+        temp = base64.b64encode(temp)
+        temp = gzip.compress(temp)
+
+        # """with open("imgs.gz", "wb") as f:
+        #     f.write(temp)"""
+
+        start = time.time()
+
+        api_endpoint = "https://edh5g0f8h3.execute-api.ap-south-1.amazonaws.com/default/mxnet4"
+
+        headers = {'content-encoding': 'gzip'}
+
+        res = requests.post(url=api_endpoint, data=temp, headers=headers)
+
+        print(time.time()-start)
+
+        return res.content
 
     def read_pics_local(self, img_names):
         imgs = []
@@ -62,44 +103,6 @@ class Predict():
         net = gluon.nn.SymbolBlock.imports("new_ssd_512_mobilenet1.0_voc-symbol.json", [
                                            'data'], "new_ssd_512_mobilenet1.0_voc-0000.params", ctx=self.ctx)
         return net
-
-    def predict_api(self, imageNames):
-        """file = open('/home/karan/conv/foo.b64', 'rb')
-
-        temp = file.read()
-
-        """
-        imgs = self.read_pics_api(imageNames)
-
-        l = []
-
-        print(len(imgs))
-
-        for i in range(len(imgs)):
-
-            dictionary = {}
-            dictionary['name'] = imageNames[i]
-
-            dictionary['data'] = [imgs[i]]
-
-            l.append(dictionary)
-
-        temp = pickle.dumps(l)
-        temp = base64.b64encode(temp)
-
-        start = time.time()
-
-        api_endpoint = "https://cmmj1ivdoe.execute-api.us-east-1.amazonaws.com/default/mxnet-model"
-
-        #api_endpoint = "https://z2tegdgan1.execute-api.ap-south-1.amazonaws.com/v1/post-json"
-
-        headers = {}
-
-        res = requests.post(url=api_endpoint, data=temp, headers=headers)
-
-        print(time.time()-start)
-
-        return res.content
 
     def predict_local(self, img_names):
 
@@ -174,11 +177,11 @@ def startOnePrediction(imageNames, lambda_number, lockobject):
     # print("LAMBDA NUMBER")
     # print (lambda_number)
     # print("A")
-    # print(imageNames)
-    model=Predict(True)
-    prediction=model.predict_local(imageNames)
-    model.editDatabase(prediction)
-    # print("LAMBDA "+str(lambda_number)+" PREDICTION")
+    print(imageNames)
+    model=Predict(False)
+    prediction=model.predict_api(imageNames)
+    # model.editDatabase(prediction)
+    print("LAMBDA "+str(lambda_number)+" PREDICTION")
     print(prediction)
     lockobject.release()
 
@@ -194,7 +197,7 @@ def create_thread(img_names, lambda_number):
     _thread.start_new_thread(startOnePrediction, (img_names, lambda_number, a_lock))
 
 num_lambda = 2
-batch_size = 1
+batch_size = 3
 def beginPrediction():
     global locks
     model=Predict(True)
@@ -213,7 +216,7 @@ def beginPrediction():
             # Acquire all the locks, which means all the threads have released the locks
             all(lock.acquire() for lock in locks)
             
-# if __name__ == "__main__":
-#     beginPrediction()
+if __name__ == "__main__":
+    beginPrediction()
         
 

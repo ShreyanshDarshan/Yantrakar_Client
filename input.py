@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import mysql.connector as mysql
 import json
-import rtsp
+# import rtsp
 
 passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
