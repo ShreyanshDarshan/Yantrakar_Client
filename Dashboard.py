@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 # import mysql.connector as mysql
+import pandas as pd
 
 passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
@@ -23,6 +24,8 @@ class DashboardGallerySlide(wx.Panel):
         self.color1 = color1
         self.color2 = color2
         self.color3 = color3
+
+        self.imageBitmap = wx.Bitmap(wx.NullBitmap)
         #print("SLIDER SIZE")
         #print(size)
         super(DashboardGallerySlide, self).__init__(parent, -1, size=(self.size[0], -1), pos=wx.DefaultPosition)
@@ -37,7 +40,7 @@ class DashboardGallerySlide(wx.Panel):
 
         #self.SetFont(wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
 
-        self.slideImagePanel = wx.Panel(self, -1)
+        self.slideImagePanel = wx.StaticBitmap(self, -1)
         self.slideImagePanel.SetBackgroundColour(self.color2)
         self.slideDetailsPanel = wx.Panel(self, -1)
         self.slideDetailsPanel.SetBackgroundColour(self.color2)
@@ -79,18 +82,37 @@ class DashboardGallerySlide(wx.Panel):
         LayoutSlide.Fit(self)
         self.Layout()
 
-        self.imageBitmap = wx.Bitmap(self.image, wx.BITMAP_TYPE_ANY)
+        if (self.image is None):
+            self.imageBitmap = wx.Bitmap(wx.NullBitmap)
+        else:
+            self.imageBitmap = wx.Bitmap(self.image, wx.BITMAP_TYPE_ANY)
 
         wx.CallAfter(self.addImage)
 
+    def changeImage(self, newImg):
+        self.image = newImg
+        if (self.image is None):
+            self.imageBitmap = wx.Bitmap(wx.NullBitmap)
+            self.slideImagePanel.SetBitmap(self.imageBitmap)
+        else:
+            self.imageBitmap = wx.Bitmap(self.image, wx.BITMAP_TYPE_ANY)
+            self.scaleImage()
+            self.slideImagePanel.SetBitmap(self.imageBitmap)
+
     def addImage(self):
-        self.scaleImage()
-        self.imageBitmapView = wx.StaticBitmap(self.slideImagePanel, -1, self.imageBitmap)
+        if (self.image is None):
+            # if(self.imageBitmap == wx.NullBitmap):
+            # self.imageBitmapView = wx.StaticBitmap(self.slideImagePanel, -1, self.imageBitmap)
+            self.slideImagePanel.SetBitmap(self.imageBitmap)
+        else:
+            self.scaleImage()
+            # self.imageBitmapView = wx.StaticBitmap(self.slideImagePanel, -1, self.imageBitmap)
+            self.slideImagePanel.SetBitmap(self.imageBitmap)
 
     def scaleImage(self):
         image = wx.Bitmap.ConvertToImage(self.imageBitmap)
-        #print(self.slideImagePanel.GetSize())
-        #print(self.slideDetailsPanel.GetSize())
+        # print(self.slideImagePanel.GetSize())
+        # print(self.slideDetailsPanel.GetSize())
         image = image.Scale(self.slideImagePanel.GetSize()[0], self.slideImagePanel.GetSize()[1], wx.IMAGE_QUALITY_HIGH)
         self.imageBitmap = wx.Bitmap(image)
 
@@ -113,6 +135,9 @@ class Dashboard(wx.Panel):
         # self.databaseName = "cameraDatabaseFinal"
 
         self.cameraList = {}
+
+        self.galleryImageList = []
+        self.prevSliderPos = -1
 
         self.SetMinSize((1100, 750))
         self.initUI()
@@ -148,14 +173,14 @@ class Dashboard(wx.Panel):
         self.cameraAliasEntry.Append("All Cameras")
         self.cameraAliasEntry.SetSelection(0)
 
-        durationLabel = wx.StaticText(self.dashboardPanel, -1, "Duration")
+        durationLabel = wx.StaticText(self.dashboardPanel, -1, "Date")
         durationLabel.SetForegroundColour(self.faintWhite)
         self.durationEntry = wx.ComboBox(self.dashboardPanel, -1)
-        self.durationEntry.Append("All Days")
-        self.durationEntry.Append("Today")
-        self.durationEntry.Append("Last 2 days")
-        self.durationEntry.Append("Last 3 days")
-        self.durationEntry.SetSelection(0)
+        #self.durationEntry.Append("All Days")
+        #self.durationEntry.Append("Today")
+        #self.durationEntry.Append("Last 2 days")
+        #self.durationEntry.Append("Last 3 days")
+        #self.durationEntry.SetSelection(0)
 
         self.viewButton = wx.Button(self.dashboardPanel, -1, "View", wx.DefaultPosition, wx.DefaultSize, wx.BORDER_NONE)
         self.viewButton.SetForegroundColour(self.faintWhite)
@@ -274,6 +299,7 @@ class Dashboard(wx.Panel):
 
         self.updateGalleryPanel()
         self.updateCameraAliasList()
+        self.updateDurationEntry()
 
         self.gallerySlider.Bind(wx.EVT_SLIDER, self.onGallerySlider)
 
@@ -292,131 +318,87 @@ class Dashboard(wx.Panel):
         print ("can set transparent")
         print (self.CanSetTransparent())
 
-    def getImageNames(self, numberOfDays, cameraID):
-        noOfDates = 0
-        dateList = []
-        if(cameraID is None):
-            # self.db.reconnect()
-            # print("HERE")
-            # query = """SELECT frameID
-            #                 FROM """ + self.databaseName + """ 
-            #                 WHERE process_flag=2"""
-            # today = int(datetime.datetime.now().day)
-            # self.cursor.execute(query)
-            # imageNames = self.cursor.fetchall()
-            # print(imageNames)
-            # print(len(imageNames))
-            imageNames=[]
-            imagesToBeDisplayed = []
-            for names in imageNames:
-                day = int(names[0][6:8])
-                if ((not day in dateList) and (day > today - numberOfDays)):
-                    noOfDates = noOfDates + 1
-                    dateList.append(day)
-                if (day > today - numberOfDays):
-                    imagesToBeDisplayed.append(names[0])
-            return imagesToBeDisplayed, noOfDates, dateList
+    def updateDurationEntry(self):
+        for i in range(0, 5):
+            d = datetime.datetime.today() - datetime.timedelta(days=i)
+            self.durationEntry.Append(str(d.date().strftime("%d-%m-%Y")))
+        self.durationEntry.SetSelection(0)
+
+    def getImageNames(self, cameraID, day):
+        #open csv file according to day value
+        #import data from csv
+        csvData = [{'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"},
+                   {'cameraid': "000001", 'frameid': "00000128063739415"}]
+
+        df = pd.DataFrame(csvData)
+
+        stamps = []
+        if (cameraID is None):
+            stamps = df['frameid']
         else:
-            # self.db.reconnect()
-            # query = """SELECT frameID
-            #         FROM """ + self.databaseName + """ 
-            #         WHERE cameraId=%s AND process_flag=2"""
-            # today = int(datetime.datetime.now().day)
-            # values = (cameraID,)
-            # self.cursor.execute(query, values)
-            # imageNames = self.cursor.fetchall()
-            imageNames=[]
-            imagesToBeDisplayed = []
-            for names in imageNames:
-                day = int(names[0][6:8])
-                if((not day in dateList) and (day > today - numberOfDays)):
-                    noOfDates = noOfDates + 1
-                    dateList.append(day)
-                if (day > today - numberOfDays):
-                    imagesToBeDisplayed.append(names[0])
-            return imagesToBeDisplayed, noOfDates, dateList
+            stamps = df.loc[df['cameraid'] == cameraID]['frameid']
+
+        #print('DATA LENGTH')
+        #print(len(stamps))
+
+        return stamps
 
     def viewButtonClicked(self, event):
         cameraAlias = self.cameraAliasEntry.GetValue()
         cameraID = ""
-        noOfDays = 0
-        ""
-        #print(cameraAlias)
-        if(cameraAlias == "All Cameras"):
+        day = 0
+        if (cameraAlias == "All Cameras"):
             cameraID = None
         else:
             cameraID = self.cameraList[cameraAlias]
+
         duration = self.durationEntry.GetValue()
 
-        if(duration == "All Days"):
-            noOfDays = 31
-        elif(duration == 'Today'):
-            noOfDays = 1
-        else:
-            noOfDays = duration.split(' ')
-            noOfDays = int(noOfDays[1])
+        day = int(self.durationEntry.GetValue().split('-')[0])
+        print(day)
 
-        imageNameList, noOfDates, dateList = self.getImageNames(noOfDays, cameraID)
-        self.noOfSlides = len(imageNameList)
-        self.addSlides(imageNameList)
+        imageNamesList = self.getImageNames(cameraID, day)
+        self.noOfSlides = len(imageNamesList)
+        if (self.noOfSlides):
+            #self.galleryActive = True
+            self.galleryImageList = imageNamesList
+        self.addSlides(list(imageNamesList))
         self.updateGalleryPanel()
-        self.plotData(imageNameList, noOfDates, dateList)
+        self.plotData(list(imageNamesList))
         return event
 
-    #Graph with fixed time interval
-    # def plotData(self, imageNameList, noOfDates, dateList):
-    #     timeRange = 2
-    #
-    #     y = [0] * int(noOfDates * 12)
-    #     x_list = [item for item in range(1, int((noOfDates * 12) + 1))]
-    #
-    #     for img in imageNameList:
-    #         for i in range(0, int(24/timeRange)):
-    #                     if((int(i*timeRange) < int(img[8:10]) < int(i*timeRange + timeRange)) or (int(img[8:10]) == int(i*timeRange + timeRange) and int(img[10:12]) == 0) or (int(img[8:10]) == int(i*timeRange) and int(img[10:12]) > 0)):
-    #                         DateIndex = dateList.index(int(img[6:8]))
-    #                         y[int(DateIndex * (24 / timeRange) + i)] = y[int(DateIndex * (24 / timeRange) + i)] + 1
-    #                         continue
-    #
-    #     x_labels = []
-    #     for dates in dateList:
-    #         for i in range(0, int(24/timeRange)):
-    #             x_labels.append("Date:\n" + str(dates) + "\nTIME:\n" + str((i*timeRange)) + "-" + str(((i+1))*timeRange))
-    #
-    #     plt.style.use(u'dark_background')
-    #     fig = plt.figure()
-    #     plt.xticks(x_list, x_labels)
-    #     ax = plt.subplot(111)
-    #     ax.plot(x_list, y, label='$y = numbers')
-    #     plt.title('Legend inside')
-    #     ax.legend()
-    #     # plt.show()
-    #     fig.set_size_inches(15, 5)
-    #     fig.tight_layout()
-    #     fig.savefig('plot.png', transparent=True)
-    #     self.DashboardGraphPanel.SetBitmap(wx.Bitmap("plot.png"))
-    #     self.DashboardGraphPanel.Refresh()
-    #     self.Layout()
-    #     pass
-
-    # Graph with variable time interval
-    def plotData(self, imageNameList, noOfDates, dateList):
-        minTimeInterval = 1
-        timeRange = int(24 * noOfDates / (24 / minTimeInterval))
-
+    # Plot graph for a particular day
+    def plotData(self, imageNameList):
+        timeInterval = 1
         y = [0] * 24
-        x_list = [item for item in range(1, int((24 / minTimeInterval) + 1))]
+        x_list = [item for item in range(1, 25)]
 
-        for img in  imageNameList:
-            for i in range(0, int(24/timeRange)):
-                if((int(i*timeRange) < int(img[8:10]) < int(i*timeRange + timeRange)) or (int(img[8:10]) == int(i*timeRange + timeRange) and int(img[10:12]) == 0) or (int(img[8:10]) == int(i*timeRange) and int(img[10:12]) > 0)):
-                    DateIndex = dateList.index(int(img[6:8]))
-                    y[int(DateIndex * (24 / timeRange) + i)] = y[int(DateIndex * (24 / timeRange) + i)] + 1
-                    continue
+        for img in imageNameList:
+            hour = int(img[8:10])
+            if (hour == 0 and int(img[10:12]) == 0):
+                y[23] = y[23] + 1
+            else:
+                if (int(img[10:12]) == 0):
+                    y[hour - 1] = y[hour - 1] + 1
+                else:
+                    y[hour] = y[hour] + 1
 
         x_labels = []
-        for dates in dateList:
-            for i in range(0, int(24/timeRange)):
-                x_labels.append("Date:\n" + str(dates) + "\nTIME:\n" + str((i*timeRange)) + "-" + str(((i+1))*timeRange))
+        for i in range(0, 24):
+            x_labels.append("TIME:\n" + str((i)) + "-" + str(((i + 1))))
 
         plt.style.use(u'dark_background')
         fig = plt.figure()
@@ -453,13 +435,49 @@ class Dashboard(wx.Panel):
             self.durationEntry.Enable(False)
             self.viewButton.Enable(False)
 
-    def addSlides(self, imgNameList):
+    def updateSlideImages(self, value):
+        currSliderPos = int(
+            (self.gallerySlider.GetValue() / (self.dashboardGalleryView.GetSize()[0])) * self.slideSpeed + 0.5)
 
+        if((currSliderPos - self.prevSliderPos) > 0):
+            self.prevSliderPos = currSliderPos
+            deletepos = currSliderPos - 5
+            addPos = currSliderPos + 4
+
+            if(deletepos >= 0):
+                slide = self.SlidesList[deletepos]
+                slide.changeImage(None)
+                self.Layout()
+
+            if(addPos < self.noOfSlides):
+                slide = self.SlidesList[addPos]
+                slide.changeImage("FRAMES/" + list(self.galleryImageList)[addPos] + ".png")
+                self.Layout()
+            pass
+        elif((currSliderPos - self.prevSliderPos) < 0):
+            deletepos = self.prevSliderPos + 5
+            addPos = self.prevSliderPos - 3
+
+            if(deletepos < self.noOfSlides):
+                slide = self.SlidesList[deletepos]
+                slide.changeImage(None)
+                #slide.Refresh()
+                self.Layout()
+            if(addPos >= 0):
+                slide = self.SlidesList[addPos]
+                #print(list(self.galleryImageList)[addPos])
+                slide.changeImage("FRAMES/" + list(self.galleryImageList)[addPos] + ".png")
+                #slide.Refresh()
+                self.Layout()
+            self.prevSliderPos = currSliderPos
+            pass
+
+    def addSlides(self, imgNameList):
         self.isPlaying = False
         self.timer.Stop()
         self.LayoutDashboardGalleryView.Clear(True)
 
-        #for i in self.SlidesList:
+        # for i in self.SlidesList:
         #    i.Remove(self.LayoutDashboardGalleryView)
         self.SlidesList.clear()
 
@@ -469,10 +487,24 @@ class Dashboard(wx.Panel):
             cameraID = i[0:6]
             cameraAlias = list(self.cameraList.keys())[list(self.cameraList.values()).index(cameraID)]
 
-            slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "./FRAMES/" + i + ".png", time, cameraID, cameraAlias, self.lightGrey, self.darkGrey, self.white)
+            # slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(), "./FRAMES/" + i + ".png", time, cameraID, cameraAlias, self.lightGrey, self.darkGrey, self.white)
+            slide1 = DashboardGallerySlide(self.dashboardGalleryView, self.dashboardGalleryView.GetSize(),
+                                           None, time, cameraID, cameraAlias, self.lightGrey,
+                                           self.darkGrey, self.white)
             self.SlidesList.append(slide1)
             self.LayoutDashboardGalleryView.Add(slide1, wx.GBPosition(0, slideNo), wx.GBSpan(1, 1), wx.ALL, 0)
             slideNo = slideNo + 1
+
+        self.Layout()
+
+        self.prevSliderPos = 0
+        currentSliderPos = 0
+
+        for i in range(0, len(imgNameList)):
+            if (i < 5):
+                slide = self.SlidesList[i]
+                slide.changeImage("FRAMES/" + imgNameList[i] + ".png")
+
         self.Layout()
         self.timer.Start(1)
 
@@ -532,6 +564,9 @@ class Dashboard(wx.Panel):
 
     def onGallerySlider(self, event):
         val = self.gallerySlider.GetValue()
+
+        if(self.noOfSlides > 5):
+            wx.CallAfter(self.updateSlideImages, val)
 
         if(val >= self.gallerySlider.GetRange()[1]):
             self.slideshowDirection = -1

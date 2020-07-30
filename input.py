@@ -158,7 +158,7 @@ def beginInput(updateIndex, shared_images):
         input.getFrames(updateIndex, shared_images)
         
         # if(len(shared_images)>10):
-        cv2.waitKey(waitDuration)
+        cv2.waitKey(int(waitDuration))
         
 def updateWaitDuration(updateRate,currentDuration,targetDuration):
     return (1-updateRate)*currentDuration+updateRate*targetDuration
