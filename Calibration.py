@@ -5,7 +5,6 @@ import cameraCalib
 import json
 import numpy as np
 import motionDetector
-import input
 
 class Calibration(wx.Panel):
 
