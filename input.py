@@ -1,20 +1,20 @@
 import cv2
 import numpy as np
 import datetime
-import mysql.connector as mysql
+# import mysql.connector as mysql
 import json
 import pandas as pd
 # import rtsp
 
-passFile = open("pass.txt","r")
-mysql_pass = passFile.readline()
-passFile.close()
+# passFile = open("pass.txt","r")
+# mysql_pass = passFile.readline()
+# passFile.close()
 
 class Input():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd=mysql_pass, database="test")
-        self.cursor=self.db.cursor()
-        self.databaseName="cameraDatabaseFinal"
+        # self.db=mysql.connect(host="localhost",user="root",passwd=mysql_pass, database="test")
+        # self.cursor=self.db.cursor()
+        # self.databaseName="cameraDatabaseFinal"
         self.image_extension=".png"
         self.cameraDataProcessed={
             # "000001":{
@@ -28,6 +28,7 @@ class Input():
                 "counter": 0
             }
         }
+        # self.getDataJson()
         self.initialiseCameras()
         
     def getDataJson(self):
@@ -38,7 +39,7 @@ class Input():
 
         for cameraKey, cameraValue in cameraData.items():
             if(cameraValue["CalibrationData"]!=None):
-                cameraMatrix= np.array(cameraValue["CalibrationData"]["calibrationMatrix"])
+                # cameraMatrix= np.array(cameraValue["CalibrationData"]["calibrationMatrix"])
                 self.cameraDataProcessed.update({
                     cameraKey:{
                         "username": cameraValue["cameraID"],
@@ -52,6 +53,7 @@ class Input():
     def initialiseCameras(self):
         self.cap={}
         for camerakey,cameraData in self.cameraDataProcessed.items():
+            # self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["username"]+":"+cameraData["password"]+"@"+cameraData["IP"])
             self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
@@ -97,6 +99,7 @@ class Input():
             cameraData=json.load(jsonFile)
         
         cameraData[key]["cameraStatus"]["feedAvailable"]=False
+        cameraData[key]["cameraStatus"]["isPaused"]=True
         
         with open('cameraDatabase.json','w') as jsonFile:
             json.dump(cameraData,jsonFile)
@@ -113,6 +116,10 @@ class Input():
         # updateFile.close()
 
 
+images_upper_limit=10
+images_lower_limit=5
+waitKey_duration=500
+
 # if __name__ == "__main__":
 def beginInput(updateIndex, shared_images):
     input=Input()
@@ -121,9 +128,10 @@ def beginInput(updateIndex, shared_images):
     while(True):
         if updateIndex.value != oldUpdateIndex:
             print("getting json data in input.py")
-        #     input.getDataJson()
+            # input.getDataJson()
         oldUpdateIndex = updateIndex.value
-        input.getFrames(updateIndex, shared_images)   
+        input.getFrames(updateIndex, shared_images)
+        # if(len(shared_images)>10):
         cv2.waitKey(500)
         
 # up = 0

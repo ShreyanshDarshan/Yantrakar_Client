@@ -6,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import json
-import mysql.connector as mysql
+# import mysql.connector as mysql
 
 passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
@@ -108,9 +108,9 @@ class Dashboard(wx.Panel):
         self.slideSpeed = 10
         self.SlidesList = []
 
-        self.db = mysql.connect(host="localhost", user="root", passwd=mysql_pass, database="test")
-        self.cursor = self.db.cursor()
-        self.databaseName = "cameraDatabaseFinal"
+        # self.db = mysql.connect(host="localhost", user="root", passwd=mysql_pass, database="test")
+        # self.cursor = self.db.cursor()
+        # self.databaseName = "cameraDatabaseFinal"
 
         self.cameraList = {}
 
@@ -296,16 +296,17 @@ class Dashboard(wx.Panel):
         noOfDates = 0
         dateList = []
         if(cameraID is None):
-            self.db.reconnect()
-            print("HERE")
-            query = """SELECT frameID
-                            FROM """ + self.databaseName + """ 
-                            WHERE process_flag=2"""
-            today = int(datetime.datetime.now().day)
-            self.cursor.execute(query)
-            imageNames = self.cursor.fetchall()
-            print(imageNames)
-            print(len(imageNames))
+            # self.db.reconnect()
+            # print("HERE")
+            # query = """SELECT frameID
+            #                 FROM """ + self.databaseName + """ 
+            #                 WHERE process_flag=2"""
+            # today = int(datetime.datetime.now().day)
+            # self.cursor.execute(query)
+            # imageNames = self.cursor.fetchall()
+            # print(imageNames)
+            # print(len(imageNames))
+            imageNames=[]
             imagesToBeDisplayed = []
             for names in imageNames:
                 day = int(names[0][6:8])
@@ -316,14 +317,15 @@ class Dashboard(wx.Panel):
                     imagesToBeDisplayed.append(names[0])
             return imagesToBeDisplayed, noOfDates, dateList
         else:
-            self.db.reconnect()
-            query = """SELECT frameID
-                    FROM """ + self.databaseName + """ 
-                    WHERE cameraId=%s AND process_flag=2"""
-            today = int(datetime.datetime.now().day)
-            values = (cameraID,)
-            self.cursor.execute(query, values)
-            imageNames = self.cursor.fetchall()
+            # self.db.reconnect()
+            # query = """SELECT frameID
+            #         FROM """ + self.databaseName + """ 
+            #         WHERE cameraId=%s AND process_flag=2"""
+            # today = int(datetime.datetime.now().day)
+            # values = (cameraID,)
+            # self.cursor.execute(query, values)
+            # imageNames = self.cursor.fetchall()
+            imageNames=[]
             imagesToBeDisplayed = []
             for names in imageNames:
                 day = int(names[0][6:8])
