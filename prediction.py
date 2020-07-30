@@ -7,11 +7,11 @@ import json
 import pickle
 import base64
 import time
-import mysql.connector as mysql
+# import mysql.connector as mysql
 import _thread
 import threading 
 import gzip
-import transformation
+# import transformation
 from itertools import combinations
 import os
 
@@ -277,6 +277,8 @@ def startOnePrediction(imageNamesBuffer, lambda_number):
             prediction=model.predict_local(imageNames)
             # model.editDatabase(prediction)
             print("LAMBDA "+str(lambda_number)+" PREDICTION")
+            if('message' in prediction and 'Internal server error' in prediction['message']):
+                print("Error")
             print(prediction)
             violatedPoints=model.processData(prediction)
             print(violatedPoints)

@@ -548,9 +548,9 @@ class MyFrame1 ( wx.Panel ):
                     "cameraIP": cameraIP,
                     "cameraPassword": cameraPassword,
                     "cameraStatus": {
-                        "feedAvailable": False,
+                        "feedAvailable": True,
                         "calibAvailable": False,
-                        "isPaused":True,
+                        "isPaused":False,
                     },
                     "CalibrationData": None,
                     "motionDetectorThreshold": 0.0,

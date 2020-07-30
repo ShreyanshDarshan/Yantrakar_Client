@@ -1,1 +1,54 @@
-{"000001": {"CalibrationData": null, "cameraAlias": "Main Gate", "cameraID": "Admin", "cameraIP": "192.100.0.106", "cameraPassword": "user123", "cameraStatus": {"calibAvailable": false, "feedAvailable": false, "isPaused": true}, "motionDetectorThreshold": 0.0}, "000002": {"CalibrationData": null, "cameraAlias": "Main Hall", "cameraID": "Admin", "cameraIP": "192.100.0.107", "cameraPassword": "user123", "cameraStatus": {"calibAvailable": false, "feedAvailable": false, "isPaused": true}, "motionDetectorThreshold": 0.0}, "000003": {"CalibrationData": null, "cameraAlias": "Side Lane", "cameraID": "Admin", "cameraIP": "192.100.0.108", "cameraPassword": "user123", "cameraStatus": {"calibAvailable": false, "feedAvailable": false, "isPaused": true}, "motionDetectorThreshold": 0.0}, "000004": {"CalibrationData": null, "cameraAlias": "Back Gate", "cameraID": "Admin", "cameraIP": "192.100.0.109", "cameraPassword": "user123", "cameraStatus": {"calibAvailable": false, "feedAvailable": false, "isPaused": true}, "motionDetectorThreshold": 0.0}}
+{
+    "000001": {
+        "CalibrationData": null,
+        "cameraAlias": "Main Gate",
+        "cameraID": "Admin",
+        "cameraIP": "192.100.0.106",
+        "cameraPassword": "user123",
+        "cameraStatus": {
+            "calibAvailable": false,
+            "feedAvailable": false,
+            "isPaused": true
+        },
+        "motionDetectorThreshold": 0.0
+    },
+    "000002": {
+        "CalibrationData": null,
+        "cameraAlias": "Main Hall",
+        "cameraID": "Admin",
+        "cameraIP": "192.100.0.107",
+        "cameraPassword": "user123",
+        "cameraStatus": {
+            "calibAvailable": false,
+            "feedAvailable": false,
+            "isPaused": true
+        },
+        "motionDetectorThreshold": 0.0
+    },
+    "000003": {
+        "CalibrationData": null,
+        "cameraAlias": "Side Lane",
+        "cameraID": "Admin",
+        "cameraIP": "192.100.0.108",
+        "cameraPassword": "user123",
+        "cameraStatus": {
+            "calibAvailable": false,
+            "feedAvailable": false,
+            "isPaused": true
+        },
+        "motionDetectorThreshold": 0.0
+    },
+    "000004": {
+        "CalibrationData": null,
+        "cameraAlias": "Back Gate",
+        "cameraID": "Admin",
+        "cameraIP": "192.100.0.109",
+        "cameraPassword": "user123",
+        "cameraStatus": {
+            "calibAvailable": false,
+            "feedAvailable": false,
+            "isPaused": true
+        },
+        "motionDetectorThreshold": 0.0
+    }
+}

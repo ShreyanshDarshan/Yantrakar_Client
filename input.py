@@ -1,20 +1,20 @@
 import cv2
 import numpy as np
 import datetime
-import mysql.connector as mysql
+# import mysql.connector as mysql
 import json
 import pandas as pd
 # import rtsp
 
-passFile = open("pass.txt","r")
-mysql_pass = passFile.readline()
-passFile.close()
+# passFile = open("pass.txt","r")
+# mysql_pass = passFile.readline()
+# passFile.close()
 
 class Input():
     def __init__(self):
-        self.db=mysql.connect(host="localhost",user="root",passwd=mysql_pass, database="test")
-        self.cursor=self.db.cursor()
-        self.databaseName="cameraDatabaseFinal"
+        # self.db=mysql.connect(host="localhost",user="root",passwd=mysql_pass, database="test")
+        # self.cursor=self.db.cursor()
+        # self.databaseName="cameraDatabaseFinal"
         self.image_extension=".png"
         self.cameraDataProcessed={
             # "000001":{
@@ -28,6 +28,7 @@ class Input():
                 "counter": 0
             }
         }
+        # self.getDataJson()
         self.initialiseCameras()
         
     def getDataJson(self):
@@ -38,7 +39,7 @@ class Input():
 
         for cameraKey, cameraValue in cameraData.items():
             if(cameraValue["CalibrationData"]!=None):
-                cameraMatrix= np.array(cameraValue["CalibrationData"]["calibrationMatrix"])
+                # cameraMatrix= np.array(cameraValue["CalibrationData"]["calibrationMatrix"])
                 self.cameraDataProcessed.update({
                     cameraKey:{
                         "username": cameraValue["cameraID"],
@@ -52,6 +53,7 @@ class Input():
     def initialiseCameras(self):
         self.cap={}
         for camerakey,cameraData in self.cameraDataProcessed.items():
+            # self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["username"]+":"+cameraData["password"]+"@"+cameraData["IP"])
             self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
@@ -90,6 +92,7 @@ class Input():
     #     self.db.commit()
 
     def editSheredMemory (self, frameID, sharedMem):
+        print("yo")
         sharedMem.append(frameID)
 
     def editJson(self,key,updateIndex):
@@ -97,6 +100,7 @@ class Input():
             cameraData=json.load(jsonFile)
         
         cameraData[key]["cameraStatus"]["feedAvailable"]=False
+        cameraData[key]["cameraStatus"]["isPaused"]=True
         
         with open('cameraDatabase.json','w') as jsonFile:
             json.dump(cameraData,jsonFile)
@@ -113,18 +117,55 @@ class Input():
         # updateFile.close()
 
 
+images_upper_limit=10
+images_lower_limit=5
+waitDuration=500
+targetDuration=500
+upperDurationCounter=None
+fpsChangeFactor=2
+
 # if __name__ == "__main__":
 def beginInput(updateIndex, shared_images):
+    global images_upper_limit,images_lower_limit,waitDuration,targetDuration,upperDurationCounter
+    global fpsChangeFactor
     input=Input()
     print (input.cameraDataProcessed)
     oldUpdateIndex = updateIndex.value
     while(True):
         if updateIndex.value != oldUpdateIndex:
             print("getting json data in input.py")
-        #     input.getDataJson()
+            # input.getDataJson()
+            
+        print(len(shared_images))
+        
+        #FPS MANAGEMENT
+        # if(len(shared_images)>images_upper_limit):
+        #     if(upperDurationCounter==None):
+        #         upperDurationCounter=0
+        #         targetDuration=targetDuration*fpsChangeFactor
+        #         waitDuration=targetDuration
+        #         print("fps decreased")
+        #     upperDurationCounter=upperDurationCounter+1
+        #     if(upperDurationCounter>5):
+        #         print("fps decreased")
+        #         upperDurationCounter=0
+        #         targetDuration=targetDuration*fpsChangeFactor
+        #         waitDuration=targetDuration
+        # elif(len(shared_images)<images_lower_limit):
+        #     print("fps increased")
+        #     print(int(waitDuration))
+        #     upperDurationCounter=0
+        #     if(waitDuration-targetDuration<10):
+        #         targetDuration=targetDuration/fpsChangeFactor
+        #     waitDuration=updateWaitDuration(0.5,waitDuration,targetDuration)
+            
         oldUpdateIndex = updateIndex.value
-        input.getFrames(updateIndex, shared_images)   
-        cv2.waitKey(500)
+        input.getFrames(updateIndex, shared_images)
+        
+        cv2.waitKey(int(waitDuration))
+        
+def updateWaitDuration(updateRate,currentDuration,targetDuration):
+    return (1-updateRate)*currentDuration+updateRate*targetDuration
         
 # up = 0
 # beginInput(up)
