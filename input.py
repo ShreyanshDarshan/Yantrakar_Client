@@ -120,10 +120,13 @@ images_upper_limit=10
 images_lower_limit=5
 waitDuration=500
 targetDuration=500
+upperDurationCounter=None
+fpsChangeFactor=2
 
 # if __name__ == "__main__":
 def beginInput(updateIndex, shared_images):
-    global images_upper_limit,images_lower_limit,waitDuration,targetDuration
+    global images_upper_limit,images_lower_limit,waitDuration,targetDuration,upperDurationCounter
+    global fpsChangeFactor
     input=Input()
     print (input.cameraDataProcessed)
     oldUpdateIndex = updateIndex.value
@@ -132,12 +135,23 @@ def beginInput(updateIndex, shared_images):
             print("getting json data in input.py")
             # input.getDataJson()
         
+        #FPS MANAGEMENT
         if(len(shared_images)>images_upper_limit):
-            targetDuration=targetDuration*2
-            waitDuration=targetDuration
+            if(upperDurationCounter==None):
+                upperDurationCounter=0
+                targetDuration=targetDuration*fpsChangeFactor
+                waitDuration=targetDuration
+            upperDurationCounter=upperDurationCounter+1
+            print("fps decreased")
+            if(upperDurationCounter>5):
+                upperDurationCounter=0
+                targetDuration=targetDuration*fpsChangeFactor
+                waitDuration=targetDuration
         elif(len(shared_images)<images_lower_limit):
-            if(waitDuration==targetDuration):
-                targetDuration=targetDuration/2
+            print("fps increased")
+            upperDurationCounter=0
+            if(waitDuration-targetDuration<10):
+                targetDuration=targetDuration/fpsChangeFactor
             waitDuration=updateWaitDuration(0.5,waitDuration,targetDuration)
             
         oldUpdateIndex = updateIndex.value
