@@ -72,6 +72,9 @@ class User(wx.Panel):
         self.pricingBitmap = self.scaleImages(self.pricingBitmap,
                                               (self.settingsBtnSize[1], self.settingsBtnSize[1]))
 
+        self.autoTimerRows = 0
+        self.autoTimerRowList = []
+
         self.initUI()
 
 
@@ -198,6 +201,10 @@ class User(wx.Panel):
         self.autoTimerButton.icon.SetBitmap(self.autoTimerBitmap)
         self.autoTimerButton.description.SetLabel("Set intervals to make the application run and stop automatically")
         self.autoTimerButton.description.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
+        self.autoTimerButton.icon.Bind(wx.EVT_LEFT_UP, lambda evt: self.autoTimerButtonClicked(evt))
+        self.autoTimerButton.heading.Bind(wx.EVT_LEFT_UP, lambda evt: self.autoTimerButtonClicked(evt))
+        self.autoTimerButton.description.Bind(wx.EVT_LEFT_UP,
+                                                    lambda evt: self.autoTimerButtonClicked(evt))
 
         self.pricingButton = settingsButton(self.settingsMenu, self.settingsBtnSize)
         self.pricingButton.heading.SetLabel("Pricing")
@@ -271,7 +278,7 @@ class User(wx.Panel):
                                           lambda evt: self.changeColor(evt, self.slightlyLightGrey))
         self.cancelPassChangebutton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.darkGrey))
         self.cancelPassChangebutton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
-        self.cancelPassChangebutton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(self.cancelPassChangebuttonClicked(evt),
+        self.cancelPassChangebutton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(self.hideAllForms(evt),
                                                                                        self.slightlyLightGrey))
 
         LayoutpassChangeFields.SetEmptyCellSize((10, 10))
@@ -330,7 +337,7 @@ class User(wx.Panel):
         self.cancelKeyChangebutton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.darkGrey))
         self.cancelKeyChangebutton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
         self.cancelKeyChangebutton.Bind(wx.EVT_LEFT_UP,
-                                         lambda evt: self.changeColor(self.cancelKeyChangebuttonClicked(evt),
+                                         lambda evt: self.changeColor(self.hideAllForms(evt),
                                                                       self.slightlyLightGrey))
 
         LayoutactivationKeyChangeFields.SetEmptyCellSize((10, 10))
@@ -354,12 +361,133 @@ class User(wx.Panel):
         self.activationKeyChangePanel.SetSizer(LayoutactivationKeyChangePanel)
         LayoutactivationKeyChangePanel.Fit(self.activationKeyChangePanel)
 
+        ##### 3) Auto Timer CHANGE PANEL
+
+        self.autoTimerPanel = wx.Panel(self.settingsPanel, -1)
+        #self.autoTimerPanel.SetScrollRate(5, 5)
+        self.autoTimerPanel.SetBackgroundColour(self.darkGrey)
+
+        LayoutautoTimerPanel = wx.BoxSizer(wx.VERTICAL)
+
+        self.autoTimerFields = wx.Panel(self.autoTimerPanel, -1)
+        self.autoTimerFields.SetBackgroundColour(self.Grey)
+
+        LayoutAutoTimerFields = wx.GridBagSizer(10, 10)
+
+        self.autoTimerHeading = wx.StaticText(self.autoTimerFields, -1, "Auto Timer Settings")
+        self.autoTimerHeading.SetForegroundColour(self.faintWhite)
+        self.autoTimerHeading.SetFont(self.fontBold)
+
+        self.addIntervalButton = wx.Button(self.autoTimerFields, -1, "Add Interval", style=wx.NO_BORDER)
+        self.addIntervalButton.SetForegroundColour(self.white)
+        self.addIntervalButton.SetBackgroundColour(self.darkGrey)
+        self.addIntervalButton.Bind(wx.EVT_ENTER_WINDOW,
+                                        lambda evt: self.changeColor(evt, self.slightlyLightGrey))
+        self.addIntervalButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.darkGrey))
+        self.addIntervalButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        self.addIntervalButton.Bind(wx.EVT_LEFT_UP,
+                                        lambda evt: self.changeColor(self.autoTimerAddIntervalClicked(evt),
+                                                                     self.slightlyLightGrey))
+
+        self.autoTimerHelpButton = wx.Button(self.autoTimerFields, -1, "Help ?", style=wx.NO_BORDER)
+        self.autoTimerHelpButton.SetForegroundColour(self.white)
+        self.autoTimerHelpButton.SetBackgroundColour(self.darkGrey)
+        self.autoTimerHelpButton.Bind(wx.EVT_ENTER_WINDOW,
+                                    lambda evt: self.changeColor(evt, self.slightlyLightGrey))
+        self.autoTimerHelpButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.darkGrey))
+        self.autoTimerHelpButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        self.autoTimerHelpButton.Bind(wx.EVT_LEFT_UP,
+                                    lambda evt: self.changeColor(evt,
+                                                                 self.slightlyLightGrey))
+
+        self.confirmAutoTimerbutton = wx.Button(self.autoTimerFields, -1, "Confirm",
+                                                          style=wx.NO_BORDER)
+        self.confirmAutoTimerbutton.SetForegroundColour(self.white)
+        self.confirmAutoTimerbutton.SetBackgroundColour(self.darkGrey)
+        self.confirmAutoTimerbutton.Bind(wx.EVT_ENTER_WINDOW,
+                                                   lambda evt: self.changeColor(evt, self.slightlyLightGrey))
+        self.confirmAutoTimerbutton.Bind(wx.EVT_LEAVE_WINDOW,
+                                                   lambda evt: self.changeColor(evt, self.darkGrey))
+        self.confirmAutoTimerbutton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        self.confirmAutoTimerbutton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(evt,
+                                                                                                self.slightlyLightGrey))
+
+        self.cancelAutoTimerebutton = wx.Button(self.autoTimerFields, -1, "Cancel", style=wx.NO_BORDER)
+        self.cancelAutoTimerebutton.SetForegroundColour(self.white)
+        self.cancelAutoTimerebutton.SetBackgroundColour(self.darkGrey)
+        self.cancelAutoTimerebutton.Bind(wx.EVT_ENTER_WINDOW,
+                                        lambda evt: self.changeColor(evt, self.slightlyLightGrey))
+        self.cancelAutoTimerebutton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.darkGrey))
+        self.cancelAutoTimerebutton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        self.cancelAutoTimerebutton.Bind(wx.EVT_LEFT_UP,
+                                        lambda evt: self.changeColor(self.hideAllForms(evt),
+                                                                     self.slightlyLightGrey))
+
+        self.autoTimerIntervalPanel = wx.Panel(self.autoTimerFields, -1)
+        #self.autoTimerIntervalPanel.SetMinSize((-1, 100))
+
+        LayoutAutoTimerInterval = wx.BoxSizer(wx.VERTICAL)
+
+        self.intervalHeadLabel = wx.StaticText(self.autoTimerIntervalPanel, -1, "Interval", size=(80, -1), style=wx.ALIGN_CENTER)
+        self.intervalHeadLabel.SetForegroundColour(self.faintWhite)
+        self.intervalHeadLabel.SetFont(self.fontBold)
+        self.startAllHeadLabel = wx.StaticText(self.autoTimerIntervalPanel, -1, "Start All", size=(80, -1), style=wx.ALIGN_CENTER)
+        self.startAllHeadLabel.SetForegroundColour(self.faintWhite)
+        self.startAllHeadLabel.SetFont(self.fontBold)
+        self.stopAllHeadLabel = wx.StaticText(self.autoTimerIntervalPanel, -1, "Stop All", size=(80, -1), style=wx.ALIGN_CENTER)
+        self.stopAllHeadLabel.SetForegroundColour(self.faintWhite)
+        self.stopAllHeadLabel.SetFont(self.fontBold)
+        self.weekHeadLabel = wx.StaticText(self.autoTimerIntervalPanel, -1, "Week", size=(270, -1), style=wx.ALIGN_CENTER)
+        self.weekHeadLabel.SetForegroundColour(self.faintWhite)
+        self.weekHeadLabel.SetFont(self.fontBold)
+
+        self.LayoutAutoTimerIntervalList = wx.GridBagSizer(10, 0)
+        self.LayoutAutoTimerIntervalList.SetEmptyCellSize((10, 10))
+
+        self.LayoutAutoTimerIntervalList.Add(self.intervalHeadLabel, wx.GBPosition(0, 0), wx.GBSpan(1, 2), wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(self.startAllHeadLabel, wx.GBPosition(0, 6), wx.GBSpan(1, 2), wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(self.stopAllHeadLabel, wx.GBPosition(0, 9), wx.GBSpan(1, 2), wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(self.weekHeadLabel, wx.GBPosition(0, 15), wx.GBSpan(1, 13), wx.EXPAND | wx.ALL)
+
+        LayoutAutoTimerInterval.Add(self.LayoutAutoTimerIntervalList, proportion=0, flag=wx.EXPAND | wx.ALL)
+
+        self.autoTimerIntervalPanel.SetSizer(LayoutAutoTimerInterval)
+        LayoutAutoTimerInterval.Fit(self.autoTimerIntervalPanel)
+
+        LayoutAutoTimerFields.SetEmptyCellSize((10, 10))
+
+        LayoutAutoTimerFields.Add(self.autoTimerHeading, wx.GBPosition(0, 0), wx.GBSpan(1, 11),
+                                            wx.ALIGN_CENTER | wx.ALL, 10)
+        LayoutAutoTimerFields.Add(self.addIntervalButton, wx.GBPosition(1, 0), wx.GBSpan(1, 2),
+                                  wx.ALIGN_CENTER | wx.ALL, 10)
+        LayoutAutoTimerFields.Add(self.autoTimerHelpButton, wx.GBPosition(1, 10), wx.GBSpan(1, 1),
+                                  wx.ALIGN_CENTER | wx.ALL, 10)
+        LayoutAutoTimerFields.Add(self.autoTimerIntervalPanel, wx.GBPosition(2, 0), wx.GBSpan(1, 11),
+                                  wx.ALIGN_CENTER | wx.ALL, 10)
+        LayoutAutoTimerFields.Add(self.confirmAutoTimerbutton, wx.GBPosition(3, 4), wx.GBSpan(1, 2),
+                                  wx.ALIGN_CENTER | wx.ALL, 10)
+        LayoutAutoTimerFields.Add(self.cancelAutoTimerebutton, wx.GBPosition(3, 6), wx.GBSpan(1, 2),
+                                  wx.ALIGN_CENTER | wx.ALL, 10)
+
+        self.autoTimerFields.SetSizer(LayoutAutoTimerFields)
+        LayoutAutoTimerFields.Fit(self.autoTimerFields)
+
+        LayoutautoTimerPanel.Add((0, 0), proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutautoTimerPanel.Add(self.autoTimerFields, proportion=0, flag=wx.CENTER | wx.ALL,
+                                           border=20)
+        LayoutautoTimerPanel.Add((0, 0), proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+
+        self.autoTimerPanel.SetSizer(LayoutautoTimerPanel)
+        LayoutautoTimerPanel.Fit(self.autoTimerPanel)
+
         LayoutSettingsPanel.Add(self.settingsMenuPanel, proportion=2, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutSettingsPanel.Add(self.passChangePanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
         LayoutSettingsPanel.Add(self.activationKeyChangePanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
+        LayoutSettingsPanel.Add(self.autoTimerPanel, proportion=1, flag=wx.EXPAND | wx.ALL, border=0)
 
         self.passChangePanel.Hide()
         self.activationKeyChangePanel.Hide()
+        self.autoTimerPanel.Hide()
 
         self.settingsPanel.SetSizer(LayoutSettingsPanel)
         LayoutSettingsPanel.Fit(self.settingsPanel)
@@ -392,39 +520,191 @@ class User(wx.Panel):
         self.Show(True)
         self.Layout()
 
+    def autoTimerAddIntervalClicked(self, event):
+        self.autoTimerRows = self.autoTimerRows + 1
+        self.addAutoTimerIntervalRow(self.autoTimerRows)
+        return event
+
+    def addAutoTimerIntervalRow(self, rowNo):
+        intervalCheckbox = wx.CheckBox(self.autoTimerIntervalPanel, -1, "Interval " + str(rowNo), name="timerCheckbox-" + str(rowNo))
+        intervalCheckbox.SetForegroundColour(self.faintWhite)
+        startAllHourEntry = wx.ComboBox(self.autoTimerIntervalPanel, -1, size=(40, -1), name="timerStartAllHour-" + str(rowNo))
+        startAllHourEntry.SetEditable(False)
+        startAllMinsEntry = wx.ComboBox(self.autoTimerIntervalPanel, -1, size=(40, -1), name="timerStartAllMin-" + str(rowNo))
+        startAllMinsEntry.SetEditable(False)
+        stopAllHourEntry = wx.ComboBox(self.autoTimerIntervalPanel, -1, size=(40, -1), name="timerStopAllHour-" + str(rowNo))
+        stopAllHourEntry.SetEditable(False)
+        stopAllMinsEntry = wx.ComboBox(self.autoTimerIntervalPanel, -1, size=(40, -1), name="timerStopAllMin-" + str(rowNo))
+        stopAllMinsEntry.SetEditable(False)
+        monWeekButton = wx.ToggleButton(self.autoTimerIntervalPanel, -1, "M", size=(30, -1), name="timerWeekMon-" + str(rowNo), style=wx.NO_BORDER)
+        monWeekButton.SetForegroundColour(self.white)
+        monWeekButton.SetBackgroundColour(self.Grey)
+        monWeekButton.Bind(wx.EVT_ENTER_WINDOW,
+                                         lambda evt: self.changeColor(evt, self.darkGrey))
+        monWeekButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        monWeekButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        monWeekButton.Bind(wx.EVT_LEFT_UP,
+                                         lambda evt: self.changeColor(self.timerWeekButtonClicked(evt),
+                                                                      self.weekToggleColor(evt)))
+        #monWeekButton.Bind(wx.EVT_TOGGLEBUTTON, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        tueWeekButton = wx.ToggleButton(self.autoTimerIntervalPanel, -1, "T", size=(30, -1), name="timerWeekTue-" + str(rowNo), style=wx.NO_BORDER)
+        tueWeekButton.SetForegroundColour(self.white)
+        tueWeekButton.SetBackgroundColour(self.Grey)
+        tueWeekButton.Bind(wx.EVT_ENTER_WINDOW,
+                           lambda evt: self.changeColor(evt, self.darkGrey))
+        tueWeekButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        tueWeekButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        tueWeekButton.Bind(wx.EVT_LEFT_UP,
+                           lambda evt: self.changeColor(self.timerWeekButtonClicked(evt),
+                                                        self.weekToggleColor(evt)))
+        #tueWeekButton.Bind(wx.EVT_TOGGLEBUTTON, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        wedWeekButton = wx.ToggleButton(self.autoTimerIntervalPanel, -1, "W", size=(30, -1), name="timerWeekWed-" + str(rowNo), style=wx.NO_BORDER)
+        wedWeekButton.SetForegroundColour(self.white)
+        wedWeekButton.SetBackgroundColour(self.Grey)
+        wedWeekButton.Bind(wx.EVT_ENTER_WINDOW,
+                           lambda evt: self.changeColor(evt, self.darkGrey))
+        wedWeekButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        wedWeekButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        wedWeekButton.Bind(wx.EVT_LEFT_UP,
+                           lambda evt: self.changeColor(self.timerWeekButtonClicked(evt),
+                                                        self.weekToggleColor(evt)))
+        #wedWeekButton.Bind(wx.EVT_TOGGLEBUTTON, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        thuWeekButton = wx.ToggleButton(self.autoTimerIntervalPanel, -1, "T", size=(30, -1), name="timerWeekThu-" + str(rowNo), style=wx.NO_BORDER)
+        thuWeekButton.SetForegroundColour(self.white)
+        thuWeekButton.SetBackgroundColour(self.Grey)
+        thuWeekButton.Bind(wx.EVT_ENTER_WINDOW,
+                           lambda evt: self.changeColor(evt, self.darkGrey))
+        thuWeekButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        thuWeekButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        thuWeekButton.Bind(wx.EVT_LEFT_UP,
+                           lambda evt: self.changeColor(self.timerWeekButtonClicked(evt),
+                                                        self.weekToggleColor(evt)))
+        #thuWeekButton.Bind(wx.EVT_TOGGLEBUTTON, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        friWeekButton = wx.ToggleButton(self.autoTimerIntervalPanel, -1, "F", size=(30, -1), name="timerWeekFri-" + str(rowNo), style=wx.NO_BORDER)
+        friWeekButton.SetForegroundColour(self.white)
+        friWeekButton.SetBackgroundColour(self.Grey)
+        friWeekButton.Bind(wx.EVT_ENTER_WINDOW,
+                           lambda evt: self.changeColor(evt, self.darkGrey))
+        friWeekButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        friWeekButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        friWeekButton.Bind(wx.EVT_LEFT_UP,
+                           lambda evt: self.changeColor(self.timerWeekButtonClicked(evt),
+                                                        self.weekToggleColor(evt)))
+        #friWeekButton.Bind(wx.EVT_TOGGLEBUTTON, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        satWeekButton = wx.ToggleButton(self.autoTimerIntervalPanel, -1, "S", size=(30, -1), name="timerWeekSat-" + str(rowNo), style=wx.NO_BORDER)
+        satWeekButton.SetForegroundColour(self.white)
+        satWeekButton.SetBackgroundColour(self.Grey)
+        satWeekButton.Bind(wx.EVT_ENTER_WINDOW,
+                           lambda evt: self.changeColor(evt, self.darkGrey))
+        satWeekButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        satWeekButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        satWeekButton.Bind(wx.EVT_LEFT_UP,
+                           lambda evt: self.changeColor(self.timerWeekButtonClicked(evt),
+                                                        self.weekToggleColor(evt)))
+        #satWeekButton.Bind(wx.EVT_TOGGLEBUTTON, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        sunWeekButton = wx.ToggleButton(self.autoTimerIntervalPanel, -1, "S", size=(30, -1), name="timerWeekSun-" + str(rowNo), style=wx.NO_BORDER)
+        sunWeekButton.SetForegroundColour(self.white)
+        sunWeekButton.SetBackgroundColour(self.Grey)
+        sunWeekButton.Bind(wx.EVT_ENTER_WINDOW,
+                           lambda evt: self.changeColor(evt, self.darkGrey))
+        sunWeekButton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.weekToggleColor(evt)))
+        sunWeekButton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
+        sunWeekButton.Bind(wx.EVT_LEFT_UP,
+                           lambda evt: self.changeColor(self.timerWeekButtonClicked(evt),
+                                                        self.weekToggleColor(evt)))
+        #sunWeekButton.Bind(wx.EVT_TOGGLEBUTTON, lambda  evt: self.changeColor(evt, self.weekToggleColor(evt)))
+
+        for i in range(0, 60):
+            if(i < 24):
+                startAllHourEntry.Append(str(i))
+                stopAllHourEntry.Append(str(i))
+            startAllMinsEntry.Append(str(i))
+            stopAllMinsEntry.Append(str(i))
+
+        self.LayoutAutoTimerIntervalList.Add(intervalCheckbox, wx.GBPosition(rowNo, 0), wx.GBSpan(1, 2), wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(startAllHourEntry, wx.GBPosition(rowNo, 6), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(startAllMinsEntry, wx.GBPosition(rowNo, 7), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(stopAllHourEntry, wx.GBPosition(rowNo, 9), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(stopAllMinsEntry, wx.GBPosition(rowNo, 10), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(monWeekButton, wx.GBPosition(rowNo, 15), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(tueWeekButton, wx.GBPosition(rowNo, 17), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(wedWeekButton, wx.GBPosition(rowNo, 19), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(thuWeekButton, wx.GBPosition(rowNo, 21), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(friWeekButton, wx.GBPosition(rowNo, 23), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(satWeekButton, wx.GBPosition(rowNo, 25), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+        self.LayoutAutoTimerIntervalList.Add(sunWeekButton, wx.GBPosition(rowNo, 27), wx.GBSpan(1, 1),
+                                             wx.EXPAND | wx.ALL)
+
+        tmpList = []
+        tmpList.append(intervalCheckbox)
+        tmpList.append(startAllHourEntry)
+        tmpList.append(startAllMinsEntry)
+        tmpList.append(stopAllHourEntry)
+        tmpList.append(stopAllMinsEntry)
+        tmpList.append(monWeekButton)
+        tmpList.append(tueWeekButton)
+        tmpList.append(wedWeekButton)
+        tmpList.append(thuWeekButton)
+        tmpList.append(friWeekButton)
+        tmpList.append(satWeekButton)
+        tmpList.append(sunWeekButton)
+
+        self.autoTimerRowList.append(tmpList)
+
+        self.Layout()
+
     def scaleImages(self, imageBitmap, imageSize):
         image = wx.Bitmap.ConvertToImage(imageBitmap)
         image = image.Scale(imageSize[0], imageSize[1], wx.IMAGE_QUALITY_HIGH)
         return wx.Bitmap(image)
 
-    def cancelKeyChangebuttonClicked(self, event):
+    # def cancelKeyChangebuttonClicked(self, event):
+    #     self.activationKeyChangePanel.Hide()
+    #     self.Layout()
+    #     return event
+    #
+    # def cancelPassChangebuttonClicked(self, event):
+    #     self.passChangePanel.Hide()
+    #     self.Layout()
+    #     return event
+
+    def hideAllForms(self, event):
+        self.passChangePanel.Hide()
         self.activationKeyChangePanel.Hide()
+        self.autoTimerPanel.Hide()
         self.Layout()
         return event
-
-    def cancelPassChangebuttonClicked(self, event):
-        self.passChangePanel.Hide()
-        self.Layout()
-        return event
-
-    def hideAllForms(self):
-        self.passChangePanel.Hide()
-        self.activationKeyChangePanel.Hide()
 
     def changeKeyClicked(self, event):
-        self.hideAllForms()
+        self.hideAllForms(None)
         self.activationKeyChangePanel.Show(True)
         self.Layout()
         self.settingsPanel.Scroll((0, 100))
 
     def changePassClicked(self, event, type):
-        self.hideAllForms()
+        self.hideAllForms(None)
         if(type == "Admin"):
             self.passChangeHeading.SetLabel(type + " Password")
             self.passChangePanel.Show(True)
         else:
             self.passChangeHeading.SetLabel(type + " Password")
             self.passChangePanel.Show(True)
+        self.Layout()
+        self.settingsPanel.Scroll((0, 100))
+
+    def autoTimerButtonClicked(self, event):
+        self.hideAllForms(None)
+        self.autoTimerPanel.Show(True)
         self.Layout()
         self.settingsPanel.Scroll((0, 100))
 
@@ -472,6 +752,19 @@ class User(wx.Panel):
     def userPageSizeChanged(self, event):
         self.Layout()
         wx.CallAfter(self.changeSettingsMenuLayout)
+
+    def timerWeekButtonClicked(self, event):
+        if(event.GetEventObject().GetValue()):
+            event.GetEventObject().SetValue(False)
+        else:
+            event.GetEventObject().SetValue(True)
+
+    def weekToggleColor(self, event):
+        print(event.GetEventObject().GetValue())
+        if(event.GetEventObject().GetValue()):
+            return self.darkGrey
+        else:
+            return self.Grey
 
     def changeColor(self, event, newcolor):
         event.GetEventObject().SetBackgroundColour(newcolor)
