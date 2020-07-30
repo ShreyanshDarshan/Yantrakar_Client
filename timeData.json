@@ -1,0 +1,9 @@
+{
+    "Monday":[[1,2],[5,6]],
+    "Tuesday": [[1,2],[5,6]],
+    "Wednesday":[[1,2]],
+    "Thursday": [[1,2]],
+    "Friday": [[1,2]],
+    "Saturday": [[12,1]],
+    "Sunday":[[12,1]]
+}

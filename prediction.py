@@ -81,9 +81,9 @@ class Predict():
 
         start = time.time()
 
-        api_endpoint = "https://edh5g0f8h3.execute-api.ap-south-1.amazonaws.com/default/mxnet4"
+        api_endpoint = "https://epj0x952wb.execute-api.ap-south-1.amazonaws.com/default/mxnet4"
 
-        headers = {'content-encoding': 'gzip'}
+        headers = {'content-encoding': 'gzip','x-api-key':'KtXX1LIane85Em62ddsjUaC4bF9zNF5D7PEOWC6T'}
 
         res = requests.post(url=api_endpoint, data=temp, headers=headers)
 
@@ -279,9 +279,10 @@ def startOnePrediction(imageNamesBuffer, lambda_number):
             print("LAMBDA "+str(lambda_number)+" PREDICTION")
             if('message' in prediction and 'Internal server error' in prediction['message']):
                 print("Error")
-            print(prediction)
-            violatedPoints=model.processData(prediction)
-            print(violatedPoints)
+            else: 
+                print(prediction)
+                violatedPoints=model.processData(prediction)
+                print(violatedPoints)
     # transformation.beginTransformation(updateIndex)
     # lockobject.release()
 
