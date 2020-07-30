@@ -92,6 +92,7 @@ class Input():
     #     self.db.commit()
 
     def editSheredMemory (self, frameID, sharedMem):
+        print("yo")
         sharedMem.append(frameID)
 
     def editJson(self,key,updateIndex):
@@ -134,30 +135,33 @@ def beginInput(updateIndex, shared_images):
         if updateIndex.value != oldUpdateIndex:
             print("getting json data in input.py")
             # input.getDataJson()
+            
+        print(len(shared_images))
         
         #FPS MANAGEMENT
-        if(len(shared_images)>images_upper_limit):
-            if(upperDurationCounter==None):
-                upperDurationCounter=0
-                targetDuration=targetDuration*fpsChangeFactor
-                waitDuration=targetDuration
-            upperDurationCounter=upperDurationCounter+1
-            print("fps decreased")
-            if(upperDurationCounter>5):
-                upperDurationCounter=0
-                targetDuration=targetDuration*fpsChangeFactor
-                waitDuration=targetDuration
-        elif(len(shared_images)<images_lower_limit):
-            print("fps increased")
-            upperDurationCounter=0
-            if(waitDuration-targetDuration<10):
-                targetDuration=targetDuration/fpsChangeFactor
-            waitDuration=updateWaitDuration(0.5,waitDuration,targetDuration)
+        # if(len(shared_images)>images_upper_limit):
+        #     if(upperDurationCounter==None):
+        #         upperDurationCounter=0
+        #         targetDuration=targetDuration*fpsChangeFactor
+        #         waitDuration=targetDuration
+        #         print("fps decreased")
+        #     upperDurationCounter=upperDurationCounter+1
+        #     if(upperDurationCounter>5):
+        #         print("fps decreased")
+        #         upperDurationCounter=0
+        #         targetDuration=targetDuration*fpsChangeFactor
+        #         waitDuration=targetDuration
+        # elif(len(shared_images)<images_lower_limit):
+        #     print("fps increased")
+        #     print(int(waitDuration))
+        #     upperDurationCounter=0
+        #     if(waitDuration-targetDuration<10):
+        #         targetDuration=targetDuration/fpsChangeFactor
+        #     waitDuration=updateWaitDuration(0.5,waitDuration,targetDuration)
             
         oldUpdateIndex = updateIndex.value
         input.getFrames(updateIndex, shared_images)
         
-        # if(len(shared_images)>10):
         cv2.waitKey(int(waitDuration))
         
 def updateWaitDuration(updateRate,currentDuration,targetDuration):

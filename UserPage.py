@@ -1,5 +1,7 @@
 import wx
 import wx.lib.platebtn as plateButtons
+from cryptography.fernet import Fernet
+import ast
 
 class settingsButton(wx.Panel):
     def __init__(self, parent, size):
@@ -11,6 +13,8 @@ class settingsButton(wx.Panel):
         #self.Center()
         self.Layout()
         #self.Show(True)
+        
+        self.encryptionKey=b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
 
     def initUI(self):
 
@@ -475,6 +479,44 @@ class User(wx.Panel):
 
     def changeColor(self, event, newcolor):
         event.GetEventObject().SetBackgroundColour(newcolor)
+        
+    def changeAdminPass(oldPass,newPass):
+        with open('userSetting.txt','r') as file:
+            data=file.read()
+        cipher=Fernet(self.key)
+        userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
+        if(userSetting["adminPass"]==oldPass):
+            userSetting["adminPass"]=newPass
+            encrypted=cipher.encrypt(str(userSettings).encode('utf-8'))
+            with open('userSetting.txt','w') as file:
+                file.write(encrypted.decode('utf-8'))
+            return 1
+        else:
+            return 0
+    
+    def changeViewerPass(oldPass,newPass):
+        with open('userSetting.txt','r') as file:
+            data=file.read()
+        cipher=Fernet(self.key)
+        userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
+        if(userSetting["viewerPass"]==oldPass):
+            userSetting["viewerPass"]=newPass
+            encrypted=cipher.encrypt(str(userSettings).encode('utf-8'))
+            with open('userSetting.txt','w') as file:
+                file.write(encrypted.decode('utf-8'))
+            return 1
+        else:
+            return 0
+    
+    def changeActivationKey(key):
+        with open('userSetting.txt','r') as file:
+            data=file.read()
+        cipher=Fernet(self.key)
+        userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
+        userSetting["activationKey"]=key
+        encrypted=cipher.encrypt(str(userSettings).encode('utf-8'))
+        with open('userSetting.txt','w') as file:
+            file.write(encrypted.decode('utf-8'))
 
 #app = wx.App()
 #window = User(None)
