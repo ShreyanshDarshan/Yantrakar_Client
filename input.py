@@ -5,6 +5,7 @@ import datetime
 import json
 import pandas as pd
 # import rtsp
+import motionDetector
 
 # passFile = open("pass.txt","r")
 # mysql_pass = passFile.readline()
@@ -28,6 +29,7 @@ class Input():
                 "counter": 0
             }
         }
+        self.motionDetector = motionDetector.MotionDetector()
         # self.getDataJson()
         self.initialiseCameras()
         
@@ -47,6 +49,7 @@ class Input():
                         "IP": cameraValue["cameraIP"],
                         "isPaused": cameraValue["cameraStatus"]["isPaused"],
                         "counter": 0,
+                        "motionThreshold": cameraValue["motionDetectorThreshold"]
                     } 
                 })
                 
@@ -66,11 +69,22 @@ class Input():
             if(not self.cameraDataProcessed[key]["isPaused"]):
                 ret, frame=camera.read()
                 if(ret):
-                    frame=cv2.resize(frame,(256,256))
-                    cv2.imwrite("./FRAMES/"+key+timestamp+self.image_extension,frame)
-                    # cv2.imshow("img",frame)
-                    self.cameraDataProcessed[key]["counter"]=0
-                    self.editSheredMemory(key+timestamp,sharedMem)
+                    processImg = 0
+                    if(not (self.cameraDataProcessed[key]["motionThreshold"] == 0.0)):
+                        motionRes, _ = self.motionDetector.detect(frame, self.cameraDataProcessed[key]["motionThreshold"])
+                        if(motionRes):
+                            processImg = 1
+                        else:
+                            processImg = 0
+                    else:
+                        processImg = 1
+
+                    if(processImg):
+                        frame=cv2.resize(frame,(256,256))
+                        cv2.imwrite("./FRAMES/"+key+timestamp+self.image_extension,frame)
+                        # cv2.imshow("img",frame)
+                        self.cameraDataProcessed[key]["counter"]=0
+                        self.editSheredMemory(key+timestamp,sharedMem)
                 else:
                     self.cameraDataProcessed[key]["counter"]=self.cameraDataProcessed[key]["counter"]+1
                 if(self.cameraDataProcessed[key]["counter"]>5):
