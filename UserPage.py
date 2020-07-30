@@ -46,14 +46,14 @@ class User(wx.Panel):
 
         self.settingsBtnSize = (300, 150)
 
-        self.changeAdminPassBitmap = wx.Bitmap("ui_elements/test.png")
-        self.changeViewerPassBitmap = wx.Bitmap("ui_elements/test.png")
-        self.updateKeyBitmap = wx.Bitmap("ui_elements/test.png")
-        self.updateAppBitmap = wx.Bitmap("ui_elements/test.png")
-        self.factoryResetBitmap = wx.Bitmap("ui_elements/test.png")
-        self.deleteAllDataBitmap = wx.Bitmap("ui_elements/test.png")
-        self.autoTimerBitmap = wx.Bitmap("ui_elements/test.png")
-        self.pricingBitmap = wx.Bitmap("ui_elements/test.png")
+        self.changeAdminPassBitmap = wx.Bitmap("ui_elements/admin.png")
+        self.changeViewerPassBitmap = wx.Bitmap("ui_elements/Guest.png")
+        self.updateKeyBitmap = wx.Bitmap("ui_elements/Key.png")
+        self.updateAppBitmap = wx.Bitmap("ui_elements/Update.png")
+        self.factoryResetBitmap = wx.Bitmap("ui_elements/Factory.png")
+        self.deleteAllDataBitmap = wx.Bitmap("ui_elements/Delete.png")
+        self.autoTimerBitmap = wx.Bitmap("ui_elements/Timer.png")
+        self.pricingBitmap = wx.Bitmap("ui_elements/Pricing.png")
 
         self.changeAdminPassBitmap = self.scaleImages(self.changeAdminPassBitmap,
                                                       (self.settingsBtnSize[1], self.settingsBtnSize[1]))
@@ -144,7 +144,7 @@ class User(wx.Panel):
         self.changeAdminPassButton.heading.Bind(wx.EVT_LEFT_UP, lambda evt: self.changePassClicked(evt, type="Admin"))
         self.changeAdminPassButton.description.Bind(wx.EVT_LEFT_UP, lambda evt: self.changePassClicked(evt, type="Admin"))
         self.changeAdminPassButton.icon.SetBitmap(self.changeAdminPassBitmap)
-        self.changeAdminPassButton.description.SetLabel("Description of the heading")
+        self.changeAdminPassButton.description.SetLabel("Admin account has access to all panels")
         self.changeAdminPassButton.description.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
 
 
@@ -157,7 +157,7 @@ class User(wx.Panel):
         self.changeViewerPassButton.description.Bind(wx.EVT_LEFT_UP,
                                                     lambda evt: self.changePassClicked(evt, type="Viewer"))
         self.changeViewerPassButton.icon.SetBitmap(self.changeViewerPassBitmap)
-        self.changeViewerPassButton.description.SetLabel("Description of the heading")
+        self.changeViewerPassButton.description.SetLabel("Viewer has access to the only the Dashboard Panel")
         self.changeViewerPassButton.description.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
 
         self.updateActivationKeyButton = settingsButton(self.settingsMenu, self.settingsBtnSize)
@@ -168,42 +168,42 @@ class User(wx.Panel):
         self.updateActivationKeyButton.description.Bind(wx.EVT_LEFT_UP,
                                                      lambda evt: self.changeKeyClicked(evt))
         self.updateActivationKeyButton.icon.SetBitmap(self.updateKeyBitmap)
-        self.updateActivationKeyButton.description.SetLabel("Description of the heading")
+        self.updateActivationKeyButton.description.SetLabel("Updating activation key ensures data safety")
         self.updateActivationKeyButton.description.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
 
         self.updateAppButton = settingsButton(self.settingsMenu, self.settingsBtnSize)
         self.updateAppButton.heading.SetLabel("Update Application")
         self.updateAppButton.heading.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
         self.updateAppButton.icon.SetBitmap(self.updateAppBitmap)
-        self.updateAppButton.description.SetLabel("Description of the heading")
+        self.updateAppButton.description.SetLabel("Install software updates for better experience")
         self.updateAppButton.description.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
 
         self.factoryResetButton = settingsButton(self.settingsMenu, self.settingsBtnSize)
         self.factoryResetButton.heading.SetLabel("Factory Reset")
         self.factoryResetButton.heading.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
         self.factoryResetButton.icon.SetBitmap(self.factoryResetBitmap)
-        self.factoryResetButton.description.SetLabel("Description of the heading")
+        self.factoryResetButton.description.SetLabel("Deletes all configuration settings captured images")
         self.factoryResetButton.description.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
 
         self.deleteAllDataButton = settingsButton(self.settingsMenu, self.settingsBtnSize)
         self.deleteAllDataButton.heading.SetLabel("Delete Data")
         self.deleteAllDataButton.heading.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
         self.deleteAllDataButton.icon.SetBitmap(self.deleteAllDataBitmap)
-        self.deleteAllDataButton.description.SetLabel("Description of the heading")
+        self.deleteAllDataButton.description.SetLabel("Deletes the captured images")
         self.deleteAllDataButton.description.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
 
         self.autoTimerButton = settingsButton(self.settingsMenu, self.settingsBtnSize)
         self.autoTimerButton.heading.SetLabel("Auto-Timer")
         self.autoTimerButton.heading.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
         self.autoTimerButton.icon.SetBitmap(self.autoTimerBitmap)
-        self.autoTimerButton.description.SetLabel("Description of the heading")
+        self.autoTimerButton.description.SetLabel("Set intervals to make the application run and stop automatically")
         self.autoTimerButton.description.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
 
         self.pricingButton = settingsButton(self.settingsMenu, self.settingsBtnSize)
         self.pricingButton.heading.SetLabel("Pricing")
         self.pricingButton.heading.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
         self.pricingButton.icon.SetBitmap(self.pricingBitmap)
-        self.pricingButton.description.SetLabel("Description of the heading")
+        self.pricingButton.description.SetLabel("Check the estimated cost for your system")
         self.pricingButton.description.Wrap(self.settingsBtnSize[0] - self.settingsBtnSize[1] - 20)
 
         self.LayoutSettingsMenuOptions.Add(self.changeAdminPassButton, wx.GBPosition(0, 0), wx.GBSpan(1, 1),

@@ -275,11 +275,11 @@ def startOnePrediction(imageNamesBuffer, lambda_number):
             print(imageNames)
             model=Predict(True)
             prediction=model.predict_local(imageNames)
-            model.editDatabase(prediction)
+            # model.editDatabase(prediction)
             print("LAMBDA "+str(lambda_number)+" PREDICTION")
             print(prediction)
             violatedPoints=model.processData(prediction)
-            prediction(violatedPoints)
+            print(violatedPoints)
     # transformation.beginTransformation(updateIndex)
     # lockobject.release()
 

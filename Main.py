@@ -338,13 +338,14 @@ if __name__ == '__main__':
     updateIndex = mp.Value('i', 0)
     with mp.Manager() as manager:
         shared_images = manager.list()
-        Input = mp.Process(target=input.beginInput, args=(updateIndex, shared_images))
+        # Input = mp.Process(target=input.beginInput, args=(updateIndex, shared_images))
+        Input = _thread.start_new_thread(input.beginInput, (updateIndex, shared_images))
         Predict = mp.Process(target=prediction.beginPrediction, args=(shared_images,))
         # Predict = _thread.start_new_thread(prediction.beginPrediction, ())
         GUI = mp.Process(target=initGUI, args=(updateIndex,))
         # Transform = mp.Process(target=transformation.beginTransformation, args=(updateIndex,))
         GUI.start()
-        Input.start()
+        # Input.start()
         Predict.start()
         # Transform.start()
 
