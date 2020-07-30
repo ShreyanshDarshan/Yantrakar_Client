@@ -118,10 +118,12 @@ class Input():
 
 images_upper_limit=10
 images_lower_limit=5
-waitKey_duration=500
+waitDuration=500
+targetDuration=500
 
 # if __name__ == "__main__":
 def beginInput(updateIndex, shared_images):
+    global images_upper_limit,images_lower_limit,waitDuration,targetDuration
     input=Input()
     print (input.cameraDataProcessed)
     oldUpdateIndex = updateIndex.value
@@ -129,10 +131,23 @@ def beginInput(updateIndex, shared_images):
         if updateIndex.value != oldUpdateIndex:
             print("getting json data in input.py")
             # input.getDataJson()
+        
+        if(len(shared_images)>images_upper_limit):
+            targetDuration=targetDuration*2
+            waitDuration=targetDuration
+        elif(len(shared_images)<images_lower_limit):
+            if(waitDuration==targetDuration):
+                targetDuration=targetDuration/2
+            waitDuration=updateWaitDuration(0.5,waitDuration,targetDuration)
+            
         oldUpdateIndex = updateIndex.value
         input.getFrames(updateIndex, shared_images)
+        
         # if(len(shared_images)>10):
-        cv2.waitKey(500)
+        cv2.waitKey(waitDuration)
+        
+def updateWaitDuration(updateRate,currentDuration,targetDuration):
+    return (1-updateRate)*currentDuration+updateRate*targetDuration
         
 # up = 0
 # beginInput(up)
