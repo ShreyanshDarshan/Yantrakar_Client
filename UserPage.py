@@ -13,8 +13,6 @@ class settingsButton(wx.Panel):
         #self.Center()
         self.Layout()
         #self.Show(True)
-        
-        self.encryptionKey=b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
 
     def initUI(self):
 
@@ -49,6 +47,8 @@ class User(wx.Panel):
         self.SetMinSize((1100, 750))
 
         self.settingsBtnSize = (300, 150)
+
+        self.encryptionKey = b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
 
         self.changeAdminPassBitmap = wx.Bitmap("ui_elements/admin.png")
         self.changeViewerPassBitmap = wx.Bitmap("ui_elements/Guest.png")
@@ -272,7 +272,7 @@ class User(wx.Panel):
         self.confirmPassChangebutton.Bind(wx.EVT_ENTER_WINDOW, lambda evt: self.changeColor(evt, self.slightlyLightGrey))
         self.confirmPassChangebutton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.darkGrey))
         self.confirmPassChangebutton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
-        self.confirmPassChangebutton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(evt,
+        self.confirmPassChangebutton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(self.confirmPassChangebuttonClicked(evt),
                                                                                     self.slightlyLightGrey))
 
         self.cancelPassChangebutton = wx.Button(self.passChangeFields, -1, "Cancel", style=wx.NO_BORDER)
@@ -330,7 +330,7 @@ class User(wx.Panel):
                                           lambda evt: self.changeColor(evt, self.slightlyLightGrey))
         self.confirmActivationKeyChangebutton.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.changeColor(evt, self.darkGrey))
         self.confirmActivationKeyChangebutton.Bind(wx.EVT_LEFT_DOWN, lambda evt: self.changeColor(evt, self.lightGrey))
-        self.confirmActivationKeyChangebutton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(evt,
+        self.confirmActivationKeyChangebutton.Bind(wx.EVT_LEFT_UP, lambda evt: self.changeColor(self.confirmKeyChangebuttonClicked(evt),
                                                                                        self.slightlyLightGrey))
 
         self.cancelKeyChangebutton = wx.Button(self.activationKeyChangeFields, -1, "Cancel", style=wx.NO_BORDER)
@@ -686,6 +686,9 @@ class User(wx.Panel):
         self.passChangePanel.Hide()
         self.activationKeyChangePanel.Hide()
         self.autoTimerPanel.Hide()
+        self.newKeyEntry.SetValue("")
+        self.currentPasswordEntry.SetValue("")
+        self.newPasswordEntry.SetValue("")
         self.Layout()
         return event
 
@@ -697,6 +700,7 @@ class User(wx.Panel):
 
     def changePassClicked(self, event, type):
         self.hideAllForms(None)
+        self.passChangePanel.SetName(type)
         if(type == "Admin"):
             self.passChangeHeading.SetLabel(type + " Password")
             self.passChangePanel.Show(True)
@@ -764,7 +768,6 @@ class User(wx.Panel):
             event.GetEventObject().SetValue(True)
 
     def weekToggleColor(self, event):
-        print(event.GetEventObject().GetValue())
         if(event.GetEventObject().GetValue()):
             return self.darkGrey
         else:
@@ -773,43 +776,78 @@ class User(wx.Panel):
     def changeColor(self, event, newcolor):
         event.GetEventObject().SetBackgroundColour(newcolor)
         
-    def changeAdminPass(oldPass,newPass):
+    def changeAdminPass(self, oldPass,newPass):
         with open('userSetting.txt','r') as file:
             data=file.read()
-        cipher=Fernet(self.key)
+        cipher=Fernet(self.encryptionKey)
         userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
         if(userSetting["adminPass"]==oldPass):
             userSetting["adminPass"]=newPass
-            encrypted=cipher.encrypt(str(userSettings).encode('utf-8'))
+            encrypted=cipher.encrypt(str(userSetting).encode('utf-8'))
             with open('userSetting.txt','w') as file:
                 file.write(encrypted.decode('utf-8'))
             return 1
         else:
             return 0
     
-    def changeViewerPass(oldPass,newPass):
+    def changeViewerPass(self, oldPass,newPass):
         with open('userSetting.txt','r') as file:
             data=file.read()
-        cipher=Fernet(self.key)
+        cipher=Fernet(self.encryptionKey)
         userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
         if(userSetting["viewerPass"]==oldPass):
             userSetting["viewerPass"]=newPass
-            encrypted=cipher.encrypt(str(userSettings).encode('utf-8'))
+            encrypted=cipher.encrypt(str(userSetting).encode('utf-8'))
             with open('userSetting.txt','w') as file:
                 file.write(encrypted.decode('utf-8'))
             return 1
         else:
             return 0
     
-    def changeActivationKey(key):
+    def changeActivationKey(self, key):
         with open('userSetting.txt','r') as file:
             data=file.read()
-        cipher=Fernet(self.key)
+        cipher=Fernet(self.encryptionKey)
         userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
         userSetting["activationKey"]=key
-        encrypted=cipher.encrypt(str(userSettings).encode('utf-8'))
+        encrypted=cipher.encrypt(str(userSetting).encode('utf-8'))
         with open('userSetting.txt','w') as file:
             file.write(encrypted.decode('utf-8'))
+
+    def confirmPassChangebuttonClicked(self, event):
+        type = self.passChangePanel.GetName()
+        oldPass = self.currentPasswordEntry.GetValue()
+        newPass = self.newPasswordEntry.GetValue()
+        if(type == "Admin"):
+            if(newPass == ""):
+                msgBox = wx.MessageBox("Admin password changed failed!", "Admin Password", parent=self)
+            else:
+                if(self.changeAdminPass(oldPass, newPass)):
+                    msgBox = wx.MessageBox("Admin password changed successfully", "Admin Password", parent=self)
+                    self.hideAllForms(None)
+                else:
+                    msgBox = wx.MessageBox("Admin password change failed. Current Admin password is incorrect!", "Admin Password", parent=self)
+        elif(type == "Viewer"):
+            if (newPass == ""):
+                msgBox = wx.MessageBox("Viewer password changed failed!", "Viewer Password", parent=self)
+            else:
+                if (self.changeViewerPass(oldPass, newPass)):
+                    msgBox = wx.MessageBox("Viewer password changed successfully", "Viewer Password", parent=self)
+                    self.hideAllForms(None)
+                else:
+                    msgBox = wx.MessageBox("Viewer password change failed. Current Viewer password is incorrect!",
+                                           "Viewer Password", parent=self)
+
+        return event
+
+    def confirmKeyChangebuttonClicked(self, event):
+        newKey = self.newKeyEntry.GetValue()
+        if(not (newKey == "")):
+            self.changeActivationKey(newKey)
+            msgBox = wx.MessageBox("Activation Key changed successfully", "Activation Key", parent=self)
+        else:
+            msgBox = wx.MessageBox("Activation Key change failed!", "Activation Key", parent=self)
+        return event
 
 #app = wx.App()
 #window = User(None)
