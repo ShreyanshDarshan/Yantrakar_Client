@@ -25,3 +25,13 @@ pip install opencv-contrib-python
 ```sh
 pip install matplotlib
 ```
+## Installation Instructions
+1. Dependencies (given above)
+   - WxPython
+   - Mxnet
+   - Gluoncv
+   - Opencv Contrib Modules
+   - Matplotlib
+2. Run [make_file.py](make_file.py) to get the models
+3. Make a "FRAMES" folder if already not present
+4. Run [Main.py](Main.py)

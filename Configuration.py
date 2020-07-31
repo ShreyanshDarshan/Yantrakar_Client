@@ -4,6 +4,8 @@ import json
 import os
 from os import path
 import wx.lib.platebtn as plateButtons
+from cryptography.fernet import Fernet
+import ast
 
 class MyFrame1 ( wx.Panel ):
     
@@ -14,7 +16,7 @@ class MyFrame1 ( wx.Panel ):
         self.parent = parent
         self.mainParent = mainParent
 
-        self.maxCameras = 5
+        self.maxCameras = self.getMaxCameras()
 
         self.refreshrate = 1000
         self.timer = wx.Timer(self)
@@ -36,7 +38,7 @@ class MyFrame1 ( wx.Panel ):
         self.fontNormal = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.fontBold = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 
-        self.lastCameraIndex="01"
+        self.lastCameraIndex="000000"
         self.didUpdate=False
         
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
@@ -272,6 +274,13 @@ class MyFrame1 ( wx.Panel ):
     
     def __del__( self ):
         pass
+    
+    def getMaxCameras(self):
+        with open('userSetting.txt','r') as file:
+            data=file.read()
+        cipher=Fernet(b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU=')
+        userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
+        return userSetting["maxNumberOfCamera"]
     
     def stopAll(self,event,sizer,updateIndex):
         numberOfItems=int(len(sizer.Children)/10)
@@ -548,11 +557,18 @@ class MyFrame1 ( wx.Panel ):
                     "cameraIP": cameraIP,
                     "cameraPassword": cameraPassword,
                     "cameraStatus": {
-                        "feedAvailable": False,
-                        "calibAvailable": False,
-                        "isPaused":True,
+                        "feedAvailable": True,
+                        "calibAvailable": True,
+                        "isPaused":False,
                     },
-                    "CalibrationData": None,
+                    "CalibrationData": {
+                        "calibrationMatrix": [
+                        [3.1612221417170847, 4.846925792950359, -496.72650850126706],
+                        [0.1291950574865343, 8.764284189342257, -524.0348595951967],
+                        [0.0007983134495323501, 0.008610688677292509, 1.0]
+                        ],
+                        "worldRatio": 0.58
+                    },
                     "motionDetectorThreshold": 0.0,
                     }
                 })

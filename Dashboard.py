@@ -6,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import json
-import mysql.connector as mysql
+# import mysql.connector as mysql
 import pandas as pd
 
 passFile = open("pass.txt","r")
@@ -130,9 +130,9 @@ class Dashboard(wx.Panel):
         self.slideSpeed = 10
         self.SlidesList = []
 
-        self.db = mysql.connect(host="localhost", user="root", passwd=mysql_pass, database="test")
-        self.cursor = self.db.cursor()
-        self.databaseName = "cameraDatabaseFinal"
+        # self.db = mysql.connect(host="localhost", user="root", passwd=mysql_pass, database="test")
+        # self.cursor = self.db.cursor()
+        # self.databaseName = "cameraDatabaseFinal"
 
         self.cameraList = {}
 

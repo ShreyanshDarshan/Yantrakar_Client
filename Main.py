@@ -262,6 +262,7 @@ class MainFrame(wx.Frame):
         self.configPage.Hide()
         self.calibPage.Hide()
         self.loginPage.Hide()
+        self.userPage.hideAllForms(None)
         self.userPage.Hide()
         if(self.current_page == 1):
             self.dashboardPage.updateCameraAliasList()
@@ -349,7 +350,7 @@ if __name__ == '__main__':
         Predict.start()
         # Transform.start()
 
-        print ("ajajajjajajjajajjjajajja")
+        print ("Processes Initialised")
 
 
         while True:

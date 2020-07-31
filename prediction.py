@@ -7,13 +7,15 @@ import json
 import pickle
 import base64
 import time
-import mysql.connector as mysql
+# import mysql.connector as mysql
 import _thread
 import threading 
 import gzip
-import transformation
+# import transformation
 from itertools import combinations
 import os
+from cryptography.fernet import Fernet
+import ast
 
 # passFile = open("pass.txt","r")
 # mysql_pass = passFile.readline()
@@ -30,6 +32,19 @@ class Predict():
             self.net = self.get_model()
         self.image_extension=".png"
         self.getDataJson()
+        
+        self.encryptionKey = b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
+        
+        self.getSystemConfiguration()
+        
+    def getSystemConfiguration(self):
+        with open('userSetting.txt','r') as file:
+            data=file.read()
+        cipher=Fernet(self.encryptionKey)
+        userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
+        self.activationKey=userSetting["activationKey"]
+        self.apiURL=userSetting["apiURL"]
+        self.numberOfLambda=userSetting["numberOfLambda"]
 
     # def getNames(self):
     #     self.db.reconnect()
@@ -81,15 +96,15 @@ class Predict():
 
         start = time.time()
 
-        api_endpoint = "https://edh5g0f8h3.execute-api.ap-south-1.amazonaws.com/default/mxnet4"
+        api_endpoint = self.apiURL
 
-        headers = {'content-encoding': 'gzip'}
+        headers = {'content-encoding': 'gzip','x-api-key':self.activationKey}
 
         res = requests.post(url=api_endpoint, data=temp, headers=headers)
 
         print(time.time()-start)
 
-        return res.content
+        return ast.literal_eval(res.content.decode('utf-8'))
 
     def read_pics_local(self, img_names):
         imgs = []
@@ -277,9 +292,12 @@ def startOnePrediction(imageNamesBuffer, lambda_number):
             prediction=model.predict_local(imageNames)
             # model.editDatabase(prediction)
             print("LAMBDA "+str(lambda_number)+" PREDICTION")
-            print(prediction)
-            violatedPoints=model.processData(prediction)
-            print(violatedPoints)
+            if('message' in prediction and 'Internal server error' in prediction['message']):
+                print("Error")
+            else: 
+                print(prediction)
+                violatedPoints=model.processData(prediction)
+                print(violatedPoints)
     # transformation.beginTransformation(updateIndex)
     # lockobject.release()
 
@@ -294,12 +312,13 @@ def create_thread(img_names, lambda_number):
     # Pass it to the newly created thread which can release the lock once done
     _thread.start_new_thread(startOnePrediction, (img_names, lambda_number))
 
-num_lambda = 2
+# num_lambda = 3
 batch_size = 2
 min_batch_size = 1
 def beginPrediction(shared_images):
     global locks
     model=Predict(True)
+    num_lambda=model.numberOfLambda
     thread_buffers = [[]]*num_lambda
     for i in range(num_lambda):
         create_thread(thread_buffers[i], i)
