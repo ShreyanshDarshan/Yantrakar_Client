@@ -57,8 +57,8 @@ class Input():
     def initialiseCameras(self):
         self.cap={}
         for camerakey,cameraData in self.cameraDataProcessed.items():
-            self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["username"]+":"+cameraData["password"]+"@"+cameraData["IP"])
-            # self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
+            # self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["username"]+":"+cameraData["password"]+"@"+cameraData["IP"])
+            self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)

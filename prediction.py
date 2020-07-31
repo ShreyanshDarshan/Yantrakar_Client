@@ -16,6 +16,8 @@ from itertools import combinations
 import os
 from cryptography.fernet import Fernet
 import ast
+import pandas as pd
+import datetime
 
 # passFile = open("pass.txt","r")
 # mysql_pass = passFile.readline()
@@ -277,8 +279,9 @@ class Predict():
 
 
 locks = []
-
+csv_didnt_open={}
 def startOnePrediction(imageNamesBuffer, lambda_number):
+    global csv_didnt_open
     # print("LAMBDA NUMBER")
     # print (lambda_number)
     # print("A")
@@ -287,7 +290,7 @@ def startOnePrediction(imageNamesBuffer, lambda_number):
         if (num_img > min_batch_size):
             imageNames = imageNamesBuffer[0:min(batch_size, num_img)]
             del imageNamesBuffer[0:min(batch_size, num_img)]
-            print(imageNames)
+            # print(imageNames)
             model=Predict(True)
             prediction=model.predict_local(imageNames)
             # model.editDatabase(prediction)
@@ -295,9 +298,43 @@ def startOnePrediction(imageNamesBuffer, lambda_number):
             if('message' in prediction and 'Internal server error' in prediction['message']):
                 print("Error")
             else: 
-                print(prediction)
+                # print(prediction)
                 violatedPoints=model.processData(prediction)
                 print(violatedPoints)
+                csv_name=str(datetime.datetime.now().day).zfill(2)+str(datetime.datetime.now().month).zfill(2)+str(datetime.datetime.now().year).zfill(2)
+                if(os.path.exists(csv_name+'.csv')):
+                    try:
+                        data=pd.read_csv(csv_name+'.csv')
+                        for frameID,points in violatedPoints.items():
+                            if(len(points)!=0):
+                                new_row = pd.Series(data={'cameraID': 'A'+frameID[0:6],'frameID': 'A'+frameID,'points': points})
+                                data = data.append(new_row, ignore_index=True)
+                        if(len(csv_didnt_open)!=0):
+                            for frameID,points in csv_didnt_open.items():
+                                if(len(points)!=0):
+                                    new_row = pd.Series(data={'cameraID': 'A'+frameID[0:6],'frameID': 'A'+frameID,'points': points})
+                                    data = data.append(new_row, ignore_index=True)
+                            csv_didnt_open={}
+                        if(len(data)!=0):
+                            data.to_csv( csv_name+'.csv',index=False)
+                    except:
+                        print("Couldn't open csv "+str(len(csv_didnt_open)))
+                        csv_didnt_open.update(violatedPoints)
+                else:
+                    emptyData={
+                        'cameraID': [],
+                        'frameID': [],
+                        'points': []
+                    }
+                    data = pd.DataFrame(emptyData, index=[])
+                    # data.to_csv( csv_name+'.csv',index=False)
+                    for frameID,points in violatedPoints.items():
+                        if(len(points)!=0):
+                            new_row = pd.Series(data={'cameraID': 'A'+frameID[0:6],'frameID': 'A'+frameID,'points': points})
+                            data = data.append(new_row, ignore_index=True)
+                    if(len(data)!=0):
+                        data.to_csv( csv_name+'.csv',index=False)
+                
     # transformation.beginTransformation(updateIndex)
     # lockobject.release()
 
@@ -339,7 +376,7 @@ def beginPrediction(shared_images):
             # Acquire all the locks, which means all the threads have released the locks
             # all(lock.acquire() for lock in locks)
             
-if __name__ == "__main__":
-    beginPrediction()
+# if __name__ == "__main__":
+    # beginPrediction()
         
 
