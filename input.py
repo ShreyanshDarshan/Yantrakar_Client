@@ -26,11 +26,12 @@ class Input():
             "000001":{
                 "url": 0,
                 "isPaused": False,
-                "counter": 0
+                "counter": 0,
+                "motionThreshold": 0.0
             }
         }
         self.motionDetector = motionDetector.MotionDetector()
-        # self.getDataJson()
+        self.getDataJson()
         self.initialiseCameras()
         
     def getDataJson(self):
@@ -56,11 +57,13 @@ class Input():
     def initialiseCameras(self):
         self.cap={}
         for camerakey,cameraData in self.cameraDataProcessed.items():
-            # self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["username"]+":"+cameraData["password"]+"@"+cameraData["IP"])
-            self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
+            self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["username"]+":"+cameraData["password"]+"@"+cameraData["IP"])
+            # self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
+        if(len(self.cameraDataProcessed)!=0):
+            print("Cameras Initialised")
             
     def getFrames(self,updateIndex,sharedMem):
         time=datetime.datetime.now()
@@ -87,7 +90,7 @@ class Input():
                         self.editSheredMemory(key+timestamp,sharedMem)
                 else:
                     self.cameraDataProcessed[key]["counter"]=self.cameraDataProcessed[key]["counter"]+1
-                if(self.cameraDataProcessed[key]["counter"]>5):
+                if(self.cameraDataProcessed[key]["counter"]>3):
                     self.cameraDataProcessed[key]["isPaused"]=True
                     # print("yo")
                     self.editJson(key,updateIndex)
@@ -106,7 +109,6 @@ class Input():
     #     self.db.commit()
 
     def editSheredMemory (self, frameID, sharedMem):
-        print("yo")
         sharedMem.append(frameID)
 
     def editJson(self,key,updateIndex):
@@ -143,14 +145,15 @@ def beginInput(updateIndex, shared_images):
     global images_upper_limit,images_lower_limit,waitDuration,targetDuration,upperDurationCounter
     global fpsChangeFactor
     input=Input()
-    print (input.cameraDataProcessed)
+    # print (input.cameraDataProcessed)
     oldUpdateIndex = updateIndex.value
     while(True):
         if updateIndex.value != oldUpdateIndex:
             print("getting json data in input.py")
-            # input.getDataJson()
+            input.getDataJson()
+            input.initialiseCameras()
             
-        print(len(shared_images))
+        # print(len(shared_images))
         
         #FPS MANAGEMENT
         # if(len(shared_images)>images_upper_limit):

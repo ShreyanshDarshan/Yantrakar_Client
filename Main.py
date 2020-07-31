@@ -350,7 +350,7 @@ if __name__ == '__main__':
         Predict.start()
         # Transform.start()
 
-        print ("ajajajjajajjajajjjajajja")
+        print ("Processes Initialised")
 
 
         while True:
