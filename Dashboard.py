@@ -8,6 +8,7 @@ import numpy as np
 import json
 # import mysql.connector as mysql
 import pandas as pd
+import os
 
 passFile = open("pass.txt","r")
 mysql_pass = passFile.readline()
@@ -327,32 +328,45 @@ class Dashboard(wx.Panel):
     def getImageNames(self, cameraID, day):
         #open csv file according to day value
         #import data from csv
-        csvData = [{'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"},
-                   {'cameraid': "000001", 'frameid': "00000128063739415"}]
-
-        df = pd.DataFrame(csvData)
+        #csvData = pd.read_csv("31072020.csv", dtype=str)
 
         stamps = []
-        if (cameraID is None):
-            stamps = df['frameid']
-        else:
-            stamps = df.loc[df['cameraid'] == cameraID]['frameid']
+        if(os.path.exists(day + ".csv")):
+            csvData = pd.read_csv(day + ".csv", dtype=str)
+            # csvData = [{'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"},
+            #            {'cameraid': "000001", 'frameid': "00000128063739415"}]
 
-        #print('DATA LENGTH')
-        #print(len(stamps))
+            df = csvData
+            #df = pd.DataFrame(csvData)
+
+            if (cameraID is None):
+                stamps = df['frameID']
+            else:
+                cameraID = "A" + cameraID
+                stamps = df.loc[df['cameraID'] == cameraID]['frameID']
+
+            stamps = list(stamps)
+            for i in range(0, len(stamps)):
+                stamps[i] = stamps[i][1:]
+
+            #print(df['cameraID'])
+            #print('frameId')
+            #print(stamps)
+            #print('DATA LENGTH')
+            #print(len(stamps))
 
         return stamps
 
@@ -367,7 +381,8 @@ class Dashboard(wx.Panel):
 
         duration = self.durationEntry.GetValue()
 
-        day = int(self.durationEntry.GetValue().split('-')[0])
+        day = self.durationEntry.GetValue().split('-')
+        day = day[0] + day[1] + day[2]
         print(day)
 
         imageNamesList = self.getImageNames(cameraID, day)
