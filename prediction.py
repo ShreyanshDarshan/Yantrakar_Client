@@ -18,7 +18,7 @@ from cryptography.fernet import Fernet
 import ast
 import pandas as pd
 import datetime
-
+import cv2
 # passFile = open("pass.txt","r")
 # mysql_pass = passFile.readline()
 # passFile.close()
@@ -233,7 +233,13 @@ class Predict():
         for frameID,violatedPoints in violatedPointsData.items():
             if(len(violatedPoints)==0):
                 deleteFile=frameID+self.image_extension
-                os.remove('./FRAMES/'+deleteFile) 
+                os.remove('./FRAMES/'+deleteFile)
+            else:
+                for pointpair in violatedPoints:
+                    image_file = './FRAMES/'+frameID+self.image_extension
+                    im = cv2.imread(image_file)
+                    im = cv2.line(im, pointpair[0], pointpair[1], (0, 0, 100))
+                    cv2.imwrite(image_file, im)                    
         
         return violatedPointsData
 

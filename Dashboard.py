@@ -364,7 +364,7 @@ class Dashboard(wx.Panel):
 
             #print(df['cameraID'])
             #print('frameId')
-            #print(stamps)
+            print(stamps)
             #print('DATA LENGTH')
             #print(len(stamps))
 
