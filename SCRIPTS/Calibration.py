@@ -5,6 +5,9 @@ import cameraCalib
 import json
 import numpy as np
 import motionDetector
+import os
+
+two_up = os.path.dirname(os.path.dirname(__file__))
 
 class Calibration(wx.Panel):
 
@@ -26,9 +29,9 @@ class Calibration(wx.Panel):
 
         self.instructionStatus = -1
 
-        self.calibImage1 = wx.Bitmap("ui_elements/calibImg1.png")
-        self.calibImage2 = wx.Bitmap("ui_elements/calibImg2.png")
-        self.calibImage3 = wx.Bitmap("ui_elements/calibImg3.png")
+        self.calibImage1 = wx.Bitmap(two_up + "/ui_elements/calibImg1.png")
+        self.calibImage2 = wx.Bitmap(two_up + "/ui_elements/calibImg2.png")
+        self.calibImage3 = wx.Bitmap(two_up + "/ui_elements/calibImg3.png")
 
         self.calibImage1 = self.scaleImage(self.calibImage1, (300, 300))
         self.calibImage2 = self.scaleImage(self.calibImage2, (300, 300))
@@ -264,7 +267,7 @@ class Calibration(wx.Panel):
         self.cameraDatabase[cameraID]['CalibrationData'] = calibrationData
         self.cameraDatabase[cameraID]['motionDetectorThreshold'] = motionDetectorThreshold
 
-        with open("cameraDatabase.json", 'w') as jsonFile:
+        with open(two_up + "/DATA/cameraDatabase.json", 'w') as jsonFile:
             json.dump(self.cameraDatabase,jsonFile,sort_keys=True, indent=4)
 
         self.calibrateSaveButton.Enable(False)
@@ -293,7 +296,7 @@ class Calibration(wx.Panel):
         self.cap={}
         for camerakey,cameraData in self.cameraDatabase.items():
             #self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["cameraID"]+":"+cameraData["cameraPassword"]+"@"+cameraData["cameraIP"])
-            self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
+            self.cap[camerakey] = cv2.VideoCapture(two_up + "/test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
@@ -301,7 +304,7 @@ class Calibration(wx.Panel):
     def updateCameraAliasList(self):
         self.cameraAliasEntry.Clear()
         try:
-            with open("cameraDatabase.json", 'r') as jsonFile:
+            with open(two_up + "/DATA/cameraDatabase.json", 'r') as jsonFile:
                 self.cameraDatabase = json.load(jsonFile)
                 for key in self.cameraDatabase:
                     self.cameraList[self.cameraDatabase[key]['cameraAlias']] = key

@@ -3,6 +3,9 @@ import wx.lib.platebtn as plateButtons
 from cryptography.fernet import Fernet
 import ast
 
+import os
+two_up = os.path.dirname(os.path.dirname(__file__))
+
 class settingsButton(wx.Panel):
     def __init__(self, parent, size):
         super(settingsButton, self).__init__(parent, size=size)
@@ -50,14 +53,14 @@ class User(wx.Panel):
 
         self.encryptionKey = b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
 
-        self.changeAdminPassBitmap = wx.Bitmap("ui_elements/admin.png")
-        self.changeViewerPassBitmap = wx.Bitmap("ui_elements/Guest.png")
-        self.updateKeyBitmap = wx.Bitmap("ui_elements/Key.png")
-        self.updateAppBitmap = wx.Bitmap("ui_elements/Update.png")
-        self.factoryResetBitmap = wx.Bitmap("ui_elements/Factory.png")
-        self.deleteAllDataBitmap = wx.Bitmap("ui_elements/Delete.png")
-        self.autoTimerBitmap = wx.Bitmap("ui_elements/Timer.png")
-        self.pricingBitmap = wx.Bitmap("ui_elements/Pricing.png")
+        self.changeAdminPassBitmap = wx.Bitmap(two_up + "/ui_elements/admin.png")
+        self.changeViewerPassBitmap = wx.Bitmap(two_up + "/ui_elements/Guest.png")
+        self.updateKeyBitmap = wx.Bitmap(two_up + "/ui_elements/Key.png")
+        self.updateAppBitmap = wx.Bitmap(two_up + "/ui_elements/Update.png")
+        self.factoryResetBitmap = wx.Bitmap(two_up + "/ui_elements/Factory.png")
+        self.deleteAllDataBitmap = wx.Bitmap(two_up + "/ui_elements/Delete.png")
+        self.autoTimerBitmap = wx.Bitmap(two_up + "/ui_elements/Timer.png")
+        self.pricingBitmap = wx.Bitmap(two_up + "/ui_elements/Pricing.png")
 
         self.changeAdminPassBitmap = self.scaleImages(self.changeAdminPassBitmap,
                                                       (self.settingsBtnSize[1], self.settingsBtnSize[1]))
@@ -777,41 +780,41 @@ class User(wx.Panel):
         event.GetEventObject().SetBackgroundColour(newcolor)
         
     def changeAdminPass(self, oldPass,newPass):
-        with open('userSetting.txt','r') as file:
+        with open(two_up + '/DATA/userSetting.txt','r') as file:
             data=file.read()
         cipher=Fernet(self.encryptionKey)
         userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
         if(userSetting["adminPass"]==oldPass):
             userSetting["adminPass"]=newPass
             encrypted=cipher.encrypt(str(userSetting).encode('utf-8'))
-            with open('userSetting.txt','w') as file:
+            with open(two_up + '/DATA/userSetting.txt','w') as file:
                 file.write(encrypted.decode('utf-8'))
             return 1
         else:
             return 0
     
     def changeViewerPass(self, oldPass,newPass):
-        with open('userSetting.txt','r') as file:
+        with open(two_up + '/DATA/userSetting.txt','r') as file:
             data=file.read()
         cipher=Fernet(self.encryptionKey)
         userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
         if(userSetting["viewerPass"]==oldPass):
             userSetting["viewerPass"]=newPass
             encrypted=cipher.encrypt(str(userSetting).encode('utf-8'))
-            with open('userSetting.txt','w') as file:
+            with open(two_up + '/DATA/userSetting.txt','w') as file:
                 file.write(encrypted.decode('utf-8'))
             return 1
         else:
             return 0
     
     def changeActivationKey(self, key):
-        with open('userSetting.txt','r') as file:
+        with open(two_up + '/DATA/userSetting.txt','r') as file:
             data=file.read()
         cipher=Fernet(self.encryptionKey)
         userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
         userSetting["activationKey"]=key
         encrypted=cipher.encrypt(str(userSetting).encode('utf-8'))
-        with open('userSetting.txt','w') as file:
+        with open(two_up + '/DATA/userSetting.txt','w') as file:
             file.write(encrypted.decode('utf-8'))
 
     def confirmPassChangebuttonClicked(self, event):

@@ -10,7 +10,8 @@ import json
 import pandas as pd
 import os
 
-passFile = open("pass.txt","r")
+two_up = os.path.dirname(os.path.dirname(__file__))
+passFile = open(two_up + "/DATA/pass.txt","r")
 mysql_pass = passFile.readline()
 passFile.close()
 
@@ -224,7 +225,7 @@ class Dashboard(wx.Panel):
         self.galleryLiveButton.SetForegroundColour(self.white)
         self.galleryLiveButton.SetPressColor(self.darkGrey)
 
-        self.galleryPauseButton = plateButtons.PlateButton(dashboardGalleryControls, -1, "", wx.Bitmap("ui_elements/pause.png"), wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL | plateButtons.PB_STYLE_SQUARE)
+        self.galleryPauseButton = plateButtons.PlateButton(dashboardGalleryControls, -1, "", wx.Bitmap(two_up + "/ui_elements/pause.png"), wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL | plateButtons.PB_STYLE_SQUARE)
         self.isPlaying = True
         self.galleryPauseButton.SetMaxSize((40, -1))
         self.galleryPauseButton.SetBackgroundColour(self.darkGrey)
@@ -256,7 +257,7 @@ class Dashboard(wx.Panel):
         LayoutDashboardGallery.Fit(DashboardGalleryPanel)
 
 
-        self.DashboardGraphPanel = wx.StaticBitmap(self.dashboardPanel, -1, wx.Bitmap("plot.png"), pos=wx.DefaultPosition, size=wx.Size(1100, 300))
+        self.DashboardGraphPanel = wx.StaticBitmap(self.dashboardPanel, -1, wx.Bitmap(two_up + "/DATA/plot.png"), pos=wx.DefaultPosition, size=wx.Size(1100, 300))
         self.DashboardGraphPanel.SetBackgroundColour(self.Grey)
         # self.DashboardGraphPanel.AutoLayout()
         self.DashboardGraphPanel.SetMinSize((-1, 500))
@@ -331,8 +332,8 @@ class Dashboard(wx.Panel):
         #csvData = pd.read_csv("31072020.csv", dtype=str)
 
         stamps = []
-        if(os.path.exists(day + ".csv")):
-            csvData = pd.read_csv(day + ".csv", dtype=str)
+        if(os.path.exists(two_up + "/DATA/" + day + ".csv")):
+            csvData = pd.read_csv(two_up + "/DATA/" + day + ".csv", dtype=str)
             # csvData = [{'cameraid': "000001", 'frameid': "00000128063739415"},
             #            {'cameraid': "000001", 'frameid': "00000128063739415"},
             #            {'cameraid': "000001", 'frameid': "00000128063739415"},
@@ -425,8 +426,8 @@ class Dashboard(wx.Panel):
         # plt.show()
         fig.set_size_inches(15, 5)
         fig.tight_layout()
-        fig.savefig('plot.png', transparent=True)
-        self.DashboardGraphPanel.SetBitmap(wx.Bitmap("plot.png"))
+        fig.savefig(two_up + '/DATA/plot.png', transparent=True)
+        self.DashboardGraphPanel.SetBitmap(wx.Bitmap(two_up + "/DATA/plot.png"))
         self.DashboardGraphPanel.Refresh()
         self.Layout()
 
@@ -436,7 +437,7 @@ class Dashboard(wx.Panel):
         self.cameraAliasEntry.Append("All Cameras")
         self.cameraAliasEntry.SetSelection(0)
         try:
-            with open("cameraDatabase.json", 'r') as jsonFile:
+            with open(two_up + "/DATA/cameraDatabase.json", 'r') as jsonFile:
                 self.cameraDatabase = json.load(jsonFile)
                 for key in self.cameraDatabase:
                     self.cameraList[self.cameraDatabase[key]['cameraAlias']] = key
@@ -466,7 +467,7 @@ class Dashboard(wx.Panel):
 
             if(addPos < self.noOfSlides):
                 slide = self.SlidesList[addPos]
-                slide.changeImage("FRAMES/" + list(self.galleryImageList)[addPos] + ".png")
+                slide.changeImage(two_up + "/FRAMES/" + list(self.galleryImageList)[addPos] + ".png")
                 self.Layout()
             pass
         elif((currSliderPos - self.prevSliderPos) < 0):
@@ -481,7 +482,7 @@ class Dashboard(wx.Panel):
             if(addPos >= 0):
                 slide = self.SlidesList[addPos]
                 #print(list(self.galleryImageList)[addPos])
-                slide.changeImage("FRAMES/" + list(self.galleryImageList)[addPos] + ".png")
+                slide.changeImage(two_up + "/FRAMES/" + list(self.galleryImageList)[addPos] + ".png")
                 #slide.Refresh()
                 self.Layout()
             self.prevSliderPos = currSliderPos
@@ -518,7 +519,7 @@ class Dashboard(wx.Panel):
         for i in range(0, len(imgNameList)):
             if (i < 5):
                 slide = self.SlidesList[i]
-                slide.changeImage("FRAMES/" + imgNameList[i] + ".png")
+                slide.changeImage(two_up + "/FRAMES/" + imgNameList[i] + ".png")
 
         self.Layout()
         self.timer.Start(1)
@@ -608,11 +609,11 @@ class Dashboard(wx.Panel):
 
     def toggle_play(self, event):
         if self.isPlaying:
-            self.galleryPauseButton.SetBitmap(wx.Bitmap("ui_elements/play.png"))
+            self.galleryPauseButton.SetBitmap(wx.Bitmap(two_up + "/ui_elements/play.png"))
             self.isLive = False
             self.isPlaying = False
         else:
-            self.galleryPauseButton.SetBitmap(wx.Bitmap("ui_elements/pause.png"))
+            self.galleryPauseButton.SetBitmap(wx.Bitmap(two_up + "/ui_elements/pause.png"))
             self.isPlaying = True
 
     def changeColor(self, event, newcolor):
