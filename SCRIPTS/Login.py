@@ -2,6 +2,8 @@ import wx
 import wx.lib.platebtn as plateButtons
 from cryptography.fernet import Fernet
 import ast
+import os
+two_up = os.path.dirname(os.path.dirname(__file__))
 
 class Login(wx.Panel):
 
@@ -92,7 +94,7 @@ class Login(wx.Panel):
 
     def loginButtonClicked(self, event):
         password = self.passwordEntry.GetValue()
-        with open('userSetting.txt','r') as file:
+        with open(two_up + '/DATA/userSetting.txt','r') as file:
             data=file.read()
         cipher=Fernet(self.encryptionKey)
         userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))

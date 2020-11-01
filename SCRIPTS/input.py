@@ -6,10 +6,11 @@ import json
 import pandas as pd
 # import rtsp
 import motionDetector
-
+import os
 # passFile = open("pass.txt","r")
 # mysql_pass = passFile.readline()
 # passFile.close()
+two_up = os.path.dirname(os.path.dirname(__file__))
 
 class Input():
     def __init__(self):
@@ -35,7 +36,7 @@ class Input():
         self.initialiseCameras()
         
     def getDataJson(self):
-        with open('cameraDatabase.json','r') as jsonFile:
+        with open(two_up + '/DATA/cameraDatabase.json','r') as jsonFile:
             cameraData=json.load(jsonFile)
 
         self.cameraDataProcessed= {}
@@ -58,7 +59,7 @@ class Input():
         self.cap={}
         for camerakey,cameraData in self.cameraDataProcessed.items():
             # self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["username"]+":"+cameraData["password"]+"@"+cameraData["IP"])
-            self.cap[camerakey] = cv2.VideoCapture("./test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
+            self.cap[camerakey] = cv2.VideoCapture(two_up + "/test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
@@ -84,7 +85,7 @@ class Input():
 
                     if(processImg):
                         frame=cv2.resize(frame,(256,256))
-                        cv2.imwrite("./FRAMES/"+key+timestamp+self.image_extension,frame)
+                        cv2.imwrite(two_up + "/FRAMES/"+key+timestamp+self.image_extension,frame)
                         # cv2.imshow("img",frame)
                         self.cameraDataProcessed[key]["counter"]=0
                         self.editSheredMemory(key+timestamp,sharedMem)

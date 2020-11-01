@@ -11,6 +11,8 @@ import os
 import multiprocessing as mp
 import _thread
 
+two_up = os.path.dirname(os.path.dirname(__file__))
+
 class MainFrame(wx.Frame):
 
     def __init__(self, updateIndex):
@@ -33,11 +35,11 @@ class MainFrame(wx.Frame):
         self.faintWhite = wx.Colour(200, 200, 200)
         self.white = wx.Colour(255, 255, 255)
 
-        self.DashboardIcon = wx.Bitmap("ui_elements/Dashboard.png")
-        self.ConfigIcon = wx.Bitmap("ui_elements/Config.png")
-        self.CalibrationIcon = wx.Bitmap("ui_elements/Calibration.png")
-        self.HelpIcon = wx.Bitmap("ui_elements/Help.png")
-        self.UserIcon = wx.Bitmap("ui_elements/User.png")
+        self.DashboardIcon = wx.Bitmap(two_up + "/ui_elements/Dashboard.png")
+        self.ConfigIcon = wx.Bitmap(two_up + "/ui_elements/Config.png")
+        self.CalibrationIcon = wx.Bitmap(two_up + "/ui_elements/Calibration.png")
+        self.HelpIcon = wx.Bitmap(two_up + "/ui_elements/Help.png")
+        self.UserIcon = wx.Bitmap(two_up + "/ui_elements/User.png")
 
         NavIconSize = wx.Size(20, 20)
 
@@ -257,7 +259,7 @@ class MainFrame(wx.Frame):
     def changePage(self, event, pageno):
         self.current_page = pageno
         self.dashboardPage.isPlaying = False
-        self.dashboardPage.galleryPauseButton.SetBitmap(wx.Bitmap("ui_elements/play.png"))
+        self.dashboardPage.galleryPauseButton.SetBitmap(wx.Bitmap(two_up + "/ui_elements/play.png"))
         self.dashboardPage.Hide()
         self.configPage.Hide()
         self.calibPage.Hide()
@@ -352,7 +354,9 @@ if __name__ == '__main__':
 
         print ("Processes Initialised")
 
-
-        while True:
-            # print(shared_images)
-            i=1
+        GUI.join()
+        Input.join()
+        # while GUI.is_alive:
+        #     # print(shared_images)
+        #     i=1
+        #     print(1)

@@ -18,10 +18,12 @@ from cryptography.fernet import Fernet
 import ast
 import pandas as pd
 import datetime
-
+import cv2
 # passFile = open("pass.txt","r")
 # mysql_pass = passFile.readline()
 # passFile.close()
+
+two_up = os.path.dirname(os.path.dirname(__file__))
 
 class Predict():
     def __init__(self, isLocal):
@@ -40,7 +42,7 @@ class Predict():
         self.getSystemConfiguration()
         
     def getSystemConfiguration(self):
-        with open('userSetting.txt','r') as file:
+        with open(two_up + '/DATA/userSetting.txt','r') as file:
             data=file.read()
         cipher=Fernet(self.encryptionKey)
         userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
@@ -62,7 +64,7 @@ class Predict():
         imgs = []
 
         for name in img_names:
-            im = Image.open("./FRAMES/" + name + self.image_extension)
+            im = Image.open(two_up + "/FRAMES/" + name + self.image_extension)
             im = (np.array(im)).reshape(256, 256, 3)
             imgs.append(im)
 
@@ -114,7 +116,7 @@ class Predict():
         for name in img_names:
             # if os.path.isfile('./FRAMES/'+name[0]+self.image_extension) :
             im = Image.open(
-                './FRAMES/'+name+self.image_extension)
+                two_up + '/FRAMES/'+name+self.image_extension)
             im = (np.array(im)).reshape(256, 256, 3)
             imgs.append(im)
 
@@ -123,8 +125,8 @@ class Predict():
         return mx.nd.array(imgs)
 
     def get_model(self):
-        net = gluon.nn.SymbolBlock.imports("new_ssd_512_mobilenet1.0_voc-symbol.json", [
-                                           'data'], "new_ssd_512_mobilenet1.0_voc-0000.params", ctx=self.ctx)
+        net = gluon.nn.SymbolBlock.imports(two_up + "/DATA/new_ssd_512_mobilenet1.0_voc-symbol.json", [
+                                           'data'], two_up + "/DATA/new_ssd_512_mobilenet1.0_voc-0000.params", ctx=self.ctx)
         return net
 
     def predict_local(self, img_names):
@@ -189,7 +191,7 @@ class Predict():
             return -1
         
     def getDataJson(self):
-        with open('cameraDatabase.json','r') as jsonFile:
+        with open(two_up + '/DATA/cameraDatabase.json','r') as jsonFile:
             cameraData=json.load(jsonFile)
 
         self.cameraDataProcessed= {}
@@ -233,7 +235,13 @@ class Predict():
         for frameID,violatedPoints in violatedPointsData.items():
             if(len(violatedPoints)==0):
                 deleteFile=frameID+self.image_extension
-                os.remove('./FRAMES/'+deleteFile) 
+                os.remove(two_up + '/FRAMES/'+deleteFile)
+            else:
+                for pointpair in violatedPoints:
+                    image_file = two_up + '/FRAMES/'+frameID+self.image_extension
+                    im = cv2.imread(image_file)
+                    im = cv2.line(im, pointpair[0], pointpair[1], (0, 0, 100))
+                    cv2.imwrite(image_file, im)                    
         
         return violatedPointsData
 
@@ -302,6 +310,7 @@ def startOnePrediction(imageNamesBuffer, lambda_number):
                 violatedPoints=model.processData(prediction)
                 print(violatedPoints)
                 csv_name=str(datetime.datetime.now().day).zfill(2)+str(datetime.datetime.now().month).zfill(2)+str(datetime.datetime.now().year).zfill(2)
+                csv_name = two_up + "/DATA/"+csv_name
                 if(os.path.exists(csv_name+'.csv')):
                     try:
                         data=pd.read_csv(csv_name+'.csv')
