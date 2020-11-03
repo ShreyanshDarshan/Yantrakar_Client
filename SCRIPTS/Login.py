@@ -1,5 +1,9 @@
 import wx
 import wx.lib.platebtn as plateButtons
+from cryptography.fernet import Fernet
+import ast
+import os
+two_up = os.path.dirname(os.path.dirname(__file__))
 
 class Login(wx.Panel):
 
@@ -8,6 +12,8 @@ class Login(wx.Panel):
         super(Login, self).__init__(parent, size=(1100, 750))
 
         self.parent = mainParent
+
+        self.encryptionKey = b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
 
         self.SetMinSize((1100, 750))
         self.initUI()
@@ -87,10 +93,15 @@ class Login(wx.Panel):
         #self.Show(True)
 
     def loginButtonClicked(self, event):
-        if(self.passwordEntry.GetValue() == "admin"):
+        password = self.passwordEntry.GetValue()
+        with open(two_up + '/DATA/userSetting.txt','r') as file:
+            data=file.read()
+        cipher=Fernet(self.encryptionKey)
+        userSetting=ast.literal_eval((cipher.decrypt(data.encode('utf-8'))).decode('utf-8'))
+        if (userSetting["adminPass"] == password):
             print("ADMIN MODE")
             self.parent.onLogin(1)
-        elif(self.passwordEntry.GetValue() == "guest"):
+        elif(userSetting["viewerPass"] == password):
             print("GUEST MODE")
             self.parent.onLogin(2)
         else:

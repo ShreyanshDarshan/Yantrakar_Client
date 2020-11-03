@@ -5,6 +5,9 @@ import cameraCalib
 import json
 import numpy as np
 import motionDetector
+import os
+
+two_up = os.path.dirname(os.path.dirname(__file__))
 
 class Calibration(wx.Panel):
 
@@ -26,9 +29,9 @@ class Calibration(wx.Panel):
 
         self.instructionStatus = -1
 
-        self.calibImage1 = wx.Bitmap("ui_elements/calibImg1.png")
-        self.calibImage2 = wx.Bitmap("ui_elements/calibImg2.png")
-        self.calibImage3 = wx.Bitmap("ui_elements/calibImg3.png")
+        self.calibImage1 = wx.Bitmap(two_up + "/ui_elements/calibImg1.png")
+        self.calibImage2 = wx.Bitmap(two_up + "/ui_elements/calibImg2.png")
+        self.calibImage3 = wx.Bitmap(two_up + "/ui_elements/calibImg3.png")
 
         self.calibImage1 = self.scaleImage(self.calibImage1, (300, 300))
         self.calibImage2 = self.scaleImage(self.calibImage2, (300, 300))
@@ -36,6 +39,7 @@ class Calibration(wx.Panel):
 
         self.cameraDatabase = None
         self.cameraList = {}
+        self.currentCamera = ""
 
         self.SetMinSize((1100, 750))
         self.initUI()
@@ -52,8 +56,8 @@ class Calibration(wx.Panel):
         self.white = wx.Colour(255, 255, 255)
         self.slightlyLightGrey = wx.Colour(80, 80, 80)
 
-        self.capture = cv2.VideoCapture(0)
-        ret, self.feed = self.capture.read()
+        #self.capture = cv2.VideoCapture(0)
+        #ret, self.feed = self.capture.read()
 
         self.SetFont(self.fontNormal)
         self.SetBackgroundColour(self.Grey)
@@ -263,7 +267,7 @@ class Calibration(wx.Panel):
         self.cameraDatabase[cameraID]['CalibrationData'] = calibrationData
         self.cameraDatabase[cameraID]['motionDetectorThreshold'] = motionDetectorThreshold
 
-        with open("cameraDatabase.json", 'w') as jsonFile:
+        with open(two_up + "/DATA/cameraDatabase.json", 'w') as jsonFile:
             json.dump(self.cameraDatabase,jsonFile,sort_keys=True, indent=4)
 
         self.calibrateSaveButton.Enable(False)
@@ -277,6 +281,7 @@ class Calibration(wx.Panel):
             self.instructionStatus = - 1
             self.calibrateSaveButton.Enable(False)
             cameraID = self.cameraList[self.cameraAliasEntry.GetValue()]
+            self.currentCamera = cameraID
             if(self.cameraDatabase[cameraID]['cameraStatus']['calibAvailable']):
                 print("HERE")
                 self.calibrater.topViewTransform = np.array(self.cameraDatabase[cameraID]['CalibrationData']['calibrationMatrix'])
@@ -287,15 +292,25 @@ class Calibration(wx.Panel):
         else:
             self.motionThresholdCheckbox.Enable(False)
 
+    def initialiseCameras(self):
+        self.cap={}
+        for camerakey,cameraData in self.cameraDatabase.items():
+            #self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["cameraID"]+":"+cameraData["cameraPassword"]+"@"+cameraData["cameraIP"])
+            self.cap[camerakey] = cv2.VideoCapture(two_up + "/test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
+            self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
+            self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
+            self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
 
     def updateCameraAliasList(self):
         self.cameraAliasEntry.Clear()
         try:
-            with open("cameraDatabase.json", 'r') as jsonFile:
+            with open(two_up + "/DATA/cameraDatabase.json", 'r') as jsonFile:
                 self.cameraDatabase = json.load(jsonFile)
                 for key in self.cameraDatabase:
                     self.cameraList[self.cameraDatabase[key]['cameraAlias']] = key
                     self.cameraAliasEntry.Append(self.cameraDatabase[key]['cameraAlias'])
+
+            self.initialiseCameras()
 
             self.cameraAliasEntry.Enable(True)
             self.calibrateStartButton.Enable(True)
@@ -320,66 +335,73 @@ class Calibration(wx.Panel):
         if(self.feedPlaying):
 
             #Get Frame from source
-            rvt, self.feed = self.capture.read()
+            #rvt, self.feed = self.capture.read()
 
-            if(self.isCalibrating):
-                if (not self.calibrater.calibrationDone):
-                    self.calibrater.calibrate(self.feed, float(self.markerSideEntry.GetValue()))
-            else:
-                if(self.calibrater.calibrationDone):
-                    #print("HERE")
-                    self.feed = self.calibrater.drawGroundPlane(self.feed)
-                    #self.feed = self.calibrater.findTopView(self.feed)
+            if(not self.currentCamera == ""):
+                if(self.currentCamera in self.cap.keys()):
+                    ret, frame = self.cap[self.currentCamera].read()
+                    
+                    if(ret):
+                        self.feed = frame
 
-            if (self.isCalibrating):
-                if (not (self.instructionStatus == self.calibrater.calibrationLEDStatus)):
-                    print("HERE")
-                    #print(self.instructionStatus)
-                    #print(self.calibrater.calibrationLEDStatus)
-                    self.instructionStatus = self.calibrater.calibrationLEDStatus
-                    if (self.calibrater.calibrationLEDStatus == 0):
-                        self.instructionImage.SetBitmap(self.calibImage1)
-                        self.instructionText.SetLabel(
-                            "Marker Not Found! Marker is either not present or too small to detect")
-                        self.instructionText.Wrap(280)
-                        self.instructionPanel.Refresh()
-                        self.calibrationFeedPanel.Layout()
-                    elif (self.calibrater.calibrationLEDStatus == 1):
-                        self.instructionImage.SetBitmap(self.calibImage2)
-                        self.instructionText.SetLabel("Wait Calibrating! Do not move the marker")
-                        self.instructionText.Wrap(280)
-                        self.instructionPanel.Refresh()
-                        self.calibrationFeedPanel.Layout()
-                    else:
-                        #print("Here")
-                        self.instructionImage.SetBitmap(self.calibImage3)
-                        self.instructionText.SetLabel("CALIBRATION COMPLETE! Now you can remove marker")
-                        self.instructionText.Wrap(280)
-                        self.instructionPanel.Refresh()
-                        self.calibrationFeedPanel.Layout()
-                        self.isCalibrating = False
-                        self.calibrateStartButton.SetLabel("Start")
-                        self.calibrateSaveButton.Enable(True)
-                        self.cameraAliasEntry.Enable(True)
-                        self.markerSideEntry.Enable(True)
-                else:
-                    print(self.instructionStatus)
+                        if(self.isCalibrating):
+                            if (not self.calibrater.calibrationDone):
+                                self.calibrater.calibrate(self.feed, float(self.markerSideEntry.GetValue()))
+                        else:
+                            if(self.calibrater.calibrationDone):
+                                #print("HERE")
+                                self.feed = self.calibrater.drawGroundPlane(self.feed)
+                                #self.feed = self.calibrater.findTopView(self.feed)
 
-            if(self.motionDetectorFeedOn):
-                result, thres = self.motionDetector.detect(self.feed, float(self.motionThresholdEntry.GetValue()))
-                if(not thres is None):
-                    frame = thres
-                    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
-                    tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
-                else:
-                    frame = cv2.cvtColor(self.feed, cv2.COLOR_BGR2RGB)
-                    tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
-                self.scaleFeed(tmpBmp)
-            else:
-                frame = cv2.cvtColor(self.feed, cv2.COLOR_BGR2RGB)
-                tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
-                self.scaleFeed(tmpBmp)
-            self.calibrationFeed.Refresh()
+                        if (self.isCalibrating):
+                            if (not (self.instructionStatus == self.calibrater.calibrationLEDStatus)):
+                                print("HERE")
+                                #print(self.instructionStatus)
+                                #print(self.calibrater.calibrationLEDStatus)
+                                self.instructionStatus = self.calibrater.calibrationLEDStatus
+                                if (self.calibrater.calibrationLEDStatus == 0):
+                                    self.instructionImage.SetBitmap(self.calibImage1)
+                                    self.instructionText.SetLabel(
+                                        "Marker Not Found! Marker is either not present or too small to detect")
+                                    self.instructionText.Wrap(280)
+                                    self.instructionPanel.Refresh()
+                                    self.calibrationFeedPanel.Layout()
+                                elif (self.calibrater.calibrationLEDStatus == 1):
+                                    self.instructionImage.SetBitmap(self.calibImage2)
+                                    self.instructionText.SetLabel("Wait Calibrating! Do not move the marker")
+                                    self.instructionText.Wrap(280)
+                                    self.instructionPanel.Refresh()
+                                    self.calibrationFeedPanel.Layout()
+                                else:
+                                    #print("Here")
+                                    self.instructionImage.SetBitmap(self.calibImage3)
+                                    self.instructionText.SetLabel("CALIBRATION COMPLETE! Now you can remove marker")
+                                    self.instructionText.Wrap(280)
+                                    self.instructionPanel.Refresh()
+                                    self.calibrationFeedPanel.Layout()
+                                    self.isCalibrating = False
+                                    self.calibrateStartButton.SetLabel("Start")
+                                    self.calibrateSaveButton.Enable(True)
+                                    self.cameraAliasEntry.Enable(True)
+                                    self.markerSideEntry.Enable(True)
+                            else:
+                                print(self.instructionStatus)
+
+                        if(self.motionDetectorFeedOn):
+                            result, thres = self.motionDetector.detect(self.feed, float(self.motionThresholdEntry.GetValue()))
+                            if(not thres is None):
+                                frame = thres
+                                frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+                                tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
+                            else:
+                                frame = cv2.cvtColor(self.feed, cv2.COLOR_BGR2RGB)
+                                tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
+                            self.scaleFeed(tmpBmp)
+                        else:
+                            frame = cv2.cvtColor(self.feed, cv2.COLOR_BGR2RGB)
+                            tmpBmp = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
+                            self.scaleFeed(tmpBmp)
+                        self.calibrationFeed.Refresh()
 
             # check calibration LED status with calibration code
             # if(status == 0)

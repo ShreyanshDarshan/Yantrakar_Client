@@ -1,0 +1,34 @@
+{
+    "000001": {
+        "CalibrationData": {
+            "calibrationMatrix": [
+                [
+                    0.24892311293920577,
+                    1.401915019596356,
+                    152.98644663428195
+                ],
+                [
+                    -0.23848757690582753,
+                    2.1092919216822756,
+                    498.63114196232976
+                ],
+                [
+                    -0.00011801627769658674,
+                    0.002465383077768613,
+                    1.0
+                ]
+            ],
+            "worldRatio": 0.27999999999999997
+        },
+        "cameraAlias": "Main Gate",
+        "cameraID": "shrinivas",
+        "cameraIP": "192.168.43.192:8080/h264_pcm.sdp",
+        "cameraPassword": "khiste",
+        "cameraStatus": {
+            "calibAvailable": true,
+            "feedAvailable": false,
+            "isPaused": false
+        },
+        "motionDetectorThreshold": 0.0
+    }
+}
