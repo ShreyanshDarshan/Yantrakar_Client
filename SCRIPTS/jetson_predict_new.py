@@ -22,10 +22,13 @@ import cv2
 import torch
 import argparse
 from utils import *
+from flask import Flask, render_template, Response, jsonify, request
 # passFile = open("pass.txt","r")
 # mysql_pass = passFile.readline()
 # passFile.close()
 
+app = Flask(__name__)
+global_frame = None
 two_up = os.path.dirname(os.path.dirname(__file__))
 
 class Predict():
@@ -57,7 +60,7 @@ class Predict():
         self.encryptionKey = b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
         
         self.getSystemConfiguration()
-        self.camera = cv2.VideoCapture(two_up + "/test_video/top.mp4")
+        # self.camera = cv2.VideoCapture(two_up + "/test_video/top.mp4")
         
     def getSystemConfiguration(self):
         with open(two_up + '/DATA/userSetting.txt','r') as file:
@@ -280,37 +283,80 @@ class Predict():
         if violated==True:
             cv2.imwrite(two_up+ "/FRAMES/" + str(time.clock())+".jpg", im)                    
 
-        cv2.imshow("output", im)
-        cv2.waitKey(1)
-        return violatedPointsData
+        # cv2.imshow("output", im)
+        # cv2.waitKey(1)
+        return violated
 
 csv_didnt_open={}
+# initialised here so that it basic model import does 
+# wait for client connection
+model=Predict(True)
 
 # locks = []
-def startOnePrediction():
-    global csv_didnt_open
+def startOnePrediction(im):
+    global csv_didnt_open,model
+    # avg = 0
+    # num_imgs = 0
+    # while True:
+    # num_imgs += 1
+    # starttime = time.clock()
+    mask_points=model.predict_mask(im)
+    violatedPoints_human=model.predict_human(im)
+    print("PREDICTION MASK")
+    print(mask_points)
+    print("PREDICTION HUMAN")
+    print(violatedPoints_human)
+    return model.processData(im, violatedPoints_human, mask_points)
 
-    model=Predict(True)
-    avg = 0
-    num_imgs = 0
+    # avg = avg*(num_imgs-1)/num_imgs + 1/(time.clock() - starttime)/num_imgs
+    # print(avg)
+
+
+def video_stream():
+    global global_frame
+
+    cap = cv2.VideoCapture(0)
+    isFirst=True
+
     while True:
-        num_imgs += 1
-        starttime = time.clock()
-        ret, im = model.camera.read()
-        mask_points=model.predict_mask(im)
-        violatedPoints_human=model.predict_human(im)
-        print("PREDICTION MASK")
-        print(mask_points)
-        print("PREDICTION HUMAN")
-        print(violatedPoints_human)
-        model.processData(im, violatedPoints_human, mask_points)
+        ret, frame1 = cap.read()
+            
+        if ret:
+            doSend=startOnePrediction(frame1)
+            if isFirst:
+                isFirst=False
+                ret, jpeg = cv2.imencode('.jpg', frame1)
+                frame = jpeg.tobytes()
+            if doSend:
+                ret, jpeg = cv2.imencode('.jpg', frame1)
+                frame = jpeg.tobytes()
+        else:
+            frame = None
 
-        avg = avg*(num_imgs-1)/num_imgs + 1/(time.clock() - starttime)/num_imgs
-        print(avg)
+        # frame streaming part
+        if frame != None:
+            global_frame = frame
+            yield (b'--frame\r\n'
+                   b'Content-Type:image/jpeg\r\n'
+                   b'Content-Length: ' + str(len(frame)).encode() + b'\r\n'
+                   b'\r\n' + frame + b'\r\n')
+        else:
+            yield (b'--frame\r\n'
+                   b'Content-Type:image/jpeg\r\n'
+                   b'Content-Length: ' + str(len(global_frame)).encode() + b'\r\n'
+                   b'\r\n' + global_frame + b'\r\n')
+        cv2.waitKey(1)
+
+@app.route('/video_feed')
+# This is the video streaming Route. Used in src attribute of image tag in HTML
+# To stream the video
+def video_feed():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(video_stream(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == "__main__":
-    startOnePrediction()
-
+    app.run(host='0.0.0.0', debug=False, threaded=True, use_reloader=False)
 
 
 
