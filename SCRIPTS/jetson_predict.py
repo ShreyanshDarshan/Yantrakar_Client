@@ -23,7 +23,7 @@ import cv2
 # mysql_pass = passFile.readline()
 # passFile.close()
 
-two_up = os.path.dirname(os.path.dirname(__file__))
+two_up = os.path.dirname(os.path.dirname(__file__)) #"C:/Users/Shreyansh Darshan/Documents/GitHub/Yantrakar_Client" #
 
 class Predict():
     def __init__(self, isLocal):
@@ -127,7 +127,7 @@ class Predict():
         cv2.waitKey(1)
         imgs = np.stack(imgs, axis=0)
 
-        return mx.nd.array(imgs), im
+        return mx.nd.array(imgs, self.ctx), im
 
     def get_model(self):
         net = gluon.nn.SymbolBlock.imports(two_up + "/DATA/new_ssd_512_mobilenet1.0_voc-symbol.json", [
