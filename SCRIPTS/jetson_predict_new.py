@@ -26,7 +26,7 @@ from utils import *
 # mysql_pass = passFile.readline()
 # passFile.close()
 
-two_up = os.path.dirname(os.path.dirname(__file__))
+two_up = '/home/yantrakaar/Yantrakar_Client' #os.path.dirname(os.path.dirname(__file__))
 
 class Predict():
     def __init__(self, isLocal):
@@ -70,15 +70,8 @@ class Predict():
 
     def read_pics_human(self,im):
         imgs = []
-        # # print (img_names)
-        # for name in img_names:
-        #     # if os.path.isfile('./FRAMES/'+name[0]+self.image_extension) :
-        #     im = Image.open(
-        #         two_up + '/FRAMES/'+name+self.image_extension)
-        
-        # ret, im = self.camera.read()
-        im = cv2.resize(im, (256, 256))
-        im = (np.array(im)).reshape(256, 256, 3)
+        im = cv2.resize(im, (200, 200))
+        im = (np.array(im)).reshape(200, 200, 3)
         imgs.append(im)
         imgs = np.stack(imgs, axis=0)
 
@@ -120,6 +113,8 @@ class Predict():
         y_cls_output = y_scores.detach().cpu().numpy()
 
         pred = {}
+        #print(y_bboxes_output)
+        #print(y_cls_output)
 
         # for i in range(x.shape[0]):
 
@@ -137,12 +132,13 @@ class Predict():
         keep_idxs = single_class_non_max_suppression(   y_bboxes,
                                                         bbox_max_scores,
                                                         conf_thresh=0.5,
-                                                        iou_thresh=0.4,
+                                                        iou_thresh=0.5,
                                                         )
 
         output_info_class_id = []
         output_info_conf = []
         output_info_cords = []
+        print(keep_idxs)
 
         for idx in keep_idxs:
             conf = float(bbox_max_scores[idx])
@@ -277,10 +273,10 @@ class Predict():
             violated=True
             cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 0, 255))
         
-        if violated==True:
-            cv2.imwrite(two_up+ "/FRAMES/" + str(time.clock())+".jpg", im)                    
+        #if violated==True:
+            #cv2.imwrite(two_up+ "/FRAMES/" + str(time.clock())+".jpg", im)                    
 
-        cv2.imshow("output", im)
+        #cv2.imshow("output", im)
         cv2.waitKey(1)
         return violatedPointsData
 
