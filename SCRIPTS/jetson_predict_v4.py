@@ -6,8 +6,8 @@ import pickle
 import base64
 import time
 # import mysql.connector as mysql
-import _thread
-import threading 
+# import _thread
+# import threading 
 import gzip
 # import transformation
 from itertools import combinations
@@ -20,12 +20,16 @@ import cv2
 import torch
 import argparse
 from utils import *
+from pygame import mixer
 
 from vision.ssd.mobilenet import create_mobilenetv1_ssd, create_mobilenetv1_ssd_predictor
 model_path = "/home/yantrakaar/Yantrakar_Client/models/mobilenet-v1-ssd-mp-0_675.pth"
 label_path = "/home/yantrakaar/Yantrakar_Client/models/voc-model-labels.txt"
 class_names = [name.strip() for name in open(label_path).readlines()]
 
+# two_up = '/home/yantrakaar/Yantrakar_Client'
+mixer.init()
+sound= mixer.Sound("../DATA/maskAudio.ogg")
 two_up = '/home/yantrakaar/Yantrakar_Client' #os.path.dirname(os.path.dirname(__file__))
 
 class Predict():
@@ -236,67 +240,84 @@ class Predict():
                 })
         
     def processData(self, im, dbData, mask_points):
-        violatedPointsData={}
+        violatedPointsData = {}
 
         height, width, _ = im.shape
 
-        points=combinations(dbData,2)
-        violatedPoints=[]
-        for point1,point2 in points:
-            point1_scaled = (int(point1[0]*width/256), int(point1[1]*height/256))
-            point2_scaled = (int(point2[0]*width/256), int(point2[1]*height/256))
-            distance=self.findWorldDistance(self.cameraDataProcessed["000001"]["calibrationMatrix"],self.cameraDataProcessed["000001"]["worldRatio"], point1_scaled, point2_scaled)
-            if(point1 == point2):
+        points = combinations(dbData, 2)
+        violatedPoints = []
+        distancingViolated = False
+        for point1, point2 in points:
+            point1_scaled = (int(point1[0] * width / 256),
+                             int(point1[1] * height / 256))
+            point2_scaled = (int(point2[0] * width / 256),
+                             int(point2[1] * height / 256))
+            distance = self.findWorldDistance(
+                self.cameraDataProcessed["000001"]["calibrationMatrix"],
+                self.cameraDataProcessed["000001"]["worldRatio"],
+                point1_scaled, point2_scaled)
+            if (point1 == point2):
                 continue
-            elif(distance == -1):
+            elif (distance == -1):
                 continue
-            elif(distance  < 150):
-                violatedPoints.append((point1_scaled,point2_scaled))
-        violatedPointsData.update({
-            "000001": violatedPoints
-        })
+            elif (distance < 150):
+                violatedPoints.append((point1_scaled, point2_scaled))
+        violatedPointsData.update({"000001": violatedPoints})
 
-        violated = False
-        for frameID,violatedPoints in violatedPointsData.items():
-            if(len(violatedPoints)>0):
-                violated = True
+        for _, violatedPoints in violatedPointsData.items():
+            if (len(violatedPoints) > 0):
+                distancingViolated = True
                 for pointpair in violatedPoints:
                     im = cv2.line(im, pointpair[0], pointpair[1], (0, 0, 100))
-        
+
+        maskViolated = False
         for box in mask_points['bbox']:
-            violated=True
-            cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 0, 255))
-        
-        #if violated==True:
-            #cv2.imwrite(two_up+ "/FRAMES/" + str(time.clock())+".jpg", im)                    
+            maskViolated = True
+            cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]),
+                          color=(0, 0, 255))
+
+        # if violated==True:
+        #cv2.imwrite(two_up+ "/FRAMES/" + str(time.clock())+".jpg", im)
 
         #cv2.imshow("output", im)
-        cv2.waitKey(1)
-        return violatedPointsData
+        # cv2.waitKey(1)
+        return maskViolated, distancingViolated
 
 csv_didnt_open={}
 
 # locks = []
 def startOnePrediction():
-    global csv_didnt_open
-
-    model=Predict(True)
+    global sound
+    model = Predict(True)
     avg = 0
     num_imgs = 0
     while True:
         num_imgs += 1
         starttime = time.clock()
         ret, im = model.camera.read()
-        mask_points=model.predict_mask(im)
-        violatedPoints_human=model.predict_human(im)
+        mask_points={}
+        # mask_points = model.predict_mask(im)
+        violatedPoints_human = model.predict_human(im)
         print("PREDICTION MASK")
         print(mask_points)
         print("PREDICTION HUMAN")
         print(violatedPoints_human)
-        model.processData(im, violatedPoints_human, mask_points)
+        isMask, isDist = model.processData(im, violatedPoints_human,
+                                           mask_points)
+        if isMask:
+            sound.play()
+        if isDist:
+            sound.play()
 
-        avg = avg*(num_imgs-1)/num_imgs + 1/(time.clock() - starttime)/num_imgs
+        avg = avg * (num_imgs - 1) / num_imgs + 1 / (time.clock() -
+                                                     starttime) / num_imgs
         print(avg)
+
+
 
 if __name__ == "__main__":
     startOnePrediction()
+
+
+
+
