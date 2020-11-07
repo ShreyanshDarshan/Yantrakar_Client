@@ -29,7 +29,7 @@ class_names = [name.strip() for name in open(label_path).readlines()]
 
 # two_up = '/home/yantrakaar/Yantrakar_Client'
 mixer.init()
-sound= mixer.Sound("../DATA/maskAudio.ogg")
+sound= mixer.Sound("../home/yantrakaar/Yantrakar_Client")
 two_up = '/home/yantrakaar/Yantrakar_Client' #os.path.dirname(os.path.dirname(__file__))
 
 class Predict():
@@ -296,7 +296,7 @@ def startOnePrediction():
         starttime = time.clock()
         ret, im = model.camera.read()
         mask_points={}
-        # mask_points = model.predict_mask(im)
+        mask_points = model.predict_mask(im)
         violatedPoints_human = model.predict_human(im)
         print("PREDICTION MASK")
         print(mask_points)
@@ -305,8 +305,10 @@ def startOnePrediction():
         isMask, isDist = model.processData(im, violatedPoints_human,
                                            mask_points)
         if isMask:
+            print ("********VIOLATED*******")
             sound.play()
         if isDist:
+            print ("********VIOLATED*******")
             sound.play()
 
         avg = avg * (num_imgs - 1) / num_imgs + 1 / (time.clock() -
