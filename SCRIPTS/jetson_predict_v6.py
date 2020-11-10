@@ -23,7 +23,7 @@ import argparse
 from utils import *
 from pygame import mixer
 
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 # iou : 3.5
 # conf thresh: 0.6
@@ -59,7 +59,7 @@ class Predict():
                 self.device = 'cpu'
             self.net_mask = self.get_model_mask()
         self.image_extension=".png"
-        self.getDataJson()
+        self.calibDone = self.getDataJson()
         
         self.feature_map_sizes = [[45, 45], [23, 23], [12, 12], [6, 6], [4, 4]]
         self.anchor_sizes = [[0.04, 0.056], [0.08, 0.11],
@@ -75,7 +75,6 @@ class Predict():
         self.getSystemConfiguration()
         self.camera = cv2.VideoCapture(two_up + "/test_video/mask.mp4")
         self.calibrate=calib.CalibrateWithoutGUI()
-        self.calibDone=False
 
     def getSystemConfiguration(self):
         with open(two_up + '/DATA/userSetting.txt','r') as file:
@@ -241,8 +240,11 @@ class Predict():
 
         self.cameraDataProcessed= {}
 
+        calibrated = False
+
         for cameraKey, cameraValue in cameraData.items():
             if(cameraValue["CalibrationData"]!=None):
+                calibrated = True
                 cameraMatrix= np.array(cameraValue["CalibrationData"]["calibrationMatrix"])
                 self.cameraDataProcessed.update({
                     cameraKey:{
@@ -251,12 +253,15 @@ class Predict():
                     } 
                 })
             else:
+                self.calibDone = False
                 self.cameraDataProcessed.update({
                     cameraKey:{
                         "calibrationMatrix": None,
                         "worldRatio": None
                         }
                 })
+        
+        return calibrated
         
     def processData(self, im, human_boxes, mask_points, masks_list, iter):
         violatedPointsData = {}
@@ -331,10 +336,9 @@ class Predict():
         
         return maskViolated, distancingViolated, masks_list
 
-# uncomment this for GPIO
-# def checkButton():
-#     value = GPIO.input(but_pin)
-#     return value == GPIO.LOW
+def checkButton():
+    value = GPIO.input(but_pin)
+    return value == GPIO.LOW
 
 csv_didnt_open={}
 
@@ -354,15 +358,17 @@ def startOnePrediction():
     iter = 0
 
     while True:
-        # uncomment this for GPIO
-        # if checkButton():
-        #     placeholder_code_delete_this = 0
-            # model.calibrate.runCalibration(model.camera)
-        # if not model.calibDone:
-        #     model.calibrate.runCalibration(model.camera)
-        #     model.calibDone=True
+        if not model.calibDone:
+            model.calibrate.runCalibration(model.camera)
+            model.calibDone=True
+        if checkButton():
+            time.sleep(0.5)
+            if checkButton():
+                model.calibrate.runCalibration(model.camera)
+        
         if (iter > mask_frame_buffer):
             iter = 0
+        
         num_imgs += 1
         starttime = time.clock()
         _, im = model.camera.read()
@@ -413,10 +419,9 @@ def startOnePrediction():
 
 if __name__ == "__main__":
     # uncomment this for GPIO
-    # GPIO.setmode(GPIO.BOARD)
-    # GPIO.setup(but_pin, GPIO.IN)
-    # try:
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(but_pin, GPIO.IN)
+    try:
         startOnePrediction()
-    # model=Predict(True)
-    # finally:
-        # GPIO.cleanup()
+    finally:
+        GPIO.cleanup()
