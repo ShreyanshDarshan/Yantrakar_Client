@@ -13,8 +13,8 @@ class CalibrateWithoutGUI():
         self.calibrater = cameraCalib.CameraCalibration()
         self.instructionStatus = -1 # -1: Not calibration, 0: Aruco not detected, 1: calibrating, 2: calibration complete
         self.isCalibrating = False
-        self.cameraDatabase = None
-        self.markerSide = 14.0
+        self.cameraDatabase = []
+        self.markerSide = 200.0
         self.cameraID = "000001"
         self.two_up=os.path.dirname(os.path.dirname(__file__))
         mixer.init()
@@ -36,6 +36,8 @@ class CalibrateWithoutGUI():
         }
         self.cameraDatabase[self.cameraID]['cameraStatus']['calibAvailable'] = True
         self.cameraDatabase[self.cameraID]['CalibrationData'] = calibrationData
+        
+        print (self.cameraDatabase)
 
         with open(self.two_up + "/DATA/cameraDatabase.json", 'w') as jsonFile:
             json.dump(self.cameraDatabase,jsonFile,sort_keys=True, indent=4)
@@ -52,9 +54,11 @@ class CalibrateWithoutGUI():
     def calibrate(self, frame):
         if(self.isCalibrating):
             if (not self.calibrater.calibrationDone):
+                print(1)
                 self.calibrater.calibrate(frame, float(self.markerSide))
                 self.instructionStatus = self.calibrater.calibrationLEDStatus
             else:
+                print(2)
                 self.saveCalibration()
 
     def startCalibration(self):

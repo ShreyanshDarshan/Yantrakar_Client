@@ -355,7 +355,7 @@ if __name__ == '__main__':
         print ("Processes Initialised")
 
         GUI.join()
-        Input.join()
+        # Input.join()
         # while GUI.is_alive:
         #     # print(shared_images)
         #     i=1

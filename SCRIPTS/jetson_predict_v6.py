@@ -10,6 +10,7 @@ import time
 # import _thread
 # import threading 
 import gzip
+import json
 # import transformation
 from itertools import combinations
 import os
@@ -23,7 +24,7 @@ import argparse
 from utils import *
 from pygame import mixer
 
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 # iou : 3.5
 # conf thresh: 0.6
@@ -73,7 +74,7 @@ class Predict():
         self.encryptionKey = b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
         
         self.getSystemConfiguration()
-        self.camera = cv2.VideoCapture(two_up + "/test_video/mask.mp4")
+        self.camera = cv2.VideoCapture(two_up + "/test_video/marker_background.mp4")
         self.calibrate=calib.CalibrateWithoutGUI()
 
     def getSystemConfiguration(self):
@@ -233,34 +234,55 @@ class Predict():
             return worldDistance
         else:
             return -1
-        
+
+    def initialiseJson(self):
+        data = {}
+        data.update({
+                "000001":{
+                "cameraAlias": "TestCam",
+                "cameraID": "TestCam",
+                "cameraIP": "TestCam",
+                "cameraPassword": "TestCam",
+                "cameraStatus": {
+                    "feedAvailable": True,
+                    "calibAvailable": False,
+                    "isPaused":False,
+                },
+                "CalibrationData": {
+                    "calibrationMatrix": None,
+                    "worldRatio": None
+                },
+                "motionDetectorThreshold": 0.0,
+                }
+            })
+        with open(two_up + '/DATA/cameraDatabase.json','w') as jsonFile:
+            json.dump(data,jsonFile,sort_keys=True, indent=4)
+
     def getDataJson(self):
-        with open(two_up + '/DATA/cameraDatabase.json','r') as jsonFile:
-            cameraData=json.load(jsonFile)
-
-        self.cameraDataProcessed= {}
-
-        calibrated = False
-
-        for cameraKey, cameraValue in cameraData.items():
-            if(cameraValue["CalibrationData"]!=None):
-                calibrated = True
-                cameraMatrix= np.array(cameraValue["CalibrationData"]["calibrationMatrix"])
-                self.cameraDataProcessed.update({
-                    cameraKey:{
-                        "calibrationMatrix": cameraMatrix,
-                        "worldRatio": cameraValue["CalibrationData"]["worldRatio"]
-                    } 
-                })
-            else:
-                self.calibDone = False
-                self.cameraDataProcessed.update({
-                    cameraKey:{
-                        "calibrationMatrix": None,
-                        "worldRatio": None
-                        }
-                })
         
+        calibrated = False
+        try:
+            with open(two_up + '/DATA/cameraDatabase.json','r') as jsonFile:
+                cameraData=json.load(jsonFile)
+
+            self.cameraDataProcessed= {}
+
+            for cameraKey, cameraValue in cameraData.items():
+                if(cameraValue["CalibrationData"]!=None):
+                    calibrated = True
+                    cameraMatrix= np.array(cameraValue["CalibrationData"]["calibrationMatrix"])
+                    self.cameraDataProcessed.update({
+                        cameraKey:{
+                            "calibrationMatrix": cameraMatrix,
+                            "worldRatio": cameraValue["CalibrationData"]["worldRatio"]
+                        } 
+                    })
+        except:
+            self.initialiseJson()
+
+        if calibrated == False:
+            self.initialiseJson()
+
         return calibrated
         
     def processData(self, im, human_boxes, mask_points, masks_list, iter):
@@ -336,9 +358,9 @@ class Predict():
         
         return maskViolated, distancingViolated, masks_list
 
-def checkButton():
-    value = GPIO.input(but_pin)
-    return value == GPIO.LOW
+# def checkButton():
+#     value = GPIO.input(but_pin)
+#     return value == GPIO.LOW
 
 csv_didnt_open={}
 
@@ -352,19 +374,19 @@ def startOnePrediction():
     isMaskAudioPlaying = False
     audioTime = time.time()
     model = Predict(True)
+    if not model.calibDone:
+        model.calibrate.runCalibration(model.camera)
+        model.calibDone=True
     avg = 0
     num_imgs = 0
     masks_list = []
     iter = 0
 
     while True:
-        if not model.calibDone:
-            model.calibrate.runCalibration(model.camera)
-            model.calibDone=True
-        if checkButton():
-            time.sleep(0.5)
-            if checkButton():
-                model.calibrate.runCalibration(model.camera)
+        # if checkButton():
+        #     time.sleep(0.5)
+        #     if checkButton():
+        #         model.calibrate.runCalibration(model.camera)
         
         if (iter > mask_frame_buffer):
             iter = 0
@@ -419,9 +441,9 @@ def startOnePrediction():
 
 if __name__ == "__main__":
     # uncomment this for GPIO
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(but_pin, GPIO.IN)
-    try:
+    # GPIO.setmode(GPIO.BOARD)
+    # GPIO.setup(but_pin, GPIO.IN)
+    # try:
         startOnePrediction()
-    finally:
-        GPIO.cleanup()
+    # finally:
+    #     GPIO.cleanup()

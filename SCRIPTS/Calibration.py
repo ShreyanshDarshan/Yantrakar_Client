@@ -296,7 +296,7 @@ class Calibration(wx.Panel):
         self.cap={}
         for camerakey,cameraData in self.cameraDatabase.items():
             #self.cap[camerakey] = cv2.VideoCapture("rtsp://"+cameraData["cameraID"]+":"+cameraData["cameraPassword"]+"@"+cameraData["cameraIP"])
-            self.cap[camerakey] = cv2.VideoCapture(two_up + "/test_video/top.mp4") # cv2.VideoCapture(cameraData["url"])
+            self.cap[camerakey] = cv2.VideoCapture(two_up + "/test_video/marker.mp4") # cv2.VideoCapture(cameraData["url"])
             self.cap[camerakey].set(cv2.CAP_PROP_FPS,1)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.cap[camerakey].set(cv2.CAP_PROP_FRAME_HEIGHT, 300)

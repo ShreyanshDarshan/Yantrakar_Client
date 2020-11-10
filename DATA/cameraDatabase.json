@@ -18,15 +18,15 @@
                     1.0
                 ]
             ],
-            "worldRatio": 3.97142857143
+            "worldRatio": 4.0
         },
-        "cameraAlias": "Main Gate",
-        "cameraID": "shrinivas",
-        "cameraIP": "192.168.43.192:8080/h264_pcm.sdp",
-        "cameraPassword": "khiste",
+        "cameraAlias": "TestCam",
+        "cameraID": "TestCam",
+        "cameraIP": "TestCam",
+        "cameraPassword": "TestCam",
         "cameraStatus": {
             "calibAvailable": true,
-            "feedAvailable": false,
+            "feedAvailable": true,
             "isPaused": false
         },
         "motionDetectorThreshold": 0.0
