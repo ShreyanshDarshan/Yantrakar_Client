@@ -20,6 +20,9 @@ import cv2
 import torch
 import argparse
 from utils import *
+import RPi.GPIO as GPIO
+
+but_pin = 18
 
 from vision.ssd.mobilenet import create_mobilenetv1_ssd, create_mobilenetv1_ssd_predictor
 model_path = "/home/yantrakaar/Yantrakar_Client/models/mobilenet-v1-ssd-mp-0_675.pth"
@@ -274,6 +277,10 @@ class Predict():
         cv2.waitKey(1)
         return violatedPointsData
 
+def checkButton():
+    value = GPIO.input(but_pin)
+    return value == GPIO.LOW
+
 csv_didnt_open={}
 
 # locks = []
@@ -284,6 +291,9 @@ def startOnePrediction():
     avg = 0
     num_imgs = 0
     while True:
+        if checkButton():
+            placeholder_code_delete_this = 0
+            # caliberate()
         num_imgs += 1
         starttime = time.clock()
         ret, im = model.camera.read()
@@ -299,8 +309,9 @@ def startOnePrediction():
         print(avg)
 
 if __name__ == "__main__":
-    startOnePrediction()
-
-
-
-
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(but_pin, GPIO.IN)
+    try:
+        startOnePrediction()
+    finally:
+        GPIO.cleanup()
