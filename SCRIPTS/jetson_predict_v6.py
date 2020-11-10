@@ -68,7 +68,7 @@ class Predict():
         self.encryptionKey = b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
         
         self.getSystemConfiguration()
-        self.camera = cv2.VideoCapture(two_up + "/test_video/top.mp4")
+        self.camera = cv2.VideoCapture(two_up + "/test_video/mask.mp4")
         
     def getSystemConfiguration(self):
         with open(two_up + '/DATA/userSetting.txt','r') as file:
@@ -143,7 +143,7 @@ class Predict():
         output_info_class_id = []
         output_info_conf = []
         output_info_cords = []
-        print(keep_idxs)
+        # print(keep_idxs)
 
         for idx in keep_idxs:
             conf = float(bbox_max_scores[idx])
@@ -162,8 +162,8 @@ class Predict():
         temp = {'id': output_info_class_id,
                 'prob': output_info_conf, 'bbox': output_info_cords}
             
-        print(output_info_conf)
-            # pred.update({img_names[i]: temp})
+        # print(output_info_conf)
+        # pred.update({img_names[i]: temp})
 
         return temp
     
@@ -189,7 +189,7 @@ class Predict():
             if ctr<10:
                 ctr+=1
                 box = boxes[i]
-                temp(box) #.append((int((box[0]+box[2])/2), int(box[3])))
+                temp.append(box) #.append((int((box[0]+box[2])/2), int(box[3])))
             # pred.update({im: temp})
         return temp
 
@@ -256,6 +256,7 @@ class Predict():
         dbData = []
         for box in human_boxes:
             dbData.append((int((box[0]+box[2])/2), int(box[3]), int(abs(box[2] - box[0])*abs(box[3]-box[1]))))
+            cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 0, 0))
         
         height, width, _ = im.shape
 
@@ -286,42 +287,51 @@ class Predict():
                 for pointpair in violatedPoints:
                     im = cv2.line(im, pointpair[0], pointpair[1], (0, 0, 100))
 
+
         maskViolated = False
+        # print(masks_list)
         if (iter != 0):
-            for box in mask_points['bbox']: # ask anand that probability is not considered
-                for mask in masks_list:
-                    if (box[0]+box[2])/2 - (mask[0]+mask[2])/2 < mask_radius_thresh and (box[1]+box[3])/2 - (mask[1]+mask[3])/2 < mask_radius_thresh:
-                        for human in human_boxes:
-                            if (box[0]+box[2])/2 > human[0] and (box[0]+box[2])/2 < human[2] and (box[1]+box[3])/2 > human[1] and (box[1]+box[3])/2 > human[3]:
-                                mask[4] += 1
-                cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]),
-                                color=(0, 0, 255))
+            for i, box in enumerate(mask_points['bbox']):
+                id = mask_points['id']
+                if (id[i] == 1):
+                    for mask in masks_list:
+                        if (box[0]+box[2])/2 - (mask[0]+mask[2])/2 < mask_radius_thresh and (box[1]+box[3])/2 - (mask[1]+mask[3])/2 < mask_radius_thresh:
+                            for human in human_boxes:
+                                if (box[0]+box[2])/2 > human[0] and (box[0]+box[2])/2 < human[2] and (box[1]+box[3])/2 > human[1] and (box[1]+box[3])/2 < human[3]:
+                                    mask[0] = box[0]
+                                    mask[1] = box[1]
+                                    mask[2] = box[2]
+                                    mask[3] = box[3]
+                                    mask[4] += 1
+                    cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 0, 255))
+                else:
+                    cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 255, 0))
+
         else :
             for mask in masks_list:
                 if mask[4] >= mask_frame_threshold:
                     maskViolated = True
             
             masks_list.clear()
-            for box in mask_points['bbox']: # ask anand that probability is not considered
-                for human in human_boxes:
-                    if (box[0]+box[2])/2 > human[0] and (box[0]+box[2])/2 < human[2] and (box[1]+box[3])/2 > human[1] and (box[1]+box[3])/2 > human[3]:
-                        masks_list.append([box[0], box[1], box[2], box[3], 0])
+            for i, box in enumerate(mask_points['bbox']):
+                id = mask_points['id']
+                if (id[i] == 1):
+                    for human in human_boxes:
+                        if (box[0]+box[2])/2 > human[0] and (box[0]+box[2])/2 < human[2] and (box[1]+box[3])/2 > human[1] and (box[1]+box[3])/2 < human[3]:
+                            masks_list.append([box[0], box[1], box[2], box[3], 0])
 
-
-        # if violated==True:
-        #cv2.imwrite(two_up+ "/FRAMES/" + str(time.clock())+".jpg", im)
-
-        #cv2.imshow("output", im)
-        # cv2.waitKey(1)
+        # cv2.imwrite(two_up + "/FRAMES/" + str(time.process_time()) + ".jpg", im)
+        cv2.imshow("out", im)
+        cv2.waitKey(1)
         return maskViolated, distancingViolated, masks_list
 
+# uncomment this for GPIO
 # def checkButton():
 #     value = GPIO.input(but_pin)
 #     return value == GPIO.LOW
 
 csv_didnt_open={}
 
-# locks = []
 def startOnePrediction():
     global sound
     model = Predict(True)
@@ -330,10 +340,11 @@ def startOnePrediction():
     masks_list = []
     iter = 0
     while True:
+        # uncomment this for GPIO
         # if checkButton():
         #     placeholder_code_delete_this = 0
             # caliberate()
-        if (iter > 6):
+        if (iter > mask_frame_buffer):
             iter = 0
         num_imgs += 1
         starttime = time.clock()
@@ -341,10 +352,10 @@ def startOnePrediction():
         mask_points={}
         mask_points = model.predict_mask(im)
         human_boxes = model.predict_human(im)
-        print("PREDICTION MASK")
-        print(mask_points)
-        print("PREDICTION HUMAN")
-        print(human_boxes)
+        # print("PREDICTION MASK")
+        # print(mask_points)
+        # print("PREDICTION HUMAN")
+        # print(human_boxes)
         isMask, isDist, masks_list = model.processData(im, human_boxes,
                                            mask_points, masks_list, iter)
         if isMask:
@@ -356,15 +367,16 @@ def startOnePrediction():
 
         avg = avg * (num_imgs - 1) / num_imgs + 1 / (time.clock() -
                                                      starttime) / num_imgs
-        print(avg)
+        # print(avg)
         iter += 1
 
 
 
 if __name__ == "__main__":
+    # uncomment this for GPIO
     # GPIO.setmode(GPIO.BOARD)
     # GPIO.setup(but_pin, GPIO.IN)
     # try:
-    startOnePrediction()
+        startOnePrediction()
     # finally:
         # GPIO.cleanup()
