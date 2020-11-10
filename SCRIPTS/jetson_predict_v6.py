@@ -25,6 +25,9 @@ from pygame import mixer
 
 # import RPi.GPIO as GPIO
 
+# iou : 3.5
+# conf thresh: 0.6
+
 but_pin = 18
 
 from vision.ssd.mobilenet import create_mobilenetv1_ssd, create_mobilenetv1_ssd_predictor
@@ -40,8 +43,8 @@ label_path = two_up + "/models/voc-model-labels.txt"
 class_names = [name.strip() for name in open(label_path).readlines()]
 
 image_area_threshold = 0.25
-mask_frame_threshold = 4
-mask_frame_buffer = 6 
+mask_frame_threshold = 20
+mask_frame_buffer = 30 
 mask_radius_thresh = 100
 
 # two_up = '/home/yantrakaar/Yantrakar_Client'
@@ -140,8 +143,8 @@ class Predict():
         # keep_idx is the alive bounding box after nms.
         keep_idxs = single_class_non_max_suppression(   y_bboxes,
                                                         bbox_max_scores,
-                                                        conf_thresh=0.5,
-                                                        iou_thresh=0.5,
+                                                        conf_thresh=0.6,
+                                                        iou_thresh=0.35,
                                                         )
 
         output_info_class_id = []
@@ -259,7 +262,7 @@ class Predict():
         violatedPointsData = {}
         dbData = []
         for box in human_boxes:
-            dbData.append((int((box[0]+box[2])/2), int(box[3]), int(abs(box[2] - box[0])*abs(box[3]-box[1]))))
+            dbData.append((int((box[0]+box[2])/2), int((box[1]+box[3])/2), int(abs(box[2] - box[0])*abs(box[3]-box[1]))))
             cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 0, 0))
         
         height, width, _ = im.shape
@@ -371,6 +374,10 @@ def startOnePrediction():
         # print(human_boxes)
         isMask, isDist, masks_list = model.processData(im, human_boxes,
                                            mask_points, masks_list, iter)
+
+        if isMask:
+            print("********************VIOLATED********************")
+
         if isMask and not isAudioPlaying:
             audioTime = time.time()
             isPlayingMask = True
@@ -401,7 +408,7 @@ if __name__ == "__main__":
     # GPIO.setmode(GPIO.BOARD)
     # GPIO.setup(but_pin, GPIO.IN)
     # try:
-        # startOnePrediction()
-    model=Predict(True)
+        startOnePrediction()
+    # model=Predict(True)
     # finally:
         # GPIO.cleanup()
