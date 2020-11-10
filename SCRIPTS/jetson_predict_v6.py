@@ -328,8 +328,7 @@ class Predict():
                             masks_list.append([box[0], box[1], box[2], box[3], 0])
 
         # cv2.imwrite(two_up + "/FRAMES/" + str(time.process_time()) + ".jpg", im)
-        cv2.imshow("out", im)
-        cv2.waitKey(1)
+        
         return maskViolated, distancingViolated, masks_list
 
 # uncomment this for GPIO
@@ -345,21 +344,23 @@ def startOnePrediction():
     distAudioDuration = 2
     isPlayingMask = False
     isPlayingDist = False
-    isAudioPlaying = False
+    isDistAudioPlaying = False
+    isMaskAudioPlaying = False
     audioTime = time.time()
     model = Predict(True)
     avg = 0
     num_imgs = 0
     masks_list = []
     iter = 0
+
     while True:
         # uncomment this for GPIO
         # if checkButton():
         #     placeholder_code_delete_this = 0
             # model.calibrate.runCalibration(model.camera)
-        if not model.calibDone:
-            model.calibrate.runCalibration(model.camera)
-            model.calibDone=True
+        # if not model.calibDone:
+        #     model.calibrate.runCalibration(model.camera)
+        #     model.calibDone=True
         if (iter > mask_frame_buffer):
             iter = 0
         num_imgs += 1
@@ -378,28 +379,35 @@ def startOnePrediction():
         if isMask:
             print("********************VIOLATED********************")
 
-        if isMask and not isAudioPlaying:
+
+        if isMask and not isMaskAudioPlaying and not isDistAudioPlaying:
             audioTime = time.time()
             isPlayingMask = True
             soundMask.play()
-            isAudioPlaying = True
-        if isDist and not isAudioPlaying:
+            isMaskAudioPlaying = True
+
+        if isMaskAudioPlaying:
+            cv2.putText(im, "Violated", (100,100), cv2.FONT_HERSHEY_COMPLEX, 5, color=(0, 0, 255))
+        
+        if isDist and not isDistAudioPlaying and not isMaskAudioPlaying:
             audioTime = time.time()
             isPlayingDist = True
             soundDist.play()
-            isAudioPlaying = True
+            isDistAudioPlaying = True
 
         if isPlayingMask and time.time()-audioTime > maskAudioDuration:
             isPlayingMask = False
-            isAudioPlaying = False
+            isMaskAudioPlaying = False
 
         if isPlayingDist and time.time()-audioTime > distAudioDuration:
-            isAudioPlaying = False
+            isDistAudioPlaying = False
             isPlayingDist = False
 
         avg = avg * (num_imgs - 1) / num_imgs + 1 / (time.clock() -
                                                      starttime) / num_imgs
         # print(avg)
+        cv2.imshow("out", im)
+        cv2.waitKey(1)
         iter += 1
 
 
