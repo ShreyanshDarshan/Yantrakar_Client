@@ -1,4 +1,5 @@
 import requests
+import calibrateWithoutGUI as calib
 from PIL import Image
 import numpy as np
 import json
@@ -31,7 +32,8 @@ from vision.ssd.mobilenet import create_mobilenetv1_ssd, create_mobilenetv1_ssd_
 two_up = os.path.dirname(os.path.dirname(__file__))
 
 mixer.init()
-sound= mixer.Sound(two_up + "/DATA/maskAudio.ogg")
+soundMask= mixer.Sound(two_up + "/DATA/maskAudio.ogg")
+soundDist=mixer.Sound(two_up + "/DATA/distancingAudio.ogg")
 
 model_path = two_up + "/models/mobilenet-v1-ssd-mp-0_675.pth"
 label_path = two_up + "/models/voc-model-labels.txt"
@@ -69,7 +71,9 @@ class Predict():
         
         self.getSystemConfiguration()
         self.camera = cv2.VideoCapture(two_up + "/test_video/mask.mp4")
-        
+        self.calibrate=calib.CalibrateWithoutGUI()
+        self.calibDone=False
+
     def getSystemConfiguration(self):
         with open(two_up + '/DATA/userSetting.txt','r') as file:
             data=file.read()
@@ -333,7 +337,13 @@ class Predict():
 csv_didnt_open={}
 
 def startOnePrediction():
-    global sound
+    global soundMask, soundDist
+    maskAudioDuration = 2
+    distAudioDuration = 2
+    isPlayingMask = False
+    isPlayingDist = False
+    isAudioPlaying = False
+    audioTime = time.time()
     model = Predict(True)
     avg = 0
     num_imgs = 0
@@ -343,12 +353,15 @@ def startOnePrediction():
         # uncomment this for GPIO
         # if checkButton():
         #     placeholder_code_delete_this = 0
-            # caliberate()
+            # model.calibrate.runCalibration(model.camera)
+        if not model.calibDone:
+            model.calibrate.runCalibration(model.camera)
+            model.calibDone=True
         if (iter > mask_frame_buffer):
             iter = 0
         num_imgs += 1
         starttime = time.clock()
-        ret, im = model.camera.read()
+        _, im = model.camera.read()
         mask_points={}
         mask_points = model.predict_mask(im)
         human_boxes = model.predict_human(im)
@@ -358,12 +371,24 @@ def startOnePrediction():
         # print(human_boxes)
         isMask, isDist, masks_list = model.processData(im, human_boxes,
                                            mask_points, masks_list, iter)
-        if isMask:
-            print ("********VIOLATED*******")
-            sound.play()
-        if isDist:
-            print ("********VIOLATED*******")
-            sound.play()
+        if isMask and not isAudioPlaying:
+            audioTime = time.time()
+            isPlayingMask = True
+            soundMask.play()
+            isAudioPlaying = True
+        if isDist and not isAudioPlaying:
+            audioTime = time.time()
+            isPlayingDist = True
+            soundDist.play()
+            isAudioPlaying = True
+
+        if isPlayingMask and time.time()-audioTime > maskAudioDuration:
+            isPlayingMask = False
+            isAudioPlaying = False
+
+        if isPlayingDist and time.time()-audioTime > distAudioDuration:
+            isAudioPlaying = False
+            isPlayingDist = False
 
         avg = avg * (num_imgs - 1) / num_imgs + 1 / (time.clock() -
                                                      starttime) / num_imgs
@@ -371,12 +396,12 @@ def startOnePrediction():
         iter += 1
 
 
-
 if __name__ == "__main__":
     # uncomment this for GPIO
     # GPIO.setmode(GPIO.BOARD)
     # GPIO.setup(but_pin, GPIO.IN)
     # try:
-        startOnePrediction()
+        # startOnePrediction()
+    model=Predict(True)
     # finally:
         # GPIO.cleanup()
