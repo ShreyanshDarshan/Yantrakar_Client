@@ -6,12 +6,8 @@ import json
 import pickle
 import base64
 import time
-# import mysql.connector as mysql
-# import _thread
-# import threading 
 import gzip
 import json
-# import transformation
 from itertools import combinations
 import os
 from cryptography.fernet import Fernet
@@ -38,6 +34,7 @@ two_up = os.path.dirname(os.path.dirname(__file__))
 mixer.init()
 soundMask= mixer.Sound(two_up + "/DATA/maskAudio.ogg")
 soundDist=mixer.Sound(two_up + "/DATA/distancingAudio.ogg")
+soundCam=mixer.Sound(two_up + "/DATA/cameraAudio.ogg")
 
 model_path = two_up + "/models/mobilenet-v1-ssd-mp-0_675.pth"
 label_path = two_up + "/models/voc-model-labels.txt"
@@ -74,7 +71,7 @@ class Predict():
         self.encryptionKey = b'gkmrxai04WhOcWj3EGl-2Io58Q8biOWOytdQbPhNYGU='
         
         self.getSystemConfiguration()
-        self.camera = cv2.VideoCapture(two_up + "/test_video/marker_background.mp4")
+        self.camera = cv2.VideoCapture(two_up + "/test_video/top.mp4")
         self.calibrate=calib.CalibrateWithoutGUI()
 
     def getSystemConfiguration(self):
@@ -177,7 +174,7 @@ class Predict():
     def predict_human(self, im):
         # x = self.read_pics_human(im)
         im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-        boxes, labels, probs = self.net_human.predict(im, 10, 0.4)
+        boxes, labels, probs = self.net_human.predict(im, 10, 0.2)
         new_boxes = []
         new_labels = []
         new_probs = []
@@ -286,13 +283,14 @@ class Predict():
         return calibrated
         
     def processData(self, im, human_boxes, mask_points, masks_list, iter):
+        height, width, _ = im.shape
+
         violatedPointsData = {}
         dbData = []
         for box in human_boxes:
-            dbData.append((int((box[0]+box[2])/2), int((box[1]+box[3])/2), int(abs(box[2] - box[0])*abs(box[3]-box[1]))))
-            cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 0, 0))
-        
-        height, width, _ = im.shape
+            if (box[0] > 0 and box[0] < width) and (box[1] > 0 and box[1] < height) and (box[2] > 0 and box[2] < width) and (box[3] > 0 and box[3] < height):
+                dbData.append((int((box[0]+box[2])/2), int((box[1]+box[3])/2), int(abs(box[2] - box[0])*abs(box[3]-box[1]))))
+                cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 0, 0))
 
         points = combinations(dbData, 2)
         violatedPoints = []
@@ -313,6 +311,7 @@ class Predict():
                     continue
                 elif (distance < 150):
                     violatedPoints.append((point1_scaled, point2_scaled))
+                    cv2.line(im, point1_scaled, point2_scaled, color=(255, 0, 0), thickness=2)
         violatedPointsData.update({"000001": violatedPoints})
 
         for _, violatedPoints in violatedPointsData.items():
@@ -332,11 +331,12 @@ class Predict():
                         if (box[0]+box[2])/2 - (mask[0]+mask[2])/2 < mask_radius_thresh and (box[1]+box[3])/2 - (mask[1]+mask[3])/2 < mask_radius_thresh:
                             for human in human_boxes:
                                 if (box[0]+box[2])/2 > human[0] and (box[0]+box[2])/2 < human[2] and (box[1]+box[3])/2 > human[1] and (box[1]+box[3])/2 < human[3]:
-                                    mask[0] = box[0]
-                                    mask[1] = box[1]
-                                    mask[2] = box[2]
-                                    mask[3] = box[3]
-                                    mask[4] += 1
+                                    if (box[0] > 0 and box[0] < width) and (box[1] > 0 and box[1] < height) and (box[2] > 0 and box[2] < width) and (box[3] > 0 and box[3] < height):
+                                        mask[0] = box[0]
+                                        mask[1] = box[1]
+                                        mask[2] = box[2]
+                                        mask[3] = box[3]
+                                        mask[4] += 1
                     cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 0, 255))
                 else:
                     cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]), color=(0, 255, 0))
@@ -365,13 +365,15 @@ class Predict():
 csv_didnt_open={}
 
 def startOnePrediction():
-    global soundMask, soundDist
+    global soundMask, soundDist, soundCam
     maskAudioDuration = 2
     distAudioDuration = 2
+    camAudioDuration = 2
     isPlayingMask = False
     isPlayingDist = False
     isDistAudioPlaying = False
     isMaskAudioPlaying = False
+    isCamAudioPlaying = False
     audioTime = time.time()
     model = Predict(True)
     if not model.calibDone:
@@ -383,60 +385,79 @@ def startOnePrediction():
     iter = 0
 
     while True:
-        # if checkButton():
-        #     time.sleep(0.5)
-        #     if checkButton():
-        #         model.calibrate.runCalibration(model.camera)
-        
-        if (iter > mask_frame_buffer):
-            iter = 0
-        
-        num_imgs += 1
-        starttime = time.clock()
-        _, im = model.camera.read()
-        mask_points={}
-        mask_points = model.predict_mask(im)
-        human_boxes = model.predict_human(im)
-        # print("PREDICTION MASK")
-        # print(mask_points)
-        # print("PREDICTION HUMAN")
-        # print(human_boxes)
-        isMask, isDist, masks_list = model.processData(im, human_boxes,
-                                           mask_points, masks_list, iter)
+        try:
+            # if checkButton():
+            #     time.sleep(0.5)
+            #     if checkButton():
+            #         model.calibrate.runCalibration(model.camera)
+            if (iter > mask_frame_buffer):
+                iter = 0
+            
+            num_imgs += 1
+            starttime = time.clock()
+            try:
+                ret, im = model.camera.read()
+                if not ret:
+                    if not isCamAudioPlaying and not isDistAudioPlaying and not isMaskAudioPlaying:
+                        audioTime = time.time()
+                        soundCam.play()
+                        isCamAudioPlaying = True
+                else:
+                    mask_points={}
+                    mask_points = model.predict_mask(im)
+                    human_boxes = model.predict_human(im)
+                    # print("PREDICTION MASK")
+                    # print(mask_points)
+                    # print("PREDICTION HUMAN")
+                    # print(human_boxes)
+                    isMask, isDist, masks_list = model.processData(im, human_boxes,
+                                                mask_points, masks_list, iter)
+            except:
+                if not isCamAudioPlaying and not isDistAudioPlaying and not isMaskAudioPlaying:
+                    audioTime = time.time()
+                    soundCam.play()
+                    isCamAudioPlaying = True
 
-        if isMask:
-            print("********************VIOLATED********************")
+            if isMask:
+                print("********************VIOLATED********************")
 
 
-        if isMask and not isMaskAudioPlaying and not isDistAudioPlaying:
-            audioTime = time.time()
-            isPlayingMask = True
-            soundMask.play()
-            isMaskAudioPlaying = True
+            if isMask and not isMaskAudioPlaying and not isDistAudioPlaying and not isCamAudioPlaying:
+                audioTime = time.time()
+                isPlayingMask = True
+                soundMask.play()
+                isMaskAudioPlaying = True
 
-        if isMaskAudioPlaying:
-            cv2.putText(im, "Violated", (100,100), cv2.FONT_HERSHEY_COMPLEX, 5, color=(0, 0, 255))
-        
-        if isDist and not isDistAudioPlaying and not isMaskAudioPlaying:
-            audioTime = time.time()
-            isPlayingDist = True
-            soundDist.play()
-            isDistAudioPlaying = True
+            if isMaskAudioPlaying:
+                cv2.putText(im, "Violated", (100,100), cv2.FONT_HERSHEY_COMPLEX, 5, color=(0, 0, 255))
+            
+            if isDist and not isDistAudioPlaying and not isMaskAudioPlaying and not isCamAudioPlaying:
+                audioTime = time.time()
+                isPlayingDist = True
+                soundDist.play()
+                isDistAudioPlaying = True
 
-        if isPlayingMask and time.time()-audioTime > maskAudioDuration:
-            isPlayingMask = False
-            isMaskAudioPlaying = False
+            if isPlayingMask and time.time()-audioTime > maskAudioDuration:
+                isPlayingMask = False
+                isMaskAudioPlaying = False
 
-        if isPlayingDist and time.time()-audioTime > distAudioDuration:
-            isDistAudioPlaying = False
-            isPlayingDist = False
+            if isPlayingDist and time.time()-audioTime > distAudioDuration:
+                isDistAudioPlaying = False
+                isPlayingDist = False
 
-        avg = avg * (num_imgs - 1) / num_imgs + 1 / (time.clock() -
-                                                     starttime) / num_imgs
-        # print(avg)
-        cv2.imshow("out", im)
-        cv2.waitKey(1)
-        iter += 1
+            if isCamAudioPlaying and time.time()-audioTime > camAudioDuration:
+                isCamAudioPlaying = False
+
+            avg = avg * (num_imgs - 1) / num_imgs + 1 / (time.clock() -
+                                                        starttime) / num_imgs
+            # print(avg)
+            
+            cv2.imshow("out", im)
+            cv2.waitKey(1)
+            iter += 1
+
+        except:
+            continue
 
 
 if __name__ == "__main__":
