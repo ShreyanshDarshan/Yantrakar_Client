@@ -25,7 +25,8 @@ from pygame import mixer
 # iou : 3.5
 # conf thresh: 0.6
 
-but_pin = 18
+but_pin = 12
+src_pin = 11
 
 from vision.ssd.mobilenet import create_mobilenetv1_ssd, create_mobilenetv1_ssd_predictor
 
@@ -464,6 +465,8 @@ if __name__ == "__main__":
     # uncomment this for GPIO
     # GPIO.setmode(GPIO.BOARD)
     # GPIO.setup(but_pin, GPIO.IN)
+    # GPIO.setup(src_pin, GPIO.OUT)
+    # GPIO.output(src_pin, GPIO.HIGH)
     # try:
         startOnePrediction()
     # finally:
