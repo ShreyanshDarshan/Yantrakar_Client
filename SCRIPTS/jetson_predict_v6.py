@@ -361,6 +361,7 @@ class Predict():
 
 # def checkButton():
 #     value = GPIO.input(but_pin)
+#     print("GPIO status: ", value == GPIO.LOW)
 #     return value == GPIO.LOW
 
 csv_didnt_open={}
